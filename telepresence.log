@@ -1,0 +1,834 @@
+   0.0 TEL | Telepresence 0.108 launched at Sun Mar 28 20:08:45 2021
+   0.0 TEL |   /usr/bin/telepresence --swap-deployment kubepost-controller:controller --namespace metacontroller --expose 8080 --method inject-tcp
+   0.0 TEL | uname: uname_result(system='Linux', node='nilsorbat.linux.workstation', release='5.11.8-arch1-1', version='#1 SMP PREEMPT Sun, 21 Mar 2021 01:55:51 +0000', machine='x86_64')
+   0.0 TEL | Platform: linux
+   0.0 TEL | WSL: False
+   0.0 TEL | Python 3.9.2 (default, Feb 20 2021, 18:40:11)
+   0.0 TEL | [GCC 10.2.0]
+   0.0 TEL | BEGIN SPAN main.py:40(main)
+   0.0 TEL | BEGIN SPAN startup.py:83(set_kube_command)
+   0.0 TEL | Found kubectl -> /usr/local/kubebuilder/bin/kubectl
+   0.0 TEL | [1] Capturing: kubectl config current-context
+   0.1 TEL | [1] captured in 0.05 secs.
+   0.1 TEL | [2] Capturing: kubectl --context kind-kind version --short
+   0.1 TEL | [2] captured in 0.08 secs.
+   0.1 TEL | [3] Capturing: kubectl --context kind-kind config view -o json
+   0.2 TEL | [3] captured in 0.06 secs.
+   0.2 TEL | [4] Capturing: kubectl --context kind-kind api-versions
+   0.3 TEL | [4] captured in 0.08 secs.
+   0.3 TEL | Command: kubectl 1.16.4
+   0.3 TEL | Context: kind-kind, namespace: metacontroller, version: 1.20.2
+   0.3 TEL | Looks like we're in a local VM, e.g. minikube.
+   0.3 >>> | Warning: kubectl 1.16.4 may not work correctly with cluster version 1.20.2 due to the version discrepancy. See https://kubernetes.io/docs/setup/version-skew-policy/ for more information.
+   0.3 >>> | 
+   0.3 TEL | END SPAN startup.py:83(set_kube_command)    0.3s
+   0.3 >>> | Using a Pod instead of a Deployment for the Telepresence proxy. If you experience problems, please file an issue!
+   0.3 >>> | Set the environment variable TELEPRESENCE_USE_DEPLOYMENT to any non-empty value to force the old behavior, e.g.,
+   0.3 >>> |     env TELEPRESENCE_USE_DEPLOYMENT=1 telepresence --run curl hello
+   0.3 >>> | 
+   0.3 TEL | [5] Capturing: kubectl --context kind-kind --namespace metacontroller get deploy kubepost-controller -o json
+   0.3   5 | {
+   0.3   5 |     "apiVersion": "apps/v1",
+   0.3   5 |     "kind": "Deployment",
+   0.3   5 |     "metadata": {
+   0.3   5 |         "annotations": {
+   0.3   5 |             "deployment.kubernetes.io/revision": "1",
+   0.3   5 |             "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"apps/v1\",\"kind\":\"Deployment\",\"metadata\":{\"annotations\":{},\"name\":\"kubepost-controller\",\"namespace\":\"metacontroller\"},\"spec\":{\"replicas\":1,\"selector\":{\"matchLabels\":{\"app\":\"kubepost-controller\"}},\"template\":{\"metadata\":{\"labels\":{\"app\":\"kubepost-controller\"}},\"spec\":{\"containers\":[{\"command\":[\"kubepost\"],\"image\":\"kubepost:0.2\",\"name\":\"controller\"}]}}}}\n"
+   0.3   5 |         },
+   0.3   5 |         "creationTimestamp": "2021-03-28T16:56:41Z",
+   0.3   5 |         "generation": 13,
+   0.3   5 |         "managedFields": [
+   0.3   5 |             {
+   0.3   5 |                 "apiVersion": "apps/v1",
+   0.3   5 |                 "fieldsType": "FieldsV1",
+   0.3   5 |                 "fieldsV1": {
+   0.3   5 |                     "f:metadata": {
+   0.3   5 |                         "f:annotations": {
+   0.3   5 |                             ".": {},
+   0.3   5 |                             "f:kubectl.kubernetes.io/last-applied-configuration": {}
+   0.3   5 |                         }
+   0.3   5 |                     },
+   0.3   5 |                     "f:spec": {
+   0.3   5 |                         "f:progressDeadlineSeconds": {},
+   0.3   5 |                         "f:replicas": {},
+   0.3   5 |                         "f:revisionHistoryLimit": {},
+   0.3   5 |                         "f:selector": {},
+   0.3   5 |                         "f:strategy": {
+   0.3   5 |                             "f:rollingUpdate": {
+   0.3   5 |                                 ".": {},
+   0.3   5 |                                 "f:maxSurge": {},
+   0.3   5 |                                 "f:maxUnavailable": {}
+   0.3   5 |                             },
+   0.3   5 |                             "f:type": {}
+   0.3   5 |                         },
+   0.3   5 |                         "f:template": {
+   0.3   5 |                             "f:metadata": {
+   0.3   5 |                                 "f:labels": {
+   0.3   5 |                                     ".": {},
+   0.3   5 |                                     "f:app": {}
+   0.3   5 |                                 }
+   0.3   5 |                             },
+   0.3   5 |                             "f:spec": {
+   0.3   5 |                                 "f:containers": {
+   0.3   5 |                                     "k:{\"name\":\"controller\"}": {
+   0.3   5 |                                         ".": {},
+   0.3   5 |                                         "f:command": {},
+   0.3   5 |                                         "f:image": {},
+   0.3   5 |                                         "f:imagePullPolicy": {},
+   0.3   5 |                                         "f:name": {},
+   0.3   5 |                                         "f:resources": {},
+   0.3   5 |                                         "f:terminationMessagePath": {},
+   0.3   5 |                                         "f:terminationMessagePolicy": {}
+   0.3   5 |                                     }
+   0.3   5 |                                 },
+   0.3   5 |                                 "f:dnsPolicy": {},
+   0.3   5 |                                 "f:restartPolicy": {},
+   0.3   5 |                                 "f:schedulerName": {},
+   0.3   5 |                                 "f:securityContext": {},
+   0.3   5 |                                 "f:terminationGracePeriodSeconds": {}
+   0.3   5 |                             }
+   0.3   5 |                         }
+   0.3   5 |                     }
+   0.3   5 |                 },
+   0.3   5 |                 "manager": "kubectl",
+   0.3   5 |                 "operation": "Update",
+   0.3   5 |                 "time": "2021-03-28T16:56:41Z"
+   0.3   5 |             },
+   0.3   5 |             {
+   0.3   5 |                 "apiVersion": "apps/v1",
+   0.3   5 |                 "fieldsType": "FieldsV1",
+   0.3   5 |                 "fieldsV1": {
+   0.3   5 |                     "f:metadata": {
+   0.3   5 |                         "f:annotations": {
+   0.3   5 |                             "f:deployment.kubernetes.io/revision": {}
+   0.3   5 |                         }
+   0.3   5 |                     },
+   0.3   5 |                     "f:status": {
+   0.3   5 |                         "f:conditions": {
+   0.3   5 |                             ".": {},
+   0.3   5 |                             "k:{\"type\":\"Available\"}": {
+   0.3   5 |                                 ".": {},
+   0.3   5 |                                 "f:lastTransitionTime": {},
+   0.3   5 |                                 "f:lastUpdateTime": {},
+   0.3   5 |                                 "f:message": {},
+   0.3   5 |                                 "f:reason": {},
+   0.3   5 |                                 "f:status": {},
+   0.3   5 |                                 "f:type": {}
+   0.3   5 |                             },
+   0.3   5 |                             "k:{\"type\":\"Progressing\"}": {
+   0.3   5 |                                 ".": {},
+   0.3   5 |                                 "f:lastTransitionTime": {},
+   0.3   5 |                                 "f:lastUpdateTime": {},
+   0.3   5 |                                 "f:message": {},
+   0.3   5 |                                 "f:reason": {},
+   0.3   5 |                                 "f:status": {},
+   0.3   5 |                                 "f:type": {}
+   0.3   5 |                             }
+   0.3   5 |                         },
+   0.3   5 |                         "f:observedGeneration": {},
+   0.3   5 |                         "f:replicas": {},
+   0.3   5 |                         "f:unavailableReplicas": {},
+   0.3   5 |                         "f:updatedReplicas": {}
+   0.3   5 |                     }
+   0.3   5 |                 },
+   0.3   5 |                 "manager": "kube-controller-manager",
+   0.3   5 |                 "operation": "Update",
+   0.3   5 |                 "time": "2021-03-28T18:08:17Z"
+   0.3   5 |             }
+   0.3   5 |         ],
+   0.3   5 |         "name": "kubepost-controller",
+   0.3   5 |         "namespace": "metacontroller",
+   0.3   5 |         "resourceVersion": "8567",
+   0.3   5 |         "uid": "3e7378da-076e-4cf2-bded-40fc5cf0c57a"
+   0.3   5 |     },
+   0.3   5 |     "spec": {
+   0.3   5 |         "progressDeadlineSeconds": 600,
+   0.3   5 |         "replicas": 1,
+   0.3   5 |         "revisionHistoryLimit": 10,
+   0.3   5 |         "selector": {
+   0.3   5 |             "matchLabels": {
+   0.3   5 |                 "app": "kubepost-controller"
+   0.3   5 |             }
+   0.3   5 |         },
+   0.3   5 |         "strategy": {
+   0.3   5 |             "rollingUpdate": {
+   0.3   5 |                 "maxSurge": "25%",
+   0.3   5 |                 "maxUnavailable": "25%"
+   0.3   5 |             },
+   0.3   5 |             "type": "RollingUpdate"
+   0.3   5 |         },
+   0.3   5 |         "template": {
+   0.3   5 |             "metadata": {
+   0.3   5 |                 "creationTimestamp": null,
+   0.3   5 |                 "labels": {
+   0.3   5 |                     "app": "kubepost-controller"
+   0.3   5 |                 }
+   0.3   5 |             },
+   0.3   5 |             "spec": {
+   0.3   5 |                 "containers": [
+   0.3   5 |                     {
+   0.3   5 |                         "command": [
+   0.3   5 |                             "kubepost"
+   0.3   5 |                         ],
+   0.3   5 |                         "image": "kubepost:0.2",
+   0.3   5 |                         "imagePullPolicy": "IfNotPresent",
+   0.3   5 |                         "name": "controller",
+   0.3   5 |                         "resources": {},
+   0.3   5 |                         "terminationMessagePath": "/dev/termination-log",
+   0.3   5 |                         "terminationMessagePolicy": "File"
+   0.3   5 |                     }
+   0.3   5 |                 ],
+   0.3   5 |                 "dnsPolicy": "ClusterFirst",
+   0.3   5 |                 "restartPolicy": "Always",
+   0.3   5 |                 "schedulerName": "default-scheduler",
+   0.3   5 |                 "securityContext": {},
+   0.3   5 |                 "terminationGracePeriodSeconds": 30
+   0.3   5 |             }
+   0.3   5 |         }
+   0.3   5 |     },
+   0.3   5 |     "status": {
+   0.3   5 |         "conditions": [
+   0.3   5 |             {
+   0.3   5 |                 "lastTransitionTime": "2021-03-28T16:56:41Z",
+   0.3   5 |                 "lastUpdateTime": "2021-03-28T16:56:56Z",
+   0.3   5 |                 "message": "ReplicaSet \"kubepost-controller-598b8d8455\" has successfully progressed.",
+   0.3   5 |                 "reason": "NewReplicaSetAvailable",
+   0.3   5 |                 "status": "True",
+   0.3   5 |                 "type": "Progressing"
+   0.3   5 |             },
+   0.3   5 |             {
+   0.3   5 |                 "lastTransitionTime": "2021-03-28T18:08:17Z",
+   0.3   5 |                 "lastUpdateTime": "2021-03-28T18:08:17Z",
+   0.3   5 |                 "message": "Deployment does not have minimum availability.",
+   0.3   5 |                 "reason": "MinimumReplicasUnavailable",
+   0.3   5 |                 "status": "False",
+   0.3   5 |                 "type": "Available"
+   0.3   5 |             }
+   0.3   5 |         ],
+   0.3   5 |         "observedGeneration": 13,
+   0.3   5 |         "replicas": 1,
+   0.3   5 |         "unavailableReplicas": 1,
+   0.3   5 |         "updatedReplicas": 1
+   0.3   5 |     }
+   0.3   5 | }
+   0.3 TEL | [5] captured in 0.07 secs.
+   0.3 TEL | Found ssh -> /usr/bin/ssh
+   0.3 TEL | [6] Capturing: ssh -V
+   0.4 TEL | [6] captured in 0.01 secs.
+   0.4 TEL | Found bash -> /usr/bin/bash
+   0.4 TEL | Found torsocks -> /usr/bin/torsocks
+   0.4 >>> | Starting proxy with method 'inject-tcp', which has the following limitations: Go programs, static binaries, suid programs, and custom DNS implementations are not supported. For a full list of method limitations see https://telepresence.io/reference/methods.html
+   0.4 TEL | Found sshfs -> /usr/bin/sshfs
+   0.4 TEL | Found fusermount -> /usr/bin/fusermount
+   0.4 >>> | Volumes are rooted at $TELEPRESENCE_ROOT. See https://telepresence.io/howto/volumes.html for details.
+   0.4 TEL | [7] Running: kubectl --context kind-kind --namespace metacontroller get pods telepresence-connectivity-check --ignore-not-found
+   0.4 TEL | [7] ran in 0.08 secs.
+   0.9 TEL | Scout info: {'latest_version': '0.109', 'application': 'telepresence', 'notices': []}
+   0.9 >>> | Starting network proxy to cluster by swapping out Deployment kubepost-controller with a proxy Pod
+   0.9 TEL | [8] Running: kubectl --context kind-kind --namespace metacontroller create -f -
+   1.0   8 | pod/kubepost-controll-5da3469ab14f44d7926e2bcae98b0f56 created
+   1.1 TEL | [8] ran in 0.14 secs.
+   1.1 TEL | [9] Running: kubectl --context kind-kind --namespace metacontroller scale Deployment kubepost-controller --replicas=0
+   1.1   9 | deployment.apps/kubepost-controller scaled
+   1.1 TEL | [9] ran in 0.09 secs.
+   1.1 TEL | BEGIN SPAN remote.py:109(wait_for_pod)
+   1.1 TEL | [10] Running: kubectl --context kind-kind --namespace metacontroller wait --for=condition=ready --timeout=60s pod/kubepost-controll-5da3469ab14f44d7926e2bcae98b0f56
+   2.3  10 | pod/kubepost-controll-5da3469ab14f44d7926e2bcae98b0f56 condition met
+   2.3 TEL | [10] ran in 1.13 secs.
+   2.3 TEL | [11] Capturing: kubectl --context kind-kind --namespace metacontroller get pod kubepost-controll-5da3469ab14f44d7926e2bcae98b0f56 -o json
+   2.3 TEL | [11] captured in 0.07 secs.
+   2.3 TEL | END SPAN remote.py:109(wait_for_pod)    1.2s
+   2.3 TEL | BEGIN SPAN connect.py:37(connect)
+   2.3 TEL | [12] Launching kubectl logs: kubectl --context kind-kind --namespace metacontroller logs -f kubepost-controll-5da3469ab14f44d7926e2bcae98b0f56 --container controller --tail=10
+   2.3 TEL | [13] Launching kubectl port-forward: kubectl --context kind-kind --namespace metacontroller port-forward kubepost-controll-5da3469ab14f44d7926e2bcae98b0f56 44541:8022
+   2.3 TEL | [14] Running: ssh -F /dev/null -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oConnectTimeout=5 -q -p 44541 telepresence@127.0.0.1 /bin/true
+   2.4 TEL | [14] exit 255 in 0.01 secs.
+   2.4  13 | Forwarding from 127.0.0.1:44541 -> 8022
+   2.4  13 | Forwarding from [::1]:44541 -> 8022
+   2.4  12 | 2021-03-28T18:08:47+0000 [-] Loading ./forwarder.py...
+   2.4  12 | 2021-03-28T18:08:48+0000 [-] /etc/resolv.conf changed, reparsing
+   2.4  12 | 2021-03-28T18:08:48+0000 [-] Resolver added ('10.96.0.10', 53) to server list
+   2.4  12 | 2021-03-28T18:08:48+0000 [-] SOCKSv5Factory starting on 9050
+   2.4  12 | 2021-03-28T18:08:48+0000 [socks.SOCKSv5Factory#info] Starting factory <socks.SOCKSv5Factory object at 0x7fe53849c7f0>
+   2.4  12 | 2021-03-28T18:08:48+0000 [-] DNSDatagramProtocol starting on 9053
+   2.4  12 | 2021-03-28T18:08:48+0000 [-] Starting protocol <twisted.names.dns.DNSDatagramProtocol object at 0x7fe53849ca90>
+   2.4  12 | 2021-03-28T18:08:48+0000 [-] Loaded.
+   2.4  12 | 2021-03-28T18:08:48+0000 [twisted.scripts._twistd_unix.UnixAppLogger#info] twistd 20.3.0 (/usr/bin/python3.6 3.6.8) starting up.
+   2.4  12 | 2021-03-28T18:08:48+0000 [twisted.scripts._twistd_unix.UnixAppLogger#info] reactor class: twisted.internet.epollreactor.EPollReactor.
+   2.6 TEL | [15] Running: ssh -F /dev/null -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oConnectTimeout=5 -q -p 44541 telepresence@127.0.0.1 /bin/true
+   2.6  13 | Handling connection for 44541
+   2.7 TEL | [15] ran in 0.07 secs.
+   2.7 >>> | Forwarding remote port 8080 to local port 8080.
+   2.7 TEL | [16] Launching SSH port forward (exposed ports): ssh -N -oServerAliveInterval=1 -oServerAliveCountMax=10 -F /dev/null -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oConnectTimeout=5 -q -p 44541 telepresence@127.0.0.1 -R '*:8080:127.0.0.1:8080'
+   2.7 >>> | 
+   2.7 TEL | Launching Web server for proxy poll
+   2.7 TEL | [17] Launching SSH port forward (socks and proxy poll): ssh -N -oServerAliveInterval=1 -oServerAliveCountMax=10 -F /dev/null -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oConnectTimeout=5 -q -p 44541 telepresence@127.0.0.1 -L127.0.0.1:38389:127.0.0.1:9050 -R9055:127.0.0.1:34619
+   2.7  13 | Handling connection for 44541
+   2.7 TEL | END SPAN connect.py:37(connect)    0.4s
+   2.7 TEL | BEGIN SPAN remote_env.py:29(get_remote_env)
+   2.7 TEL | [18] Capturing: kubectl --context kind-kind --namespace metacontroller exec kubepost-controll-5da3469ab14f44d7926e2bcae98b0f56 --container controller -- python3 podinfo.py
+   2.7  13 | Handling connection for 44541
+   2.9 TEL | [18] captured in 0.21 secs.
+   2.9 TEL | END SPAN remote_env.py:29(get_remote_env)    0.2s
+   2.9 TEL | BEGIN SPAN mount.py:30(mount_remote_volumes)
+   2.9 TEL | [19] Running: sshfs -p 44541 -F /dev/null -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oConnectTimeout=5 telepresence@127.0.0.1:/ /tmp/tel-v9cfso43/fs
+   2.9  13 | Handling connection for 44541
+   3.0 TEL | [19] ran in 0.05 secs.
+   3.0 TEL | END SPAN mount.py:30(mount_remote_volumes)    0.0s
+   3.0 TEL | BEGIN SPAN local.py:42(set_up_torsocks)
+   3.0 TEL | [20] Running: torsocks python3 -c 'import socket; socket.socket().connect(('"'"'kubernetes.default'"'"', 443))'
+   3.0 TEL | [20] ran in 0.06 secs.
+   3.0 TEL | END SPAN local.py:42(set_up_torsocks)    0.1s
+   3.0 >>> | Setup complete. Launching your command.
+   3.0 TEL | Everything launched. Waiting to exit...
+   3.0 TEL | BEGIN SPAN runner.py:729(wait_for_exit)
+  32.4 TEL | (proxy checking local liveness)
+  32.4  12 | 2021-03-28T18:09:18+0000 [Poll#info] Checkpoint
+  62.4 TEL | (proxy checking local liveness)
+  62.4  12 | 2021-03-28T18:09:48+0000 [Poll#info] Checkpoint
+  92.4 TEL | (proxy checking local liveness)
+  92.4  12 | 2021-03-28T18:10:18+0000 [Poll#info] Checkpoint
+ 122.4 TEL | (proxy checking local liveness)
+ 122.4  12 | 2021-03-28T18:10:48+0000 [Poll#info] Checkpoint
+ 152.4 TEL | (proxy checking local liveness)
+ 152.4  12 | 2021-03-28T18:11:18+0000 [Poll#info] Checkpoint
+ 182.4 TEL | (proxy checking local liveness)
+ 182.4  12 | 2021-03-28T18:11:48+0000 [Poll#info] Checkpoint
+ 212.4 TEL | (proxy checking local liveness)
+ 212.4  12 | 2021-03-28T18:12:18+0000 [Poll#info] Checkpoint
+ 242.4 TEL | (proxy checking local liveness)
+ 242.4  12 | 2021-03-28T18:12:48+0000 [Poll#info] Checkpoint
+ 272.4 TEL | (proxy checking local liveness)
+ 272.4  12 | 2021-03-28T18:13:18+0000 [Poll#info] Checkpoint
+ 302.4 TEL | (proxy checking local liveness)
+ 302.4  12 | 2021-03-28T18:13:48+0000 [Poll#info] Checkpoint
+ 332.4 TEL | (proxy checking local liveness)
+ 332.4  12 | 2021-03-28T18:14:18+0000 [Poll#info] Checkpoint
+ 362.4 TEL | (proxy checking local liveness)
+ 362.4  12 | 2021-03-28T18:14:48+0000 [Poll#info] Checkpoint
+ 392.4 TEL | (proxy checking local liveness)
+ 392.4  12 | 2021-03-28T18:15:18+0000 [Poll#info] Checkpoint
+ 422.4 TEL | (proxy checking local liveness)
+ 422.4  12 | 2021-03-28T18:15:48+0000 [Poll#info] Checkpoint
+ 452.4 TEL | (proxy checking local liveness)
+ 452.4  12 | 2021-03-28T18:16:18+0000 [Poll#info] Checkpoint
+ 482.4 TEL | (proxy checking local liveness)
+ 482.4  12 | 2021-03-28T18:16:48+0000 [Poll#info] Checkpoint
+ 512.4 TEL | (proxy checking local liveness)
+ 512.4  12 | 2021-03-28T18:17:18+0000 [Poll#info] Checkpoint
+ 542.4 TEL | (proxy checking local liveness)
+ 542.4  12 | 2021-03-28T18:17:48+0000 [Poll#info] Checkpoint
+ 572.4 TEL | (proxy checking local liveness)
+ 572.4  12 | 2021-03-28T18:18:18+0000 [Poll#info] Checkpoint
+ 602.4 TEL | (proxy checking local liveness)
+ 602.4  12 | 2021-03-28T18:18:48+0000 [Poll#info] Checkpoint
+ 632.4 TEL | (proxy checking local liveness)
+ 632.4  12 | 2021-03-28T18:19:18+0000 [Poll#info] Checkpoint
+ 662.4 TEL | (proxy checking local liveness)
+ 662.4  12 | 2021-03-28T18:19:48+0000 [Poll#info] Checkpoint
+ 692.4 TEL | (proxy checking local liveness)
+ 692.4  12 | 2021-03-28T18:20:18+0000 [Poll#info] Checkpoint
+ 722.4 TEL | (proxy checking local liveness)
+ 722.4  12 | 2021-03-28T18:20:48+0000 [Poll#info] Checkpoint
+ 752.4 TEL | (proxy checking local liveness)
+ 752.4  12 | 2021-03-28T18:21:18+0000 [Poll#info] Checkpoint
+ 782.4 TEL | (proxy checking local liveness)
+ 782.4  12 | 2021-03-28T18:21:48+0000 [Poll#info] Checkpoint
+ 812.4 TEL | (proxy checking local liveness)
+ 812.4  12 | 2021-03-28T18:22:18+0000 [Poll#info] Checkpoint
+ 842.4 TEL | (proxy checking local liveness)
+ 842.4  12 | 2021-03-28T18:22:48+0000 [Poll#info] Checkpoint
+ 872.4 TEL | (proxy checking local liveness)
+ 872.4  12 | 2021-03-28T18:23:18+0000 [Poll#info] Checkpoint
+ 902.4 TEL | (proxy checking local liveness)
+ 902.4  12 | 2021-03-28T18:23:48+0000 [Poll#info] Checkpoint
+ 932.4 TEL | (proxy checking local liveness)
+ 932.4  12 | 2021-03-28T18:24:18+0000 [Poll#info] Checkpoint
+ 962.4 TEL | (proxy checking local liveness)
+ 962.4  12 | 2021-03-28T18:24:48+0000 [Poll#info] Checkpoint
+ 992.4 TEL | (proxy checking local liveness)
+ 992.4  12 | 2021-03-28T18:25:18+0000 [Poll#info] Checkpoint
+1022.4 TEL | (proxy checking local liveness)
+1022.4  12 | 2021-03-28T18:25:48+0000 [Poll#info] Checkpoint
+1052.4 TEL | (proxy checking local liveness)
+1052.4  12 | 2021-03-28T18:26:18+0000 [Poll#info] Checkpoint
+1082.4 TEL | (proxy checking local liveness)
+1082.4  12 | 2021-03-28T18:26:48+0000 [Poll#info] Checkpoint
+1112.4 TEL | (proxy checking local liveness)
+1112.4  12 | 2021-03-28T18:27:18+0000 [Poll#info] Checkpoint
+1142.4 TEL | (proxy checking local liveness)
+1142.4  12 | 2021-03-28T18:27:48+0000 [Poll#info] Checkpoint
+1172.4 TEL | (proxy checking local liveness)
+1172.4  12 | 2021-03-28T18:28:18+0000 [Poll#info] Checkpoint
+1202.4 TEL | (proxy checking local liveness)
+1202.4  12 | 2021-03-28T18:28:48+0000 [Poll#info] Checkpoint
+1232.4 TEL | (proxy checking local liveness)
+1232.4  12 | 2021-03-28T18:29:18+0000 [Poll#info] Checkpoint
+1262.4 TEL | (proxy checking local liveness)
+1262.4  12 | 2021-03-28T18:29:48+0000 [Poll#info] Checkpoint
+1292.4 TEL | (proxy checking local liveness)
+1292.4  12 | 2021-03-28T18:30:18+0000 [Poll#info] Checkpoint
+1322.4 TEL | (proxy checking local liveness)
+1322.4  12 | 2021-03-28T18:30:48+0000 [Poll#info] Checkpoint
+1352.4 TEL | (proxy checking local liveness)
+1352.4  12 | 2021-03-28T18:31:18+0000 [Poll#info] Checkpoint
+1382.4 TEL | (proxy checking local liveness)
+1382.4  12 | 2021-03-28T18:31:48+0000 [Poll#info] Checkpoint
+1412.4 TEL | (proxy checking local liveness)
+1412.4  12 | 2021-03-28T18:32:18+0000 [Poll#info] Checkpoint
+1442.4 TEL | (proxy checking local liveness)
+1442.4  12 | 2021-03-28T18:32:48+0000 [Poll#info] Checkpoint
+1472.4 TEL | (proxy checking local liveness)
+1472.4  12 | 2021-03-28T18:33:18+0000 [Poll#info] Checkpoint
+1502.4 TEL | (proxy checking local liveness)
+1502.4  12 | 2021-03-28T18:33:48+0000 [Poll#info] Checkpoint
+1532.4 TEL | (proxy checking local liveness)
+1532.4  12 | 2021-03-28T18:34:18+0000 [Poll#info] Checkpoint
+1562.4 TEL | (proxy checking local liveness)
+1562.4  12 | 2021-03-28T18:34:48+0000 [Poll#info] Checkpoint
+1592.4 TEL | (proxy checking local liveness)
+1592.4  12 | 2021-03-28T18:35:18+0000 [Poll#info] Checkpoint
+1622.4 TEL | (proxy checking local liveness)
+1622.4  12 | 2021-03-28T18:35:48+0000 [Poll#info] Checkpoint
+1652.4 TEL | (proxy checking local liveness)
+1652.4  12 | 2021-03-28T18:36:18+0000 [Poll#info] Checkpoint
+1682.4 TEL | (proxy checking local liveness)
+1682.4  12 | 2021-03-28T18:36:48+0000 [Poll#info] Checkpoint
+1712.4 TEL | (proxy checking local liveness)
+1712.4  12 | 2021-03-28T18:37:18+0000 [Poll#info] Checkpoint
+1742.4 TEL | (proxy checking local liveness)
+1742.4  12 | 2021-03-28T18:37:48+0000 [Poll#info] Checkpoint
+1772.4 TEL | (proxy checking local liveness)
+1772.4  12 | 2021-03-28T18:38:18+0000 [Poll#info] Checkpoint
+1802.4 TEL | (proxy checking local liveness)
+1802.4  12 | 2021-03-28T18:38:48+0000 [Poll#info] Checkpoint
+1832.4 TEL | (proxy checking local liveness)
+1832.4  12 | 2021-03-28T18:39:18+0000 [Poll#info] Checkpoint
+1862.4 TEL | (proxy checking local liveness)
+1862.4  12 | 2021-03-28T18:39:48+0000 [Poll#info] Checkpoint
+1892.4 TEL | (proxy checking local liveness)
+1892.4  12 | 2021-03-28T18:40:18+0000 [Poll#info] Checkpoint
+1922.4 TEL | (proxy checking local liveness)
+1922.4  12 | 2021-03-28T18:40:48+0000 [Poll#info] Checkpoint
+1952.4 TEL | (proxy checking local liveness)
+1952.4  12 | 2021-03-28T18:41:18+0000 [Poll#info] Checkpoint
+1982.4 TEL | (proxy checking local liveness)
+1982.4  12 | 2021-03-28T18:41:48+0000 [Poll#info] Checkpoint
+2012.4 TEL | (proxy checking local liveness)
+2012.4  12 | 2021-03-28T18:42:18+0000 [Poll#info] Checkpoint
+2042.4 TEL | (proxy checking local liveness)
+2042.4  12 | 2021-03-28T18:42:48+0000 [Poll#info] Checkpoint
+2072.4 TEL | (proxy checking local liveness)
+2072.4  12 | 2021-03-28T18:43:18+0000 [Poll#info] Checkpoint
+2102.4 TEL | (proxy checking local liveness)
+2102.4  12 | 2021-03-28T18:43:48+0000 [Poll#info] Checkpoint
+2132.4 TEL | (proxy checking local liveness)
+2132.4  12 | 2021-03-28T18:44:18+0000 [Poll#info] Checkpoint
+2162.4 TEL | (proxy checking local liveness)
+2162.4  12 | 2021-03-28T18:44:48+0000 [Poll#info] Checkpoint
+2192.4 TEL | (proxy checking local liveness)
+2192.4  12 | 2021-03-28T18:45:18+0000 [Poll#info] Checkpoint
+2222.4 TEL | (proxy checking local liveness)
+2222.4  12 | 2021-03-28T18:45:48+0000 [Poll#info] Checkpoint
+2252.4 TEL | (proxy checking local liveness)
+2252.4  12 | 2021-03-28T18:46:18+0000 [Poll#info] Checkpoint
+2282.4 TEL | (proxy checking local liveness)
+2282.4  12 | 2021-03-28T18:46:48+0000 [Poll#info] Checkpoint
+2312.4 TEL | (proxy checking local liveness)
+2312.4  12 | 2021-03-28T18:47:18+0000 [Poll#info] Checkpoint
+2342.4 TEL | (proxy checking local liveness)
+2342.4  12 | 2021-03-28T18:47:48+0000 [Poll#info] Checkpoint
+2372.4 TEL | (proxy checking local liveness)
+2372.4  12 | 2021-03-28T18:48:18+0000 [Poll#info] Checkpoint
+2402.4 TEL | (proxy checking local liveness)
+2402.4  12 | 2021-03-28T18:48:48+0000 [Poll#info] Checkpoint
+2432.4 TEL | (proxy checking local liveness)
+2432.4  12 | 2021-03-28T18:49:18+0000 [Poll#info] Checkpoint
+2462.4 TEL | (proxy checking local liveness)
+2462.4  12 | 2021-03-28T18:49:48+0000 [Poll#info] Checkpoint
+2492.4 TEL | (proxy checking local liveness)
+2492.4  12 | 2021-03-28T18:50:18+0000 [Poll#info] Checkpoint
+2522.4 TEL | (proxy checking local liveness)
+2522.4  12 | 2021-03-28T18:50:48+0000 [Poll#info] Checkpoint
+2552.4 TEL | (proxy checking local liveness)
+2552.4  12 | 2021-03-28T18:51:18+0000 [Poll#info] Checkpoint
+2582.4 TEL | (proxy checking local liveness)
+2582.4  12 | 2021-03-28T18:51:48+0000 [Poll#info] Checkpoint
+2612.4 TEL | (proxy checking local liveness)
+2612.4  12 | 2021-03-28T18:52:18+0000 [Poll#info] Checkpoint
+2642.4 TEL | (proxy checking local liveness)
+2642.4  12 | 2021-03-28T18:52:48+0000 [Poll#info] Checkpoint
+2672.4 TEL | (proxy checking local liveness)
+2672.4  12 | 2021-03-28T18:53:18+0000 [Poll#info] Checkpoint
+2702.4 TEL | (proxy checking local liveness)
+2702.4  12 | 2021-03-28T18:53:48+0000 [Poll#info] Checkpoint
+2732.4 TEL | (proxy checking local liveness)
+2732.4  12 | 2021-03-28T18:54:18+0000 [Poll#info] Checkpoint
+2762.4 TEL | (proxy checking local liveness)
+2762.4  12 | 2021-03-28T18:54:48+0000 [Poll#info] Checkpoint
+2792.4 TEL | (proxy checking local liveness)
+2792.4  12 | 2021-03-28T18:55:18+0000 [Poll#info] Checkpoint
+2822.4 TEL | (proxy checking local liveness)
+2822.4  12 | 2021-03-28T18:55:48+0000 [Poll#info] Checkpoint
+2852.4 TEL | (proxy checking local liveness)
+2852.4  12 | 2021-03-28T18:56:18+0000 [Poll#info] Checkpoint
+2882.4 TEL | (proxy checking local liveness)
+2882.4  12 | 2021-03-28T18:56:48+0000 [Poll#info] Checkpoint
+2912.4 TEL | (proxy checking local liveness)
+2912.4  12 | 2021-03-28T18:57:18+0000 [Poll#info] Checkpoint
+2942.4 TEL | (proxy checking local liveness)
+2942.4  12 | 2021-03-28T18:57:48+0000 [Poll#info] Checkpoint
+2972.4 TEL | (proxy checking local liveness)
+2972.4  12 | 2021-03-28T18:58:18+0000 [Poll#info] Checkpoint
+3002.4 TEL | (proxy checking local liveness)
+3002.4  12 | 2021-03-28T18:58:48+0000 [Poll#info] Checkpoint
+3032.4 TEL | (proxy checking local liveness)
+3032.4  12 | 2021-03-28T18:59:18+0000 [Poll#info] Checkpoint
+3062.4 TEL | (proxy checking local liveness)
+3062.4  12 | 2021-03-28T18:59:48+0000 [Poll#info] Checkpoint
+3092.4 TEL | (proxy checking local liveness)
+3092.4  12 | 2021-03-28T19:00:18+0000 [Poll#info] Checkpoint
+3122.4 TEL | (proxy checking local liveness)
+3122.4  12 | 2021-03-28T19:00:48+0000 [Poll#info] Checkpoint
+3152.4 TEL | (proxy checking local liveness)
+3152.4  12 | 2021-03-28T19:01:18+0000 [Poll#info] Checkpoint
+3182.4 TEL | (proxy checking local liveness)
+3182.4  12 | 2021-03-28T19:01:48+0000 [Poll#info] Checkpoint
+3212.4 TEL | (proxy checking local liveness)
+3212.4  12 | 2021-03-28T19:02:18+0000 [Poll#info] Checkpoint
+3242.4 TEL | (proxy checking local liveness)
+3242.4  12 | 2021-03-28T19:02:48+0000 [Poll#info] Checkpoint
+3272.4 TEL | (proxy checking local liveness)
+3272.4  12 | 2021-03-28T19:03:18+0000 [Poll#info] Checkpoint
+3302.4 TEL | (proxy checking local liveness)
+3302.4  12 | 2021-03-28T19:03:48+0000 [Poll#info] Checkpoint
+3332.4 TEL | (proxy checking local liveness)
+3332.4  12 | 2021-03-28T19:04:18+0000 [Poll#info] Checkpoint
+3362.4 TEL | (proxy checking local liveness)
+3362.4  12 | 2021-03-28T19:04:48+0000 [Poll#info] Checkpoint
+3392.4 TEL | (proxy checking local liveness)
+3392.4  12 | 2021-03-28T19:05:18+0000 [Poll#info] Checkpoint
+3422.4 TEL | (proxy checking local liveness)
+3422.4  12 | 2021-03-28T19:05:48+0000 [Poll#info] Checkpoint
+3452.4 TEL | (proxy checking local liveness)
+3452.4  12 | 2021-03-28T19:06:18+0000 [Poll#info] Checkpoint
+3482.4 TEL | (proxy checking local liveness)
+3482.4  12 | 2021-03-28T19:06:48+0000 [Poll#info] Checkpoint
+3512.4 TEL | (proxy checking local liveness)
+3512.4  12 | 2021-03-28T19:07:18+0000 [Poll#info] Checkpoint
+3542.4 TEL | (proxy checking local liveness)
+3542.4  12 | 2021-03-28T19:07:48+0000 [Poll#info] Checkpoint
+3572.4 TEL | (proxy checking local liveness)
+3572.4  12 | 2021-03-28T19:08:18+0000 [Poll#info] Checkpoint
+3602.4 TEL | (proxy checking local liveness)
+3602.4  12 | 2021-03-28T19:08:48+0000 [Poll#info] Checkpoint
+3632.4 TEL | (proxy checking local liveness)
+3632.4  12 | 2021-03-28T19:09:18+0000 [Poll#info] Checkpoint
+3662.4 TEL | (proxy checking local liveness)
+3662.4  12 | 2021-03-28T19:09:48+0000 [Poll#info] Checkpoint
+3692.4 TEL | (proxy checking local liveness)
+3692.4  12 | 2021-03-28T19:10:18+0000 [Poll#info] Checkpoint
+3722.4 TEL | (proxy checking local liveness)
+3722.4  12 | 2021-03-28T19:10:48+0000 [Poll#info] Checkpoint
+3752.4 TEL | (proxy checking local liveness)
+3752.4  12 | 2021-03-28T19:11:18+0000 [Poll#info] Checkpoint
+3782.4 TEL | (proxy checking local liveness)
+3782.4  12 | 2021-03-28T19:11:48+0000 [Poll#info] Checkpoint
+3812.4 TEL | (proxy checking local liveness)
+3812.4  12 | 2021-03-28T19:12:18+0000 [Poll#info] Checkpoint
+3842.4 TEL | (proxy checking local liveness)
+3842.4  12 | 2021-03-28T19:12:48+0000 [Poll#info] Checkpoint
+3872.4 TEL | (proxy checking local liveness)
+3872.4  12 | 2021-03-28T19:13:18+0000 [Poll#info] Checkpoint
+3902.4 TEL | (proxy checking local liveness)
+3902.4  12 | 2021-03-28T19:13:48+0000 [Poll#info] Checkpoint
+3932.4 TEL | (proxy checking local liveness)
+3932.4  12 | 2021-03-28T19:14:18+0000 [Poll#info] Checkpoint
+3962.4 TEL | (proxy checking local liveness)
+3962.4  12 | 2021-03-28T19:14:48+0000 [Poll#info] Checkpoint
+3992.4 TEL | (proxy checking local liveness)
+3992.4  12 | 2021-03-28T19:15:18+0000 [Poll#info] Checkpoint
+4022.4 TEL | (proxy checking local liveness)
+4022.4  12 | 2021-03-28T19:15:48+0000 [Poll#info] Checkpoint
+4052.4 TEL | (proxy checking local liveness)
+4052.4  12 | 2021-03-28T19:16:18+0000 [Poll#info] Checkpoint
+4082.4 TEL | (proxy checking local liveness)
+4082.4  12 | 2021-03-28T19:16:48+0000 [Poll#info] Checkpoint
+4112.4 TEL | (proxy checking local liveness)
+4112.4  12 | 2021-03-28T19:17:18+0000 [Poll#info] Checkpoint
+4142.4 TEL | (proxy checking local liveness)
+4142.4  12 | 2021-03-28T19:17:48+0000 [Poll#info] Checkpoint
+4172.4 TEL | (proxy checking local liveness)
+4172.4  12 | 2021-03-28T19:18:18+0000 [Poll#info] Checkpoint
+4202.4 TEL | (proxy checking local liveness)
+4202.4  12 | 2021-03-28T19:18:48+0000 [Poll#info] Checkpoint
+4232.4 TEL | (proxy checking local liveness)
+4232.4  12 | 2021-03-28T19:19:18+0000 [Poll#info] Checkpoint
+4262.4 TEL | (proxy checking local liveness)
+4262.4  12 | 2021-03-28T19:19:48+0000 [Poll#info] Checkpoint
+4292.4 TEL | (proxy checking local liveness)
+4292.4  12 | 2021-03-28T19:20:18+0000 [Poll#info] Checkpoint
+4322.4 TEL | (proxy checking local liveness)
+4322.4  12 | 2021-03-28T19:20:48+0000 [Poll#info] Checkpoint
+4352.4 TEL | (proxy checking local liveness)
+4352.4  12 | 2021-03-28T19:21:18+0000 [Poll#info] Checkpoint
+4382.4 TEL | (proxy checking local liveness)
+4382.4  12 | 2021-03-28T19:21:48+0000 [Poll#info] Checkpoint
+4412.4 TEL | (proxy checking local liveness)
+4412.4  12 | 2021-03-28T19:22:18+0000 [Poll#info] Checkpoint
+4442.4 TEL | (proxy checking local liveness)
+4442.4  12 | 2021-03-28T19:22:48+0000 [Poll#info] Checkpoint
+4472.4 TEL | (proxy checking local liveness)
+4472.4  12 | 2021-03-28T19:23:18+0000 [Poll#info] Checkpoint
+4502.4 TEL | (proxy checking local liveness)
+4502.4  12 | 2021-03-28T19:23:48+0000 [Poll#info] Checkpoint
+4532.4 TEL | (proxy checking local liveness)
+4532.4  12 | 2021-03-28T19:24:18+0000 [Poll#info] Checkpoint
+4562.4 TEL | (proxy checking local liveness)
+4562.4  12 | 2021-03-28T19:24:48+0000 [Poll#info] Checkpoint
+4592.4 TEL | (proxy checking local liveness)
+4592.4  12 | 2021-03-28T19:25:18+0000 [Poll#info] Checkpoint
+4622.4 TEL | (proxy checking local liveness)
+4622.4  12 | 2021-03-28T19:25:48+0000 [Poll#info] Checkpoint
+4652.4 TEL | (proxy checking local liveness)
+4652.4  12 | 2021-03-28T19:26:18+0000 [Poll#info] Checkpoint
+4682.4 TEL | (proxy checking local liveness)
+4682.4  12 | 2021-03-28T19:26:48+0000 [Poll#info] Checkpoint
+4712.4 TEL | (proxy checking local liveness)
+4712.4  12 | 2021-03-28T19:27:18+0000 [Poll#info] Checkpoint
+4742.4 TEL | (proxy checking local liveness)
+4742.4  12 | 2021-03-28T19:27:48+0000 [Poll#info] Checkpoint
+4772.4 TEL | (proxy checking local liveness)
+4772.4  12 | 2021-03-28T19:28:18+0000 [Poll#info] Checkpoint
+4802.4 TEL | (proxy checking local liveness)
+4802.4  12 | 2021-03-28T19:28:48+0000 [Poll#info] Checkpoint
+4832.4 TEL | (proxy checking local liveness)
+4832.4  12 | 2021-03-28T19:29:18+0000 [Poll#info] Checkpoint
+4862.4 TEL | (proxy checking local liveness)
+4862.4  12 | 2021-03-28T19:29:48+0000 [Poll#info] Checkpoint
+4892.4 TEL | (proxy checking local liveness)
+4892.4  12 | 2021-03-28T19:30:18+0000 [Poll#info] Checkpoint
+4922.4 TEL | (proxy checking local liveness)
+4922.4  12 | 2021-03-28T19:30:48+0000 [Poll#info] Checkpoint
+4952.4 TEL | (proxy checking local liveness)
+4952.4  12 | 2021-03-28T19:31:18+0000 [Poll#info] Checkpoint
+4982.4 TEL | (proxy checking local liveness)
+4982.4  12 | 2021-03-28T19:31:48+0000 [Poll#info] Checkpoint
+5012.4 TEL | (proxy checking local liveness)
+5012.4  12 | 2021-03-28T19:32:18+0000 [Poll#info] Checkpoint
+5042.4 TEL | (proxy checking local liveness)
+5042.4  12 | 2021-03-28T19:32:48+0000 [Poll#info] Checkpoint
+5072.4 TEL | (proxy checking local liveness)
+5072.4  12 | 2021-03-28T19:33:18+0000 [Poll#info] Checkpoint
+5102.4 TEL | (proxy checking local liveness)
+5102.4  12 | 2021-03-28T19:33:48+0000 [Poll#info] Checkpoint
+5132.4 TEL | (proxy checking local liveness)
+5132.4  12 | 2021-03-28T19:34:18+0000 [Poll#info] Checkpoint
+5162.4 TEL | (proxy checking local liveness)
+5162.4  12 | 2021-03-28T19:34:48+0000 [Poll#info] Checkpoint
+5192.4 TEL | (proxy checking local liveness)
+5192.4  12 | 2021-03-28T19:35:18+0000 [Poll#info] Checkpoint
+5222.4 TEL | (proxy checking local liveness)
+5222.4  12 | 2021-03-28T19:35:48+0000 [Poll#info] Checkpoint
+5252.4 TEL | (proxy checking local liveness)
+5252.4  12 | 2021-03-28T19:36:18+0000 [Poll#info] Checkpoint
+5282.4 TEL | (proxy checking local liveness)
+5282.4  12 | 2021-03-28T19:36:48+0000 [Poll#info] Checkpoint
+5312.4 TEL | (proxy checking local liveness)
+5312.4  12 | 2021-03-28T19:37:18+0000 [Poll#info] Checkpoint
+5342.4 TEL | (proxy checking local liveness)
+5342.4  12 | 2021-03-28T19:37:48+0000 [Poll#info] Checkpoint
+5372.4 TEL | (proxy checking local liveness)
+5372.4  12 | 2021-03-28T19:38:18+0000 [Poll#info] Checkpoint
+5402.4 TEL | (proxy checking local liveness)
+5402.4  12 | 2021-03-28T19:38:48+0000 [Poll#info] Checkpoint
+5432.4 TEL | (proxy checking local liveness)
+5432.4  12 | 2021-03-28T19:39:18+0000 [Poll#info] Checkpoint
+5462.4 TEL | (proxy checking local liveness)
+5462.4  12 | 2021-03-28T19:39:48+0000 [Poll#info] Checkpoint
+5492.4 TEL | (proxy checking local liveness)
+5492.4  12 | 2021-03-28T19:40:18+0000 [Poll#info] Checkpoint
+5522.4 TEL | (proxy checking local liveness)
+5522.4  12 | 2021-03-28T19:40:48+0000 [Poll#info] Checkpoint
+5552.4 TEL | (proxy checking local liveness)
+5552.4  12 | 2021-03-28T19:41:18+0000 [Poll#info] Checkpoint
+5582.4 TEL | (proxy checking local liveness)
+5582.4  12 | 2021-03-28T19:41:48+0000 [Poll#info] Checkpoint
+5612.4 TEL | (proxy checking local liveness)
+5612.4  12 | 2021-03-28T19:42:18+0000 [Poll#info] Checkpoint
+5642.4 TEL | (proxy checking local liveness)
+5642.4  12 | 2021-03-28T19:42:48+0000 [Poll#info] Checkpoint
+5672.4 TEL | (proxy checking local liveness)
+5672.4  12 | 2021-03-28T19:43:18+0000 [Poll#info] Checkpoint
+5702.4 TEL | (proxy checking local liveness)
+5702.4  12 | 2021-03-28T19:43:48+0000 [Poll#info] Checkpoint
+5732.4 TEL | (proxy checking local liveness)
+5732.4  12 | 2021-03-28T19:44:18+0000 [Poll#info] Checkpoint
+5762.4 TEL | (proxy checking local liveness)
+5762.4  12 | 2021-03-28T19:44:48+0000 [Poll#info] Checkpoint
+5792.4 TEL | (proxy checking local liveness)
+5792.4  12 | 2021-03-28T19:45:18+0000 [Poll#info] Checkpoint
+5822.4 TEL | (proxy checking local liveness)
+5822.4  12 | 2021-03-28T19:45:48+0000 [Poll#info] Checkpoint
+5852.4 TEL | (proxy checking local liveness)
+5852.4  12 | 2021-03-28T19:46:18+0000 [Poll#info] Checkpoint
+5882.4 TEL | (proxy checking local liveness)
+5882.4  12 | 2021-03-28T19:46:48+0000 [Poll#info] Checkpoint
+5912.4 TEL | (proxy checking local liveness)
+5912.4  12 | 2021-03-28T19:47:18+0000 [Poll#info] Checkpoint
+5942.4 TEL | (proxy checking local liveness)
+5942.4  12 | 2021-03-28T19:47:48+0000 [Poll#info] Checkpoint
+5972.4 TEL | (proxy checking local liveness)
+5972.4  12 | 2021-03-28T19:48:18+0000 [Poll#info] Checkpoint
+6002.4 TEL | (proxy checking local liveness)
+6002.4  12 | 2021-03-28T19:48:48+0000 [Poll#info] Checkpoint
+6032.4 TEL | (proxy checking local liveness)
+6032.4  12 | 2021-03-28T19:49:18+0000 [Poll#info] Checkpoint
+6062.4 TEL | (proxy checking local liveness)
+6062.4  12 | 2021-03-28T19:49:48+0000 [Poll#info] Checkpoint
+6092.4 TEL | (proxy checking local liveness)
+6092.4  12 | 2021-03-28T19:50:18+0000 [Poll#info] Checkpoint
+6122.4 TEL | (proxy checking local liveness)
+6122.4  12 | 2021-03-28T19:50:48+0000 [Poll#info] Checkpoint
+6152.4 TEL | (proxy checking local liveness)
+6152.4  12 | 2021-03-28T19:51:18+0000 [Poll#info] Checkpoint
+6182.4 TEL | (proxy checking local liveness)
+6182.4  12 | 2021-03-28T19:51:48+0000 [Poll#info] Checkpoint
+6212.4 TEL | (proxy checking local liveness)
+6212.4  12 | 2021-03-28T19:52:18+0000 [Poll#info] Checkpoint
+6242.4 TEL | (proxy checking local liveness)
+6242.4  12 | 2021-03-28T19:52:48+0000 [Poll#info] Checkpoint
+6272.4 TEL | (proxy checking local liveness)
+6272.4  12 | 2021-03-28T19:53:18+0000 [Poll#info] Checkpoint
+6302.4 TEL | (proxy checking local liveness)
+6302.4  12 | 2021-03-28T19:53:48+0000 [Poll#info] Checkpoint
+6332.4 TEL | (proxy checking local liveness)
+6332.4  12 | 2021-03-28T19:54:18+0000 [Poll#info] Checkpoint
+6362.4 TEL | (proxy checking local liveness)
+6362.4  12 | 2021-03-28T19:54:48+0000 [Poll#info] Checkpoint
+6392.4 TEL | (proxy checking local liveness)
+6392.4  12 | 2021-03-28T19:55:18+0000 [Poll#info] Checkpoint
+6422.4 TEL | (proxy checking local liveness)
+6422.4  12 | 2021-03-28T19:55:48+0000 [Poll#info] Checkpoint
+6452.4 TEL | (proxy checking local liveness)
+6452.4  12 | 2021-03-28T19:56:18+0000 [Poll#info] Checkpoint
+6482.4 TEL | (proxy checking local liveness)
+6482.4  12 | 2021-03-28T19:56:48+0000 [Poll#info] Checkpoint
+6512.4 TEL | (proxy checking local liveness)
+6512.4  12 | 2021-03-28T19:57:18+0000 [Poll#info] Checkpoint
+6542.4 TEL | (proxy checking local liveness)
+6542.4  12 | 2021-03-28T19:57:48+0000 [Poll#info] Checkpoint
+6572.4 TEL | (proxy checking local liveness)
+6572.4  12 | 2021-03-28T19:58:18+0000 [Poll#info] Checkpoint
+6602.4 TEL | (proxy checking local liveness)
+6602.4  12 | 2021-03-28T19:58:48+0000 [Poll#info] Checkpoint
+6632.4 TEL | (proxy checking local liveness)
+6632.4  12 | 2021-03-28T19:59:18+0000 [Poll#info] Checkpoint
+6662.4 TEL | (proxy checking local liveness)
+6662.4  12 | 2021-03-28T19:59:48+0000 [Poll#info] Checkpoint
+6692.4 TEL | (proxy checking local liveness)
+6692.4  12 | 2021-03-28T20:00:18+0000 [Poll#info] Checkpoint
+6722.4 TEL | (proxy checking local liveness)
+6722.4  12 | 2021-03-28T20:00:48+0000 [Poll#info] Checkpoint
+6752.4 TEL | (proxy checking local liveness)
+6752.4  12 | 2021-03-28T20:01:18+0000 [Poll#info] Checkpoint
+6782.4 TEL | (proxy checking local liveness)
+6782.4  12 | 2021-03-28T20:01:48+0000 [Poll#info] Checkpoint
+6812.4 TEL | (proxy checking local liveness)
+6812.4  12 | 2021-03-28T20:02:18+0000 [Poll#info] Checkpoint
+6842.4 TEL | (proxy checking local liveness)
+6842.4  12 | 2021-03-28T20:02:48+0000 [Poll#info] Checkpoint
+6872.4 TEL | (proxy checking local liveness)
+6872.4  12 | 2021-03-28T20:03:18+0000 [Poll#info] Checkpoint
+6902.4 TEL | (proxy checking local liveness)
+6902.4  12 | 2021-03-28T20:03:48+0000 [Poll#info] Checkpoint
+6932.4 TEL | (proxy checking local liveness)
+6932.4  12 | 2021-03-28T20:04:18+0000 [Poll#info] Checkpoint
+6962.4 TEL | (proxy checking local liveness)
+6962.4  12 | 2021-03-28T20:04:48+0000 [Poll#info] Checkpoint
+6992.4 TEL | (proxy checking local liveness)
+6992.4  12 | 2021-03-28T20:05:18+0000 [Poll#info] Checkpoint
+7022.4 TEL | (proxy checking local liveness)
+7022.4  12 | 2021-03-28T20:05:48+0000 [Poll#info] Checkpoint
+7052.4 TEL | (proxy checking local liveness)
+7052.4  12 | 2021-03-28T20:06:18+0000 [Poll#info] Checkpoint
+7082.4 TEL | (proxy checking local liveness)
+7082.4  12 | 2021-03-28T20:06:48+0000 [Poll#info] Checkpoint
+7112.4 TEL | (proxy checking local liveness)
+7112.4  12 | 2021-03-28T20:07:18+0000 [Poll#info] Checkpoint
+7142.4 TEL | (proxy checking local liveness)
+7142.4  12 | 2021-03-28T20:07:48+0000 [Poll#info] Checkpoint
+7172.4 TEL | (proxy checking local liveness)
+7172.4  12 | 2021-03-28T20:08:18+0000 [Poll#info] Checkpoint
+7202.4 TEL | (proxy checking local liveness)
+7202.4  12 | 2021-03-28T20:08:48+0000 [Poll#info] Checkpoint
+7232.4 TEL | (proxy checking local liveness)
+7232.4  12 | 2021-03-28T20:09:18+0000 [Poll#info] Checkpoint
+7262.4 TEL | (proxy checking local liveness)
+7262.4  12 | 2021-03-28T20:09:48+0000 [Poll#info] Checkpoint
+7292.4 TEL | (proxy checking local liveness)
+7292.4  12 | 2021-03-28T20:10:18+0000 [Poll#info] Checkpoint
+7322.4 TEL | (proxy checking local liveness)
+7322.4  12 | 2021-03-28T20:10:48+0000 [Poll#info] Checkpoint
+7352.4 TEL | (proxy checking local liveness)
+7352.4  12 | 2021-03-28T20:11:18+0000 [Poll#info] Checkpoint
+7382.4 TEL | (proxy checking local liveness)
+7382.4  12 | 2021-03-28T20:11:48+0000 [Poll#info] Checkpoint
+7412.4 TEL | (proxy checking local liveness)
+7412.4  12 | 2021-03-28T20:12:18+0000 [Poll#info] Checkpoint
+7442.4 TEL | (proxy checking local liveness)
+7442.4  12 | 2021-03-28T20:12:48+0000 [Poll#info] Checkpoint
+7472.4 TEL | (proxy checking local liveness)
+7472.4  12 | 2021-03-28T20:13:18+0000 [Poll#info] Checkpoint
+7502.4 TEL | (proxy checking local liveness)
+7502.4  12 | 2021-03-28T20:13:48+0000 [Poll#info] Checkpoint
+7532.4 TEL | (proxy checking local liveness)
+7532.4  12 | 2021-03-28T20:14:18+0000 [Poll#info] Checkpoint
+7562.4 TEL | (proxy checking local liveness)
+7562.4  12 | 2021-03-28T20:14:48+0000 [Poll#info] Checkpoint
+7592.4 TEL | (proxy checking local liveness)
+7592.4  12 | 2021-03-28T20:15:18+0000 [Poll#info] Checkpoint
+7622.4 TEL | (proxy checking local liveness)
+7622.4  12 | 2021-03-28T20:15:48+0000 [Poll#info] Checkpoint
+7652.4 TEL | (proxy checking local liveness)
+7652.4  12 | 2021-03-28T20:16:18+0000 [Poll#info] Checkpoint
+7682.4 TEL | (proxy checking local liveness)
+7682.4  12 | 2021-03-28T20:16:48+0000 [Poll#info] Checkpoint
+7712.4 TEL | (proxy checking local liveness)
+7712.4  12 | 2021-03-28T20:17:18+0000 [Poll#info] Checkpoint
+7742.4 TEL | (proxy checking local liveness)
+7742.4  12 | 2021-03-28T20:17:48+0000 [Poll#info] Checkpoint
+7772.4 TEL | (proxy checking local liveness)
+7772.4  12 | 2021-03-28T20:18:18+0000 [Poll#info] Checkpoint
+7802.4 TEL | (proxy checking local liveness)
+7802.4  12 | 2021-03-28T20:18:48+0000 [Poll#info] Checkpoint
+7832.4 TEL | (proxy checking local liveness)
+7832.4  12 | 2021-03-28T20:19:18+0000 [Poll#info] Checkpoint
+7862.4 TEL | (proxy checking local liveness)
+7862.4  12 | 2021-03-28T20:19:48+0000 [Poll#info] Checkpoint
+7892.4 TEL | (proxy checking local liveness)
+7892.4  12 | 2021-03-28T20:20:18+0000 [Poll#info] Checkpoint
+7922.4 TEL | (proxy checking local liveness)
+7922.4  12 | 2021-03-28T20:20:48+0000 [Poll#info] Checkpoint
+7952.4 TEL | (proxy checking local liveness)
+7952.4  12 | 2021-03-28T20:21:18+0000 [Poll#info] Checkpoint
+7982.4 TEL | (proxy checking local liveness)
+7982.4  12 | 2021-03-28T20:21:48+0000 [Poll#info] Checkpoint
+8012.4 TEL | (proxy checking local liveness)
+8012.4  12 | 2021-03-28T20:22:18+0000 [Poll#info] Checkpoint
+8042.4 TEL | (proxy checking local liveness)
+8042.4  12 | 2021-03-28T20:22:48+0000 [Poll#info] Checkpoint
+8072.4 TEL | (proxy checking local liveness)
+8072.4  12 | 2021-03-28T20:23:18+0000 [Poll#info] Checkpoint
+8102.4 TEL | (proxy checking local liveness)
+8102.4  12 | 2021-03-28T20:23:48+0000 [Poll#info] Checkpoint
+8132.4 TEL | (proxy checking local liveness)
+8132.4  12 | 2021-03-28T20:24:18+0000 [Poll#info] Checkpoint
+8162.4 TEL | (proxy checking local liveness)
+8162.4  12 | 2021-03-28T20:24:48+0000 [Poll#info] Checkpoint
+8192.4 TEL | (proxy checking local liveness)
+8192.4  12 | 2021-03-28T20:25:18+0000 [Poll#info] Checkpoint
+8222.4 TEL | (proxy checking local liveness)
+8222.4  12 | 2021-03-28T20:25:48+0000 [Poll#info] Checkpoint
+8252.4 TEL | (proxy checking local liveness)
+8252.4  12 | 2021-03-28T20:26:18+0000 [Poll#info] Checkpoint

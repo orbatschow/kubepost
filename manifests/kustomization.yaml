@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: metacontroller
+
+resources:
+  - crd/kubepost.io_databases.yaml
+  - crd/kubepost.io_instances.yaml
+  - crd/kubepost.io_roles.yaml
+  - controller.yaml
+  - deployment.yaml
+  - service.yaml
