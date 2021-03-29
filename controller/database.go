@@ -154,5 +154,28 @@ func (database *Database) createDatabase(instances map[string]*Instance, secrets
 		return err
 	}
 
+	err = database.reconcileExtensions(instance, secret)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (database *Database) reconcileExtensions(instance *Instance, secret *v1.Secret) error  {
+	// switch to the extensions target database, as you can only create
+	// extensions from within the database you are connected to
+	instance.Spec.Database = database.Spec.DatabaseName
+	conn, err := instance.GetConnection(secret)
+	if err != nil {
+		return err
+	}
+
+	databaseRepository := repository.NewDatabaseRepository(conn)
+	err = databaseRepository.ReconcileExtensions(database.Spec.Extensions)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
