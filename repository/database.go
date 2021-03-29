@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
+	"github.com/orbatschow/kubepost/api/v1alpha1"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -54,20 +56,29 @@ func (r *databaseRepository) Delete(name string) error {
 	return nil
 }
 
-func (r *databaseRepository) ReconcileExtensions(extensions []string) error {
+func (r *databaseRepository) ReconcileExtensions(extensions []v1alpha1.Extension) error {
 
-	/*
-		// TODO
-		_, err := r.conn.Exec(context.Background(), fmt.Sprintf("DROP DATABASE %s WITH (FORCE)", name))
+	type pgExtension struct {
+		Name    string `json:"extname"`
+		Version string `json:"extversion"`
+	}
+	var pgExtensions []*pgExtension
 
-		if err != nil {
-			var pgErr *pgconn.PgError
-			if errors.As(err, &pgErr) {
-				log.Errorf("unable to delete database '%s', failed with code: '%s' and message: '%s'", name, pgErr.Code, pgErr.Message)
-				return err
-			}
+	err := pgxscan.Select(context.Background(), r.conn, &pgExtensions, "SELECT extname AS name, extversion AS version FROM pg_extension")
+
+	for _, match := range pgExtensions {
+		
+	}
+
+	if err != nil {
+		log.Error(err)
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			//log.Errorf("unable to delete database '%s', failed with code: '%s' and message: '%s'", pgErr.Code, pgErr.Message)
+			log.Error(err)
+			return err
 		}
-	*/
+	}
 
 	return nil
 }

@@ -27,7 +27,12 @@ type DatabaseSpec struct {
 	// TODO: aso
 	CascadeDelete bool `json:"cascadeDelete"`
 	//+kubebuilder:validation:Optional
-	Extensions [] string `json:"extensions"`
+	Extensions [] Extension `json:"extensions"`
+}
+
+type Extension struct {
+	Name string `json:"name"`
+	Version string `json:"version,omitempty"`
 }
 
 type DatabaseStatus struct {

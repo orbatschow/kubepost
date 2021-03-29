@@ -43,7 +43,14 @@ spec:
                 type: string
               extensions:
                 items:
-                  type: string
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                  - name
+                  type: object
                 type: array
               instanceRef:
                 properties:

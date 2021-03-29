@@ -19,6 +19,9 @@ type InstanceSpec struct {
 	Port      int       `json:"port"`
 	Database  string    `json:"database"`
 	SecretRef SecretRef `json:"secretRef"`
+	//+kubebuilder:validation:Optional
+	//+kubebuilder:default:=prefer
+	SSLMode string `json:"sslMode"`
 }
 
 type SecretRef struct {

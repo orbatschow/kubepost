@@ -57,6 +57,9 @@ spec:
                 - passwordKey
                 - userKey
                 type: object
+              sslMode:
+                default: prefer
+                type: string
             required:
             - database
             - host

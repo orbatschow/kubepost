@@ -150,6 +150,7 @@ func (instance *Instance) GetConnection(secret *v1.Secret) (*pgx.Conn, error) {
 		Username: string(usernameBytes),
 		Password: string(passwordBytes),
 		Database: instance.Spec.Database,
+		SSLMode:  instance.Spec.SSLMode,
 	}
 
 	return p.GetConnection()

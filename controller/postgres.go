@@ -16,6 +16,7 @@ type Postgres struct {
 	Username string
 	Password string
 	Database string
+	SSLMode string
 }
 
 // TODO: make sslmode configurable

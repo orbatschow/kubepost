@@ -12,6 +12,14 @@ spec:
     userKey: username
     passwordKey: password
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kubepost-instance-credentials
+data:
+  username: cG9zdGdyZXM=
+  password: cm9vdA==
+---
 apiVersion: kubepost.io/v1alpha1
 kind: Role
 metadata:
@@ -28,7 +36,6 @@ spec:
     objectType: database
     privileges:
       - ALL PRIVILEGES
-
 ---
 apiVersion: kubepost.io/v1alpha1
 kind: Database
@@ -42,12 +49,8 @@ spec:
     name: kubepost
     namespace: default
   extensions:
-    - pg_stat_statements
+    - name: pg_stat_statements
+    - name: postgis
+      version: "2.4"
+    - name: postgres_fdw
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: kubepost-instance-credentials
-data:
-  username: cG9zdGdyZXM=
-  password: cm9vdA==

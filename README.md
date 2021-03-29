@@ -4,8 +4,8 @@
 
 # kubepost Operator
 
-The kubepost Operator manages various Postgres objects via standard Kubernetes CRDs. It requires [Metacontroller]
-(https://github.com/metacontroller/metacontroller) to be installed within the cluster.
+The kubepost Operator manages various Postgres objects via standard Kubernetes CRDs. It requires
+[Metacontroller](https://github.com/metacontroller/metacontroller) to be installed within the cluster.
 
 ## Features
 
@@ -67,9 +67,9 @@ kustomize build . | kubectl apply -f -
 
 ### Instance
 
-The instance is used by other CRDs to connect to the desired database instance. It allows
-a clear segregation between roles, databases and the instance itself. To connect to the databse
-it uses a secret that should be available within the Kubernetes cluster.
+The instance is used by other CRDs to connect to the desired database instance. It allows a clear segregation between
+roles, databases and the instance itself. To connect to the databse it uses a secret that should be available within the
+Kubernetes cluster.
 
 ```yaml
 apiVersion: kubepost.io/v1alpha1
@@ -102,10 +102,8 @@ data:
 
 ### Database
 
-
-This database uses the previously mentioned instance CRD to connect to the database
-instance and creates a database with the name `kubepost`. After the database is created
-the extension `pg_stat_statements` will be installed.
+This database uses the previously mentioned instance CRD to connect to the database instance and creates a database with
+the name `kubepost`. After the database is created the extension `pg_stat_statements` will be installed.
 
 ```yaml
 apiVersion: kubepost.io/v1alpha1
@@ -125,8 +123,8 @@ spec:
 
 ### Role
 
-This role uses the previously mentioned instance CRD to connect to the database
-instance and creates a role with the name `kubepost`. It then grants this role
+This role uses the previously mentioned instance CRD to connect to the database instance and creates a role with the
+name `kubepost`. It then grants this role
 `ALL PRIVILEGES` on the database `kubepost`. The grant section is optional.
 
 ```yaml
