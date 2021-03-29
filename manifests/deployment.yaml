@@ -15,5 +15,5 @@ spec:
     spec:
       containers:
         - name: controller
-          image: kubepost:0.2
+          image: orbatschow/kubepost:latest
           command: ["kubepost"]
