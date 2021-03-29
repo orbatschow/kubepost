@@ -17,12 +17,12 @@ type Postgres struct {
 	Username string
 	Password string
 	Database string
-	SSLMode string
+	SSLMode  string
 }
 
 // TODO: make sslmode configurable
 func (p *Postgres) GetConnection() (*pgx.Conn, error) {
-	conn, err := pgx.Connect(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&application_name=kubepost", p.Username, p.Password, p.Host, p.Port, p.Database))
+	conn, err := pgx.Connect(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s&application_name=kubepost", p.Username, p.Password, p.Host, p.Port, p.Database, p.SSLMode))
 	if err != nil {
 		log.Errorf("Unable to connect to database: '%s' on host '%s' with user '%s' : '%s'", p.Database, p.Host, p.Username, err)
 		return nil, err
