@@ -32,6 +32,7 @@ type DatabaseSpec struct {
 
 type Extension struct {
 	Name string `json:"name"`
+	//+kubebuilder:default:=latest
 	Version string `json:"version,omitempty"`
 }
 

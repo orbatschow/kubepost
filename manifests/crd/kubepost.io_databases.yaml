@@ -47,6 +47,7 @@ spec:
                     name:
                       type: string
                     version:
+                      default: latest
                       type: string
                   required:
                   - name

@@ -50,7 +50,5 @@ spec:
     namespace: default
   extensions:
     - name: pg_stat_statements
-    - name: postgis
-      version: "2.4"
-    - name: postgres_fdw
+      version: "1.7"
 ---
