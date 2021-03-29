@@ -24,6 +24,7 @@ func (role *Role) HandleRolePendingState(instances map[string]*Instance, secrets
 	if err != nil {
 		log.Errorf(err.Error())
 		role.Status.Status = types.Unhealthy
+		return
 	}
 
 	role.Status.Status = types.Healthy
@@ -42,6 +43,7 @@ func (role *Role) HandleRoleHealthyState(instances map[string]*Instance, secrets
 	if err != nil {
 		log.Errorf(err.Error())
 		role.Status.Status = types.Unhealthy
+		return
 	}
 
 	role.Status.Status = types.Healthy
@@ -59,6 +61,7 @@ func (role *Role) HandleRoleUnhealthyState(instances map[string]*Instance, secre
 	if err != nil {
 		log.Errorf(err.Error())
 		role.Status.Status = types.Unhealthy
+		return
 	}
 
 	role.Status.Status = types.Healthy

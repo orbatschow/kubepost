@@ -23,6 +23,7 @@ func (database *Database) HandleDatabasePendingState(instances map[string]*Insta
 	if err != nil {
 		log.Errorf(err.Error())
 		database.Status.Status = types.Unhealthy
+		return
 	}
 
 	database.Status.Status = types.Healthy
@@ -39,6 +40,7 @@ func (database *Database) HandleDatabaseHealthyState(instances map[string]*Insta
 	if err != nil {
 		log.Errorf(err.Error())
 		database.Status.Status = types.Unhealthy
+		return
 	}
 
 	database.Status.Status = types.Healthy
@@ -55,6 +57,7 @@ func (database *Database) HandleDatabaseUnhealthyState(instances map[string]*Ins
 	if err != nil {
 		log.Errorf(err.Error())
 		database.Status.Status = types.Unhealthy
+		return
 	}
 
 	database.Status.Status = types.Healthy
