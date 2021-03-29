@@ -50,5 +50,5 @@ spec:
     namespace: default
   extensions:
     - name: pg_stat_statements
-      version: "1.7"
+      version: "1.8"
 ---
