@@ -16,4 +16,5 @@ spec:
       containers:
         - name: controller
           image: orbatschow/kubepost:latest
+          imagePullPolicy: Always
           command: ["kubepost"]
