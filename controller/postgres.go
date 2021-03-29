@@ -20,7 +20,6 @@ type Postgres struct {
 	SSLMode  string
 }
 
-// TODO: make sslmode configurable
 func (p *Postgres) GetConnection() (*pgx.Conn, error) {
 	conn, err := pgx.Connect(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s&application_name=kubepost", p.Username, p.Password, p.Host, p.Port, p.Database, p.SSLMode))
 	if err != nil {
