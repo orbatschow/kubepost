@@ -56,16 +56,18 @@ func (r *databaseRepository) Delete(name string) error {
 
 func (r *databaseRepository) ReconcileExtensions(extensions []string) error {
 
-	// TODO
-	_, err := r.conn.Exec(context.Background(), fmt.Sprintf("DROP DATABASE %s WITH (FORCE)", name))
+	/*
+		// TODO
+		_, err := r.conn.Exec(context.Background(), fmt.Sprintf("DROP DATABASE %s WITH (FORCE)", name))
 
-	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			log.Errorf("unable to delete database '%s', failed with code: '%s' and message: '%s'", name, pgErr.Code, pgErr.Message)
-			return err
+		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) {
+				log.Errorf("unable to delete database '%s', failed with code: '%s' and message: '%s'", name, pgErr.Code, pgErr.Message)
+				return err
+			}
 		}
-	}
+	*/
 
 	return nil
 }
