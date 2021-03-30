@@ -116,7 +116,10 @@ spec:
     name: kubepost
     namespace: default
   extensions:
-    - pg_stat_statements
+    - name: pg_stat_statements
+      version: "1.8"
+      # if no version is specified, latest will be used
+    - name: postgres_fdw
 ```
 
 ### Role
