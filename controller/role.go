@@ -14,7 +14,7 @@ type Role v1alpha1.Role
 
 func (role *Role) HandleRolePendingState(instances map[string]*Instance, secrets map[string]*v1.Secret) {
 
-	log.Infof("role '%s' in namespace '%s' is in '%s' state, reconciling",
+	log.Infof("role '%s' in namespace '%s' is in state '%s', reconciling",
 		role.Spec.RoleName,
 		role.Namespace,
 		role.Status.Status,
@@ -33,7 +33,7 @@ func (role *Role) HandleRolePendingState(instances map[string]*Instance, secrets
 
 func (role *Role) HandleRoleHealthyState(instances map[string]*Instance, secrets map[string]*v1.Secret) {
 
-	log.Infof("role '%s' in namespace '%s' is in '%s' state, reconciling",
+	log.Infof("role '%s' in namespace '%s' is in state '%s', reconciling",
 		role.Spec.RoleName,
 		role.Namespace,
 		role.Status.Status,
@@ -51,7 +51,7 @@ func (role *Role) HandleRoleHealthyState(instances map[string]*Instance, secrets
 }
 
 func (role *Role) HandleRoleUnhealthyState(instances map[string]*Instance, secrets map[string]*v1.Secret) {
-	log.Infof("role '%s' in namespace '%s' is in '%s' state, reconciling",
+	log.Infof("role '%s' in namespace '%s' is in state '%s', reconciling",
 		role.Spec.RoleName,
 		role.Namespace,
 		role.Status.Status,

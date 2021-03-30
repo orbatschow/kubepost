@@ -13,7 +13,7 @@ import (
 type Database v1alpha1.Database
 
 func (database *Database) HandleDatabasePendingState(instances map[string]*Instance, secrets map[string]*v1.Secret) {
-	log.Infof("database '%s' in namespace '%s' is in '%s' state, reconciling",
+	log.Infof("database '%s' in namespace '%s' is in state '%s', reconciling",
 		database.Spec.DatabaseName,
 		database.Namespace,
 		database.Status.Status,
@@ -30,7 +30,7 @@ func (database *Database) HandleDatabasePendingState(instances map[string]*Insta
 }
 
 func (database *Database) HandleDatabaseHealthyState(instances map[string]*Instance, secrets map[string]*v1.Secret) {
-	log.Infof("database '%s' in namespace '%s' is in '%s' state, reconciling",
+	log.Infof("database '%s' in namespace '%s' is in state '%s', reconciling",
 		database.Spec.DatabaseName,
 		database.Namespace,
 		database.Status.Status,
@@ -47,7 +47,7 @@ func (database *Database) HandleDatabaseHealthyState(instances map[string]*Insta
 }
 
 func (database *Database) HandleDatabaseUnhealthyState(instances map[string]*Instance, secrets map[string]*v1.Secret) {
-	log.Infof("database '%s' in namespace '%s' is in '%s' state, reconciling",
+	log.Infof("database '%s' in namespace '%s' is in state '%s', reconciling",
 		database.Spec.DatabaseName,
 		database.Namespace,
 		database.Status.Status,

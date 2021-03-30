@@ -1,5 +1,3 @@
-# NOTE
-
 **This is alpha software, use it on your own risk!**
 
 # kubepost Operator

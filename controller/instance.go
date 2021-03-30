@@ -16,7 +16,7 @@ import (
 type Instance v1alpha1.Instance
 
 func (instance *Instance) HandleInstancePendingState(secrets map[string]*v1.Secret) {
-	log.Infof("instance '%s' in namespace '%s' is in '%s' state, reconciling", instance.Name, instance.Namespace, instance.Status.Status)
+	log.Infof("instance '%s' in namespace '%s' is in state '%s', reconciling", instance.Name, instance.Namespace, instance.Status.Status)
 
 	secret, err := instance.GetSecret(secrets)
 	if err != nil {
@@ -34,7 +34,7 @@ func (instance *Instance) HandleInstancePendingState(secrets map[string]*v1.Secr
 }
 
 func (instance *Instance) HandleInstanceHealthyState(secrets map[string]*v1.Secret) {
-	log.Infof("instance '%s' in namespace '%s' is in '%s' state, reconciling",
+	log.Infof("instance '%s' in namespace '%s' is in state '%s', reconciling",
 		instance.Name,
 		instance.Namespace,
 		instance.Status.Status,
@@ -59,7 +59,7 @@ func (instance *Instance) HandleInstanceHealthyState(secrets map[string]*v1.Secr
 }
 
 func (instance *Instance) HandleInstanceUnhealthyState(secrets map[string]*v1.Secret) {
-	log.Infof("instance '%s' in namespace '%s' is in '%s' state, reconciling",
+	log.Infof("instance '%s' in namespace '%s' is in state '%s', reconciling",
 		instance.Name,
 		instance.Namespace,
 		instance.Status.Status,
