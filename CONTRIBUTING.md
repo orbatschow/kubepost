@@ -56,7 +56,7 @@ resources:
 Apply the file to the cluster:
 
 ```shell
-kustomize build . | k
+kustomize build . | kubectl apply -f -
 ```
 
 ## Kubepost
@@ -81,7 +81,7 @@ resources:
 Apply the file to the cluster:
 
 ```shell
-kustomize build . | k
+kustomize build . | kubectl apply -f -
 ```
 
 ## Telepresence
