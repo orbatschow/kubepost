@@ -86,8 +86,9 @@ kustomize build . | k
 
 ## Telepresence
 
-Telepresence can be used to proxy all requests to the previously deployed kubepost Pod to our locally running golang
-application. To proxy all requests to our locally running kubepost application you can run:
+[Telepresence](https://www.telepresence.io/) can be used to proxy all requests to the previously deployed kubepost Pod
+to our locally running golang application. To proxy all requests to our locally running kubepost application you can
+run:
 
 ```shell
 telepresence --swap-deployment kubepost-controller:controller --namespace metacontroller --expose 8080 --method inject-tcp
@@ -131,5 +132,5 @@ go run main.go
 
 ## Testing
 
-You can now test your new code by applying some examples within the `examples` directory to the cluster. All
-requests should be redirected from the cluster to the local application.
+You can now test your new code by applying some examples within the `examples` directory to the cluster. All requests
+should be redirected from the cluster to the local application.
