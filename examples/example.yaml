@@ -31,11 +31,14 @@ spec:
   instanceRef:
     name: kubepost
     namespace: default
-  grant:
-    database: kubepost
-    objectType: database
-    privileges:
-      - ALL PRIVILEGES
+  options:
+    - SUPERUSER
+    - LOGIN
+  grants:
+    - database: kubepost
+      objectType: database
+      privileges:
+        - ALL PRIVILEGES
 ---
 apiVersion: kubepost.io/v1alpha1
 kind: Database
@@ -51,5 +54,6 @@ spec:
   extensions:
     - name: pg_stat_statements
       version: "1.8"
+    # implicit use of latest version for postgres_fdw
     - name: postgres_fdw
 ---

@@ -86,31 +86,43 @@ func (r *roleRepository) Delete(name string) error {
 	return nil
 }
 
-func (r *roleRepository) Grant(roleName string, grant *v1alpha1.Grant) error {
+func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 
-	// TODO: rework logging
-	if grant.Database == "" && grant.Schema == "" {
-		log.Error("either schema or database has to be defined within a grant")
-		return errors.New("either schema or database has to be defined within a grant")
+	// grant/revoke all options
+	_, err := r.conn.Exec(context.Background(), fmt.Sprintf("ALTER ROLE %s WITH %s;", role.Spec.RoleName, strings.Join(role.Spec.Options[:], " ")))
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		log.Errorf("unable to grant superuser permissions to role '%s', failed with code: '%s' and message: '%s'", role.Spec.RoleName, pgErr.Code, pgErr.Message)
+		return err
 	}
 
-	// revoke permissions
-	_, err := r.conn.Exec(context.Background(), createRevokeQuery(roleName, grant))
-	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			log.Errorf("unable to revoke permissions from role '%s', failed with code: '%s' and message: '%s'", roleName, pgErr.Code, pgErr.Message)
-			return err
+
+	// grant/revoke all permissions
+	for _, grant := range role.Spec.Grants {
+
+		if grant.Database == "" && grant.Schema == "" {
+			log.Error("either schema or database has to be defined within a grant")
+			return errors.New("either schema or database has to be defined within a grant")
 		}
-	}
 
-	// grant permissions
-	_, err = r.conn.Exec(context.Background(), createGrantQuery(roleName, grant))
-	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			log.Errorf("unable to grant permissions to role '%s', failed with code: '%s' and message: '%s'", r, pgErr.Code, pgErr.Message)
-			return err
+		// revoke permissions
+		_, err := r.conn.Exec(context.Background(), createRevokeQuery(role.Spec.RoleName, &grant))
+		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) {
+				log.Errorf("unable to revoke permissions from role '%s', failed with code: '%s' and message: '%s'", role.Spec.RoleName, pgErr.Code, pgErr.Message)
+				return err
+			}
+		}
+
+		// grant permissions
+		_, err = r.conn.Exec(context.Background(), createGrantQuery(role.Spec.RoleName, &grant))
+		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) {
+				log.Errorf("unable to grant permissions to role '%s', failed with code: '%s' and message: '%s'", r, pgErr.Code, pgErr.Message)
+				return err
+			}
 		}
 	}
 
@@ -158,7 +170,7 @@ func createGrantQuery(roleName string, grant *v1alpha1.Grant) string {
 func createRevokeQuery(roleName string, grant *v1alpha1.Grant) string {
 	var query string
 
-		switch strings.ToUpper(grant.ObjectType) {
+	switch strings.ToUpper(grant.ObjectType) {
 	case "DATABASE":
 		query = fmt.Sprintf(
 			"REVOKE ALL PRIVILEGES ON DATABASE %s FROM %s",
