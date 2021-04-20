@@ -37,7 +37,7 @@ resources:
 
 And apply it to the desired cluster:
 
-```bash
+```shell
 kustomize build . | kubectl apply -f -
 ```
 
@@ -57,7 +57,7 @@ resources:
 
 And apply it to the desired cluster:
 
-```bash
+```shell
 kustomize build . | kubectl apply -f -
 ```
 
@@ -125,8 +125,7 @@ spec:
 ### Role
 
 This role uses the previously mentioned instance CRD to connect to the database instance and creates a role with the
-name `kubepost`. It then grants this role
-`ALL PRIVILEGES` on the database `kubepost`. The grant section is optional.
+name `kubepost`. It then grants this role `ALL PRIVILEGES` on the database `kubepost`. The grant section is optional.
 
 ```yaml
 apiVersion: kubepost.io/v1alpha1
@@ -140,7 +139,10 @@ spec:
   instanceRef:
     name: kubepost
     namespace: default
-  grant:
+  options:
+    - SUPERUSER
+    - LOGIN
+  grants:
     database: kubepost
     objectType: database
     privileges:
