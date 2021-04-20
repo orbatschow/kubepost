@@ -22,7 +22,6 @@ jobs:
         with:
           images: orbatschow/kubepost
           tags: |
-            type=ref,event=branch
             type=semver,pattern={{major}}.{{minor}}
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
