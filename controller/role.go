@@ -51,6 +51,7 @@ func (role *Role) HandleRoleHealthyState(instances map[string]*Instance, secrets
 }
 
 func (role *Role) HandleRoleUnhealthyState(instances map[string]*Instance, secrets map[string]*v1.Secret) {
+
 	log.Infof("role '%s' in namespace '%s' is in state '%s', reconciling",
 		role.Spec.RoleName,
 		role.Namespace,
@@ -72,6 +73,7 @@ func (role *Role) HandleFinalizeRoleState(instances map[string]*Instance, secret
 
 	if role.Spec.PreventDeletion {
 		role.Status.Status = types.Deleting
+		return
 	}
 
 	instance, err := role.getInstanceForRole(instances)
@@ -162,7 +164,7 @@ func (role *Role) createRole(instances map[string]*Instance, secrets map[string]
 		return err
 	}
 
-	err = roleRepository.Grant(role.Spec.RoleName, &role.Spec.Grant)
+	err = roleRepository.Grant((*v1alpha1.Role)(role))
 	if err != nil {
 		return err
 	}

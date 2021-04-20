@@ -26,13 +26,15 @@ type RoleSpec struct {
 	//+kubebuilder:default:=false
 	CascadeDelete bool `json:"cascadeDelete"`
 	//+kubebuilder:validation:Optional
-	Grant Grant `json:"grant"`
+	Options []string `json:"options"`
+	//+kubebuilder:validation:Optional
+	Grants []Grant `json:"grants"`
 }
 
 type Grant struct {
-	Database string `json:"database,omitempty"`
-	Schema string `json:"schema,omitempty"`
-	ObjectType string `json:"objectType"`
+	Database   string   `json:"database,omitempty"`
+	Schema     string   `json:"schema,omitempty"`
+	ObjectType string   `json:"objectType"`
 	Privileges []string `json:"privileges"`
 }
 
