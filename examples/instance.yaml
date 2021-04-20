@@ -1,0 +1,13 @@
+apiVersion: kubepost.io/v1alpha1
+kind: Instance
+metadata:
+  name: kubepost
+spec:
+  host: postgres
+  port: 5432
+  database: postgres
+  secretRef:
+    name: kubepost-instance-credentials
+    namespace: default
+    userKey: username
+    passwordKey: password

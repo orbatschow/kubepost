@@ -1,0 +1,19 @@
+apiVersion: kubepost.io/v1alpha1
+kind: Role
+metadata:
+  name: kubepost
+  namespace: default
+spec:
+  roleName: kubepost
+  preventDeletion: false
+  instanceRef:
+    name: kubepost
+    namespace: default
+  options:
+    - SUPERUSER
+    - LOGIN
+  grants:
+    - database: kubepost
+      objectType: database
+      privileges:
+        - ALL PRIVILEGES
