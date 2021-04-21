@@ -118,13 +118,9 @@ func (role *Role) getInstanceForRole(instances map[string]*Instance) (*Instance,
 
 	var roleInstance *Instance
 
-	// if instance ref does not have namespace set, use namespace of role
-	if role.Spec.InstanceRef.Namespace == "" {
-		role.Spec.InstanceRef.Namespace = role.Namespace
-	}
 
 	for _, instance := range instances {
-		if role.Spec.InstanceRef.Name == instance.Name && role.Spec.InstanceRef.Namespace == instance.Namespace {
+		if role.Spec.InstanceRef.Name == instance.Name {
 			roleInstance = instance
 		}
 	}
@@ -191,7 +187,7 @@ func (role *Role) getRolePassword(secrets map[string]*v1.Secret) (string, error)
 		if err != nil {
 			return "", errors.New(fmt.Sprintf("could not decode password for role '%s' in namespace '%s' - (should be base64 formatted)",
 				role.Spec.PasswordRef.Name,
-				role.Spec.PasswordRef.Namespace,
+				role.Namespace,
 			))
 		}
 
@@ -203,14 +199,9 @@ func (role *Role) getRolePassword(secrets map[string]*v1.Secret) (string, error)
 		return "NULL", nil
 	}
 
-	// if the password is set via the `passwordRef` value, find the corresponding secret
-	if role.Spec.PasswordRef.Namespace == "" {
-		role.Spec.PasswordRef.Namespace = role.Namespace
-	}
-
 	var rolePasswordSecret *v1.Secret
 	for _, secret := range secrets {
-		if role.Spec.PasswordRef.Name == secret.Name && role.Spec.PasswordRef.Namespace == secret.Namespace {
+		if role.Spec.PasswordRef.Name == secret.Name {
 			rolePasswordSecret = secret
 		}
 	}
@@ -218,7 +209,7 @@ func (role *Role) getRolePassword(secrets map[string]*v1.Secret) (string, error)
 	if rolePasswordSecret == nil {
 		return "", errors.New(fmt.Sprintf("could not find secret '%s' in namespace '%s' for role '%s'",
 			role.Spec.PasswordRef.Name,
-			role.Spec.PasswordRef.Namespace,
+			role.Namespace,
 			role.Spec.RoleName,
 		),
 		)
@@ -232,7 +223,7 @@ func (role *Role) getRolePassword(secrets map[string]*v1.Secret) (string, error)
 				"could not find key '%s' for secret '%s' in namespace '%s' for role '%s', setting role state to '%s'",
 				role.Spec.PasswordRef.PasswordKey,
 				role.Spec.PasswordRef.Name,
-				role.Spec.PasswordRef.Namespace,
+				role.Namespace,
 				role.Name,
 				types.Unhealthy,
 			),

@@ -90,13 +90,10 @@ func (instance *Instance) HandleUnknownState() {
 
 func (instance *Instance) GetSecret(secrets map[string]*v1.Secret) (*v1.Secret, error) {
 
-	if instance.Spec.SecretRef.Namespace == "" {
-		instance.Spec.SecretRef.Namespace = instance.Namespace
-	}
 
 	var instanceSecret *v1.Secret
 	for _, secret := range secrets {
-		if instance.Spec.SecretRef.Name == secret.Name && instance.Spec.SecretRef.Namespace == secret.Namespace {
+		if instance.Spec.SecretRef.Name == secret.Name {
 			instanceSecret = secret
 		}
 	}
@@ -104,7 +101,7 @@ func (instance *Instance) GetSecret(secrets map[string]*v1.Secret) (*v1.Secret, 
 	if instanceSecret == nil {
 		return nil, errors.New(fmt.Sprintf("could not find secret '%s' in namespace '%s' for instance '%s'",
 			instance.Spec.SecretRef.Name,
-			instance.Spec.SecretRef.Namespace,
+			instance.Namespace,
 			instance.Name,
 		),
 		)
@@ -123,7 +120,7 @@ func (instance *Instance) GetConnection(secret *v1.Secret) (*pgx.Conn, error) {
 				"could not find key '%s' for secret '%s' in namespace '%s' for instance '%s', setting instance state to '%s'",
 				instance.Spec.SecretRef.UserKey,
 				instance.Spec.SecretRef.Name,
-				instance.Spec.SecretRef.Namespace,
+				instance.Namespace,
 				instance.Name,
 				types.Unhealthy,
 			),
@@ -137,7 +134,7 @@ func (instance *Instance) GetConnection(secret *v1.Secret) (*pgx.Conn, error) {
 				"could not find key '%s' for secret '%s' in namespace '%s' for instance '%s', setting instance state to '%s'",
 				instance.Spec.SecretRef.UserKey,
 				instance.Spec.SecretRef.Name,
-				instance.Spec.SecretRef.Namespace,
+				instance.Namespace,
 				instance.Name,
 				types.Unhealthy,
 			),

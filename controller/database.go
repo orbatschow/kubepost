@@ -110,13 +110,8 @@ func (database *Database) getInstanceForDatabase(instances map[string]*Instance)
 
 	var databaseInstance *Instance
 
-	// if instance ref does not have namespace set, use namespace of database
-	if database.Spec.InstanceRef.Namespace == "" {
-		database.Spec.InstanceRef.Namespace = database.Namespace
-	}
-
 	for _, instance := range instances {
-		if database.Spec.InstanceRef.Name == instance.Name && database.Spec.InstanceRef.Namespace == instance.Namespace {
+		if database.Spec.InstanceRef.Name == instance.Name {
 			databaseInstance = instance
 		}
 	}

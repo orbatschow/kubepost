@@ -8,6 +8,5 @@ spec:
   database: postgres
   secretRef:
     name: kubepost-instance-credentials
-    namespace: default
     userKey: username
     passwordKey: password

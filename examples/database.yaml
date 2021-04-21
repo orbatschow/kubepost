@@ -2,13 +2,11 @@ apiVersion: kubepost.io/v1alpha1
 kind: Database
 metadata:
   name: kubepost
-  namespace: default
 spec:
   databaseName: kubepost
   preventDeletion: false
   instanceRef:
     name: kubepost
-    namespace: default
   extensions:
     - name: pg_stat_statements
       version: "1.8"
