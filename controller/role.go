@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
@@ -20,7 +21,7 @@ func (role *Role) HandleRolePendingState(instances map[string]*Instance, secrets
 		role.Status.Status,
 	)
 
-	err := role.createRole(instances, secrets)
+	err := role.reconcileRole(instances, secrets)
 	if err != nil {
 		log.Errorf(err.Error())
 		role.Status.Status = types.Unhealthy
@@ -39,7 +40,7 @@ func (role *Role) HandleRoleHealthyState(instances map[string]*Instance, secrets
 		role.Status.Status,
 	)
 
-	err := role.createRole(instances, secrets)
+	err := role.reconcileRole(instances, secrets)
 	if err != nil {
 		log.Errorf(err.Error())
 		role.Status.Status = types.Unhealthy
@@ -58,7 +59,7 @@ func (role *Role) HandleRoleUnhealthyState(instances map[string]*Instance, secre
 		role.Status.Status,
 	)
 
-	err := role.createRole(instances, secrets)
+	err := role.reconcileRole(instances, secrets)
 	if err != nil {
 		log.Errorf(err.Error())
 		role.Status.Status = types.Unhealthy
@@ -141,7 +142,7 @@ func (role *Role) getInstanceForRole(instances map[string]*Instance) (*Instance,
 	return roleInstance, nil
 }
 
-func (role *Role) createRole(instances map[string]*Instance, secrets map[string]*v1.Secret) error {
+func (role *Role) reconcileRole(instances map[string]*Instance, secrets map[string]*v1.Secret) error {
 	instance, err := role.getInstanceForRole(instances)
 	if err != nil {
 		role.Status.Status = types.Unhealthy
@@ -164,10 +165,79 @@ func (role *Role) createRole(instances map[string]*Instance, secrets map[string]
 		return err
 	}
 
+	password, err := role.getRolePassword(secrets)
+	if err != nil {
+		return err
+	}
+
+	err = roleRepository.SetPassword(role.Spec.RoleName, password)
+	if err != nil {
+		return err
+	}
+
 	err = roleRepository.Grant((*v1alpha1.Role)(role))
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (role *Role) getRolePassword(secrets map[string]*v1.Secret) (string, error) {
+
+	// if the password is set via the `password` option, just return the base64 decoded value
+	if len(role.Spec.Password) > 0 {
+		data, err := base64.StdEncoding.DecodeString(role.Spec.Password)
+		if err != nil {
+			return "", errors.New(fmt.Sprintf("could not decode password for role '%s' in namespace '%s' - (should be base64 formatted)",
+				role.Spec.PasswordRef.Name,
+				role.Spec.PasswordRef.Namespace,
+			))
+		}
+
+		return string(data), nil
+	}
+
+	// if neither password, nor passwordRef are set, set the password to `NULL`
+	if (v1alpha1.PasswordRef{} == role.Spec.PasswordRef) {
+		return "NULL", nil
+	}
+
+	// if the password is set via the `passwordRef` value, find the corresponding secret
+	if role.Spec.PasswordRef.Namespace == "" {
+		role.Spec.PasswordRef.Namespace = role.Namespace
+	}
+
+	var rolePasswordSecret *v1.Secret
+	for _, secret := range secrets {
+		if role.Spec.PasswordRef.Name == secret.Name && role.Spec.PasswordRef.Namespace == secret.Namespace {
+			rolePasswordSecret = secret
+		}
+	}
+
+	if rolePasswordSecret == nil {
+		return "", errors.New(fmt.Sprintf("could not find secret '%s' in namespace '%s' for role '%s'",
+			role.Spec.PasswordRef.Name,
+			role.Spec.PasswordRef.Namespace,
+			role.Spec.RoleName,
+		),
+		)
+	}
+
+	// extract the password
+	passwordBytes := rolePasswordSecret.Data[role.Spec.PasswordRef.PasswordKey]
+	if passwordBytes == nil {
+		return "", errors.New(
+			fmt.Sprintf(
+				"could not find key '%s' for secret '%s' in namespace '%s' for role '%s', setting role state to '%s'",
+				role.Spec.PasswordRef.PasswordKey,
+				role.Spec.PasswordRef.Name,
+				role.Spec.PasswordRef.Namespace,
+				role.Name,
+				types.Unhealthy,
+			),
+		)
+	}
+
+	return string(passwordBytes), nil
 }

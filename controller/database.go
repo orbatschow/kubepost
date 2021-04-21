@@ -63,7 +63,7 @@ func (database *Database) HandleDatabaseUnhealthyState(instances map[string]*Ins
 	database.Status.Status = types.Healthy
 }
 
-func (database *Database) HandleFinalizeDatabaseState(instances map[string]*Instance, secrets map[string]*v1.Secret)  {
+func (database *Database) HandleFinalizeDatabaseState(instances map[string]*Instance, secrets map[string]*v1.Secret) {
 
 	if database.Spec.PreventDeletion {
 		database.Status.Status = types.Deleting
@@ -165,7 +165,7 @@ func (database *Database) createDatabase(instances map[string]*Instance, secrets
 	return nil
 }
 
-func (database *Database) reconcileExtensions(instance *Instance, secret *v1.Secret) error  {
+func (database *Database) reconcileExtensions(instance *Instance, secret *v1.Secret) error {
 	// switch to the extensions target database, as you can only create
 	// extensions from within the database you are connected to
 	instance.Spec.Database = database.Spec.DatabaseName

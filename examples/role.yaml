@@ -6,6 +6,10 @@ metadata:
 spec:
   roleName: kubepost
   preventDeletion: false
+  passwordRef:
+    name: kubepost-role-credentials
+    namespace: default
+    passwordKey: password
   instanceRef:
     name: kubepost
     namespace: default

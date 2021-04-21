@@ -86,6 +86,18 @@ func (r *roleRepository) Delete(name string) error {
 	return nil
 }
 
+func (r *roleRepository) SetPassword (name string, password string) error  {
+
+	_, err := r.conn.Exec(context.Background(), fmt.Sprintf("ALTER ROLE %s WITH PASSWORD '%s';", name, password))
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		log.Errorf("unable to grant superuser permissions to role '%s', failed with code: '%s' and message: '%s'", name, pgErr.Code, pgErr.Message)
+		return err
+	}
+
+	return nil
+}
+
 func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 
 	// grant/revoke all options
