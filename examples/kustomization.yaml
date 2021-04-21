@@ -5,7 +5,8 @@ namespace: ddns-updater
 
 resources:
   - postgres.yaml
-  - secret.yaml
+  - kubepost-instance-credentials.yaml
+  - kubepost-role-credentials.yaml
   - instance.yaml
   - role.yaml
   - database.yaml

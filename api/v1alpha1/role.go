@@ -28,7 +28,17 @@ type RoleSpec struct {
 	//+kubebuilder:validation:Optional
 	Options []string `json:"options"`
 	//+kubebuilder:validation:Optional
+	Password string `json:"password"`
+	//+kubebuilder:validation:Optional
+	PasswordRef PasswordRef `json:"passwordRef"`
+	//+kubebuilder:validation:Optional
 	Grants []Grant `json:"grants"`
+}
+
+type PasswordRef struct {
+	Name        string `json:"name"`
+	Namespace   string `json:"namespace"`
+	PasswordKey string `json:"passwordKey"`
 }
 
 type Grant struct {
@@ -50,4 +60,3 @@ type RoleList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Role `json:"items"`
 }
-

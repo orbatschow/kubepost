@@ -13,7 +13,6 @@ func main() {
 	http.HandleFunc("/role/sync", hook.RoleSyncHandler)
 	http.HandleFunc("/role/customize", hook.RoleCustomizeHandler)
 
-
 	http.HandleFunc("/database/sync", hook.DatabaseSyncHandler)
 	http.HandleFunc("/database/customize", hook.DatabaseCustomizeHandler)
 

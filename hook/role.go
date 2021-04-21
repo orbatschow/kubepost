@@ -24,8 +24,8 @@ type syncRoleResponse struct {
 }
 
 type finalizeRoleResponse struct {
-	Status v1alpha1.RoleStatus `json:"status"`
-	Finalized bool `json:"finalized"`
+	Status    v1alpha1.RoleStatus `json:"status"`
+	Finalized bool                `json:"finalized"`
 }
 
 func syncRole(request *syncRoleRequest) (*syncRoleResponse, error) {
