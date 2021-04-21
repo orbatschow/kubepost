@@ -24,8 +24,8 @@ type syncDatabaseResponse struct {
 }
 
 type finalizeDatabaseResponse struct {
-	Status v1alpha1.DatabaseStatus `json:"status"`
-	Finalized bool `json:"finalized"`
+	Status    v1alpha1.DatabaseStatus `json:"status"`
+	Finalized bool                    `json:"finalized"`
 }
 
 func syncDatabase(request *syncDatabaseRequest) (*syncDatabaseResponse, error) {

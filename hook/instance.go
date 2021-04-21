@@ -66,7 +66,6 @@ func InstanceSyncHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-
 func InstanceCustomizeHandler(w http.ResponseWriter, r *http.Request) {
 
 	relatedResources := []RelatedResource{

@@ -8,7 +8,6 @@ import (
 	"github.com/orbatschow/kubepost/api/v1alpha1"
 )
 
-
 func NewExtensionRepository(conn *pgx.Conn) extensionRepository {
 	return extensionRepository{
 		conn: conn,

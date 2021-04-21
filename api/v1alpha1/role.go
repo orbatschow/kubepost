@@ -60,4 +60,3 @@ type RoleList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Role `json:"items"`
 }
-

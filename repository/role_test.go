@@ -17,7 +17,6 @@ import (
 
 var conn *pgx.Conn
 
-
 func TestGetNotExistingRole(t *testing.T) {
 	roleName := "kubepost"
 

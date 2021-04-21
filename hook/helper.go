@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-
 type CustomizeResponse struct {
 	RelatedResources []RelatedResource `json:"relatedResources"`
 }
