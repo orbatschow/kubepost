@@ -26,7 +26,6 @@ type InstanceSpec struct {
 
 type SecretRef struct {
 	Name        string `json:"name"`
-	Namespace   string `json:"namespace"`
 	UserKey     string `json:"userKey"`
 	PasswordKey string `json:"passwordKey"`
 }
@@ -37,7 +36,6 @@ type InstanceStatus struct {
 
 type InstanceRef struct {
 	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
 }
 
 //+kubebuilder:object:root=true

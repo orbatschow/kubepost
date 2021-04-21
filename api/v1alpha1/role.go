@@ -37,7 +37,6 @@ type RoleSpec struct {
 
 type PasswordRef struct {
 	Name        string `json:"name"`
-	Namespace   string `json:"namespace,omitempty"`
 	PasswordKey string `json:"passwordKey"`
 }
 
