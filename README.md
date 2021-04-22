@@ -80,7 +80,6 @@ spec:
   database: postgres
   secretRef:
     name: kubepost-instance-credentials
-    namespace: default
     userKey: username
     passwordKey: password
 ```
@@ -108,13 +107,11 @@ apiVersion: kubepost.io/v1alpha1
 kind: Database
 metadata:
   name: kubepost
-  namespace: default
 spec:
   databaseName: kubepost
   preventDeletion: false
   instanceRef:
     name: kubepost
-    namespace: default
   extensions:
     - name: pg_stat_statements
       version: "1.8"
@@ -132,13 +129,11 @@ apiVersion: kubepost.io/v1alpha1
 kind: Role
 metadata:
   name: kubepost
-  namespace: default
 spec:
   roleName: kubepost
   preventDeletion: false
   instanceRef:
     name: kubepost
-    namespace: default
   options:
     - SUPERUSER
     - LOGIN
