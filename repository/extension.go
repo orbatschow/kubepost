@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
@@ -18,7 +19,13 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) 
 
 	var existingExtensions []*v1alpha1.Extension
 
-	err := pgxscan.Select(context.Background(), r.conn, &existingExtensions, "SELECT extname AS name, extversion AS version FROM pg_extension")
+	err := pgxscan.Select(
+		context.Background(),
+		r.conn,
+		&existingExtensions,
+		"SELECT extname AS name, extversion AS version FROM pg_extension",
+	)
+
 	if err != nil {
 		return err
 	}
@@ -71,25 +78,57 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) 
 
 func createExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 	if extension.Version == "latest" || extension.Version == "" {
-		_, err := conn.Exec(context.Background(), fmt.Sprintf("CREATE EXTENSION %s", extension.Name))
+		_, err := conn.Exec(
+			context.Background(),
+			fmt.Sprintf("CREATE EXTENSION %s", SanitizeString(extension.Name)),
+		)
+
 		return err
 	} else {
-		_, err := conn.Exec(context.Background(), fmt.Sprintf("CREATE EXTENSION %s WITH VERSION '%s'", extension.Name, extension.Version))
+		_, err := conn.Exec(
+			context.Background(),
+			fmt.Sprintf(
+				"CREATE EXTENSION %s WITH VERSION %s",
+				SanitizeString(extension.Name),
+				SanitizeString(extension.Version),
+			),
+		)
+
 		return err
 	}
 }
 
 func updateExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 	if extension.Version == "latest" {
-		_, err := conn.Exec(context.Background(), fmt.Sprintf("ALTER EXTENSION %s UPDATE", extension.Name))
+
+		_, err := conn.Exec(
+			context.Background(),
+			fmt.Sprintf(
+				"ALTER EXTENSION %s UPDATE",
+				SanitizeString(extension.Name)),
+		)
+
 		return err
 	} else {
-		_, err := conn.Exec(context.Background(), fmt.Sprintf("ALTER EXTENSION %s UPDATE TO '%s'", extension.Name, extension.Version))
+		_, err := conn.Exec(
+			context.Background(),
+			fmt.Sprintf(
+				"ALTER EXTENSION %s UPDATE TO %s",
+				SanitizeString(extension.Name),
+				SanitizeString(extension.Version),
+			),
+		)
 		return err
 	}
 }
 
 func deleteExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
-	_, err := conn.Exec(context.Background(), fmt.Sprintf("DROP EXTENSION %s", extension.Name))
+	_, err := conn.Exec(
+		context.Background(),
+		fmt.Sprintf(
+			"DROP EXTENSION %s",
+			SanitizeString(extension.Name),
+		),
+	)
 	return err
 }
