@@ -41,6 +41,8 @@ spec:
                 type: boolean
               databaseName:
                 type: string
+              databaseOwner:
+                type: string
               extensions:
                 items:
                   properties:

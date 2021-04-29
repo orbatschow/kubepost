@@ -20,6 +20,8 @@ type DatabaseSpec struct {
 	InstanceRef  InstanceRef `json:"instanceRef"`
 	DatabaseName string      `json:"databaseName"`
 	//+kubebuilder:validation:Optional
+	DatabaseOwner string `json:"databaseOwner"`
+	//+kubebuilder:validation:Optional
 	//+kubebuilder:default:=true
 	PreventDeletion bool `json:"preventDeletion"`
 	//+kubebuilder:validation:Optional

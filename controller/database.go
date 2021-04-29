@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"fmt"
+
 	"github.com/orbatschow/kubepost/api/v1alpha1"
 	"github.com/orbatschow/kubepost/repository"
 	"github.com/orbatschow/kubepost/types"
@@ -102,7 +103,12 @@ func (database *Database) HandleFinalizeDatabaseState(instances map[string]*Inst
 }
 
 func (database *Database) HandleDatabaseUnknownState() {
-	log.Errorf("instance '%s' in namespace '%s' is in an unkown state, setting state to '%s'", database.Spec.DatabaseName, database.Namespace, types.Pending)
+	log.Errorf(
+		"instance '%s' in namespace '%s' is in an unkown state, setting state to '%s'",
+		database.Spec.DatabaseName,
+		database.Namespace,
+		types.Pending,
+	)
 	database.Status.Status = types.Pending
 }
 
@@ -117,12 +123,15 @@ func (database *Database) getInstanceForDatabase(instances map[string]*Instance)
 	}
 
 	if databaseInstance == nil {
-		return nil, errors.New(fmt.Sprintf("could not find instance '%s' in namespace '%s' for database '%s' in namespace '%s', setting database state to '%s'",
-			database.Spec.InstanceRef.Name,
-			database.Spec.InstanceRef.Name,
-			database.Spec.DatabaseName,
-			database.Namespace,
-			types.Unhealthy),
+		return nil, errors.New(
+			fmt.Sprintf(
+				"could not find instance '%s' in namespace '%s' for database '%s' in namespace '%s', setting database state to '%s'",
+				database.Spec.InstanceRef.Name,
+				database.Spec.InstanceRef.Name,
+				database.Spec.DatabaseName,
+				database.Namespace,
+				types.Unhealthy,
+			),
 		)
 	}
 
@@ -147,9 +156,20 @@ func (database *Database) createDatabase(instances map[string]*Instance, secrets
 	}
 
 	databaseRepository := repository.NewDatabaseRepository(conn)
+
 	err = databaseRepository.Create(database.Spec.DatabaseName)
 	if err != nil {
 		return err
+	}
+
+	if len(database.Spec.DatabaseOwner) > 0 {
+		err = databaseRepository.AlterOwner(
+			database.Spec.DatabaseName,
+			database.Spec.DatabaseOwner,
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = database.reconcileExtensions(instance, secret)

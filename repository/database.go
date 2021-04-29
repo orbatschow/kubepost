@@ -70,3 +70,30 @@ func (r *extensionRepository) Delete(name string) error {
 
 	return nil
 }
+
+func (r *extensionRepository) AlterOwner(db string, name string) error {
+
+	_, err := r.conn.Query(
+		context.Background(),
+		fmt.Sprintf(
+			"ALTER DATABASE %s OWNER TO %s",
+			SanitizeString(db),
+			SanitizeString(name),
+		),
+	)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			log.Errorf(
+				"unable to alter database ownership to '%s', failed with code: '%s' and message: '%s'",
+				name,
+				pgErr.Code,
+				pgErr.Message,
+			)
+			return err
+		}
+	}
+
+	return nil
+}

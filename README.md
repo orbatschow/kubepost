@@ -109,6 +109,7 @@ metadata:
   name: kubepost
 spec:
   databaseName: kubepost
+  databaseOwner: kubepost
   preventDeletion: false
   instanceRef:
     name: kubepost
