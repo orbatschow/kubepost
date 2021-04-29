@@ -73,7 +73,38 @@ func (r *extensionRepository) Delete(name string) error {
 
 func (r *extensionRepository) AlterOwner(db string, name string) error {
 
-	_, err := r.conn.Query(
+	var currentOwner string
+	err := r.conn.QueryRow(
+		context.Background(),
+		fmt.Sprintf(
+			"select r.rolname from pg_roles as r, pg_database as d where r.oid = d.datdba AND d.datname = '%s'",
+			db,
+		),
+	).Scan(&currentOwner)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			log.Errorf(
+				"unable to query for database ownership of '%s', failed with code: '%s' and message: '%s'",
+				db,
+				pgErr.Code,
+				pgErr.Message,
+			)
+			return err
+		}
+	}
+
+	if name == currentOwner {
+		log.Infof(
+			"role %s already owns database %s",
+			name,
+			db,
+		)
+		return nil
+	}
+
+	_, err = r.conn.Query(
 		context.Background(),
 		fmt.Sprintf(
 			"ALTER DATABASE %s OWNER TO %s",
