@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 type roleRepository struct {
@@ -26,15 +27,23 @@ func (r roleRepository) DoesRoleExist(name string) (bool, error) {
 	var exist bool
 	err := r.conn.QueryRow(
 		context.Background(),
-		fmt.Sprintf("SELECT true FROM pg_roles WHERE rolname = '%s'", name),
+		fmt.Sprintf(
+			"SELECT true FROM pg_roles WHERE rolname = '%s'",
+			SanitizeString(name),
+		),
 	).Scan(&exist)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
-			log.Errorf("unable to get role '%s', failed with code: '%s' and message: '%s'",
-				name, pgErr.Code, pgErr.Message,
+
+			log.Errorf(
+				"unable to get role '%s', failed with code: '%s' and message: '%s'",
+				name,
+				pgErr.Code,
+				pgErr.Message,
 			)
+
 			return false, err
 		}
 		if err.Error() == "no rows in result set" {
@@ -47,7 +56,10 @@ func (r roleRepository) DoesRoleExist(name string) (bool, error) {
 
 func (r *roleRepository) Create(name string) error {
 
-	_, err := r.conn.Exec(context.Background(), fmt.Sprintf("CREATE ROLE %s", name))
+	_, err := r.conn.Exec(
+		context.Background(),
+		fmt.Sprintf("CREATE ROLE %s", SanitizeString(name)),
+	)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -57,7 +69,14 @@ func (r *roleRepository) Create(name string) error {
 				log.Infof("role '%s' already exists, skipping creation", name)
 				return nil
 			}
-			log.Errorf("unable to create role '%s', failed with code: '%s' and message: '%s'", name, pgErr.Code, pgErr.Message)
+
+			log.Errorf(
+				"unable to create role '%s', failed with code: '%s' and message: '%s'",
+				name,
+				pgErr.Code,
+				pgErr.Message,
+			)
+
 			return err
 		}
 	}
@@ -67,7 +86,10 @@ func (r *roleRepository) Create(name string) error {
 
 func (r *roleRepository) Delete(name string) error {
 
-	_, err := r.conn.Exec(context.Background(), fmt.Sprintf("DROP ROLE %s", name))
+	_, err := r.conn.Exec(
+		context.Background(),
+		fmt.Sprintf("DROP ROLE %s", SanitizeString(name)),
+	)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -78,7 +100,13 @@ func (r *roleRepository) Delete(name string) error {
 				return nil
 			}
 
-			log.Errorf("unable to delete role '%s', failed with code: '%s' and message: '%s'", name, pgErr.Code, pgErr.Message)
+			log.Errorf(
+				"unable to delete role '%s', failed with code: '%s' and message: '%s'",
+				name,
+				pgErr.Code,
+				pgErr.Message,
+			)
+
 			return err
 		}
 	}
@@ -88,10 +116,18 @@ func (r *roleRepository) Delete(name string) error {
 
 func (r *roleRepository) SetPassword(name string, password string) error {
 
-	_, err := r.conn.Exec(context.Background(), fmt.Sprintf("ALTER ROLE %s WITH PASSWORD '%s';", name, password))
+	_, err := r.conn.Exec(
+		context.Background(),
+		fmt.Sprintf("ALTER ROLE %s WITH PASSWORD '%s';", name, password),
+	)
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
-		log.Errorf("unable to grant superuser permissions to role '%s', failed with code: '%s' and message: '%s'", name, pgErr.Code, pgErr.Message)
+		log.Errorf(
+			"unable to grant superuser permissions to role '%s', failed with code: '%s' and message: '%s'",
+			name,
+			pgErr.Code,
+			pgErr.Message,
+		)
 		return err
 	}
 
@@ -100,11 +136,26 @@ func (r *roleRepository) SetPassword(name string, password string) error {
 
 func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 
-	// grant/revoke all options
-	_, err := r.conn.Exec(context.Background(), fmt.Sprintf("ALTER ROLE %s WITH %s;", role.Spec.RoleName, strings.Join(role.Spec.Options[:], " ")))
+	_, err := r.conn.Exec(
+		context.Background(),
+		fmt.Sprintf(
+			"ALTER ROLE %s WITH %s;",
+			SanitizeString(role.Spec.RoleName),
+			strings.Join(role.Spec.Options[:], " "),
+		),
+	)
+
 	var pgErr *pgconn.PgError
+
 	if errors.As(err, &pgErr) {
-		log.Errorf("unable to grant superuser permissions to role '%s', failed with code: '%s' and message: '%s'", role.Spec.RoleName, pgErr.Code, pgErr.Message)
+
+		log.Errorf(
+			"unable to grant superuser permissions to role '%s', failed with code: '%s' and message: '%s'",
+			role.Spec.RoleName,
+			pgErr.Code,
+			pgErr.Message,
+		)
+
 		return err
 	}
 
@@ -117,21 +168,44 @@ func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 		}
 
 		// revoke permissions
-		_, err := r.conn.Exec(context.Background(), createRevokeQuery(role.Spec.RoleName, &grant))
+		_, err := r.conn.Exec(
+			context.Background(),
+			createRevokeQuery(role.Spec.RoleName, &grant),
+		)
+
 		if err != nil {
 			var pgErr *pgconn.PgError
+
 			if errors.As(err, &pgErr) {
-				log.Errorf("unable to revoke permissions from role '%s', failed with code: '%s' and message: '%s'", role.Spec.RoleName, pgErr.Code, pgErr.Message)
+
+				log.Errorf(
+					"unable to revoke permissions from role '%s', failed with code: '%s' and message: '%s'",
+					role.Spec.RoleName,
+					pgErr.Code,
+					pgErr.Message,
+				)
+
 				return err
 			}
 		}
 
 		// grant permissions
-		_, err = r.conn.Exec(context.Background(), createGrantQuery(role.Spec.RoleName, &grant))
+		_, err = r.conn.Exec(
+			context.Background(),
+			createGrantQuery(role.Spec.RoleName, &grant),
+		)
+
 		if err != nil {
 			var pgErr *pgconn.PgError
 			if errors.As(err, &pgErr) {
-				log.Errorf("unable to grant permissions to role '%s', failed with code: '%s' and message: '%s'", r, pgErr.Code, pgErr.Message)
+
+				log.Errorf(
+					"unable to grant permissions to role '%s', failed with code: '%s' and message: '%s'",
+					r,
+					pgErr.Code,
+					pgErr.Message,
+				)
+
 				return err
 			}
 		}
@@ -148,23 +222,23 @@ func createGrantQuery(roleName string, grant *v1alpha1.Grant) string {
 		query = fmt.Sprintf(
 			"GRANT %s ON DATABASE %s TO %s",
 			strings.Join(grant.Privileges, ","),
-			grant.Database,
-			roleName,
+			SanitizeString(grant.Database),
+			SanitizeString(roleName),
 		)
 	case "SCHEMA":
 		query = fmt.Sprintf(
 			"GRANT %s ON SCHEMA %s TO %s",
 			strings.Join(grant.Privileges, ","),
-			grant.Schema,
-			roleName,
+			SanitizeString(grant.Schema),
+			SanitizeString(roleName),
 		)
 	case "TABLE", "SEQUENCE", "FUNCTION":
 		query = fmt.Sprintf(
 			"GRANT %s ON ALL %sS IN SCHEMA %s TO %s",
 			strings.Join(grant.Privileges, ","),
-			grant.ObjectType,
-			grant.Schema,
-			roleName,
+			SanitizeString(grant.ObjectType),
+			SanitizeString(grant.Schema),
+			SanitizeString(roleName),
 		)
 	}
 
@@ -185,21 +259,21 @@ func createRevokeQuery(roleName string, grant *v1alpha1.Grant) string {
 	case "DATABASE":
 		query = fmt.Sprintf(
 			"REVOKE ALL PRIVILEGES ON DATABASE %s FROM %s",
-			grant.Database,
-			roleName,
+			SanitizeString(grant.Database),
+			SanitizeString(roleName),
 		)
 	case "SCHEMA":
 		query = fmt.Sprintf(
 			"REVOKE ALL PRIVILEGES ON SCHEMA %s FROM %s",
-			grant.Schema,
-			roleName,
+			SanitizeString(grant.Schema),
+			SanitizeString(roleName),
 		)
 	case "TABLE", "SEQUENCE", "FUNCTION":
 		query = fmt.Sprintf(
 			"REVOKE ALL PRIVILEGES ON ALL %sS IN SCHEMA %s FROM %s",
-			grant.ObjectType,
-			grant.Schema,
-			roleName,
+			SanitizeString(grant.ObjectType),
+			SanitizeString(grant.Schema),
+			SanitizeString(roleName),
 		)
 	}
 
