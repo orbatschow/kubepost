@@ -24,7 +24,7 @@ func (r *extensionRepository) Create(name string) error {
 
 	_, err := r.conn.Exec(
 		context.Background(),
-		fmt.Sprintf("CREATE DATABASE %s", SanitizeString(name)),
+		fmt.Sprintf("CREATE DATABASE \"%s\"", SanitizeString(name)),
 	)
 
 	if err != nil {
@@ -52,7 +52,7 @@ func (r *extensionRepository) Delete(name string) error {
 
 	_, err := r.conn.Query(
 		context.Background(),
-		fmt.Sprintf("DROP DATABASE %s WITH (FORCE)", SanitizeString(name)),
+		fmt.Sprintf("DROP DATABASE \"%s\" WITH (FORCE)", SanitizeString(name)),
 	)
 
 	if err != nil {
