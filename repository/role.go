@@ -58,7 +58,7 @@ func (r *roleRepository) Create(name string) error {
 
 	_, err := r.conn.Exec(
 		context.Background(),
-		fmt.Sprintf("CREATE ROLE %s", SanitizeString(name)),
+		fmt.Sprintf("CREATE ROLE \"%s\"", SanitizeString(name)),
 	)
 
 	if err != nil {
@@ -88,7 +88,7 @@ func (r *roleRepository) Delete(name string) error {
 
 	_, err := r.conn.Exec(
 		context.Background(),
-		fmt.Sprintf("DROP ROLE %s", SanitizeString(name)),
+		fmt.Sprintf("DROP ROLE \"%s\"", SanitizeString(name)),
 	)
 
 	if err != nil {
