@@ -134,7 +134,10 @@ func (r *roleRepository) SetPassword(name string, password string) error {
 	return nil
 }
 
-func (r *roleRepository) Grant(role *v1alpha1.Role) error {
+	// if no Options were given, return without effect
+	if len(options) == 0 {
+		return nil
+	}
 
 	_, err := r.conn.Exec(
 		context.Background(),
