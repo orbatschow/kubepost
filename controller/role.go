@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+
 	"github.com/orbatschow/kubepost/api/v1alpha1"
 	"github.com/orbatschow/kubepost/repository"
 	"github.com/orbatschow/kubepost/types"
@@ -118,7 +119,6 @@ func (role *Role) getInstanceForRole(instances map[string]*Instance) (*Instance,
 
 	var roleInstance *Instance
 
-
 	for _, instance := range instances {
 		if role.Spec.InstanceRef.Name == instance.Name {
 			roleInstance = instance
@@ -167,6 +167,11 @@ func (role *Role) reconcileRole(instances map[string]*Instance, secrets map[stri
 	}
 
 	err = roleRepository.SetPassword(role.Spec.RoleName, password)
+	if err != nil {
+		return err
+	}
+
+	err = roleRepository.Alter(role.Spec.RoleName, role.Spec.Options)
 	if err != nil {
 		return err
 	}
