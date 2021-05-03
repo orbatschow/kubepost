@@ -123,7 +123,7 @@ func (r *roleRepository) SetPassword(name string, password string) error {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		log.Errorf(
-			"unable to grant superuser permissions to role '%s', failed with code: '%s' and message: '%s'",
+			"unable to set password for role '%s', failed with code: '%s' and message: '%s'",
 			name,
 			pgErr.Code,
 			pgErr.Message,
@@ -134,7 +134,12 @@ func (r *roleRepository) SetPassword(name string, password string) error {
 	return nil
 }
 
-func (r *roleRepository) Grant(role *v1alpha1.Role) error {
+func (r *roleRepository) Alter(role *v1alpha1.Role) error {
+
+	// if no Options were given, return without effect
+	if len(role.Spec.Options) == 0 {
+		return nil
+	}
 
 	_, err := r.conn.Exec(
 		context.Background(),
@@ -150,7 +155,7 @@ func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 	if errors.As(err, &pgErr) {
 
 		log.Errorf(
-			"unable to grant superuser permissions to role '%s', failed with code: '%s' and message: '%s'",
+			"unable to alter permissions to role '%s', failed with code: '%s' and message: '%s'",
 			role.Spec.RoleName,
 			pgErr.Code,
 			pgErr.Message,
@@ -158,8 +163,12 @@ func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 
 		return err
 	}
+	return nil
+}
 
-	// grant/revoke all permissions
+func (r *roleRepository) Grant(role *v1alpha1.Role) error {
+
+	// grant/revoke all grants
 	for _, grant := range role.Spec.Grants {
 
 		if grant.Database == "" && grant.Schema == "" {
@@ -179,7 +188,7 @@ func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 			if errors.As(err, &pgErr) {
 
 				log.Errorf(
-					"unable to revoke permissions from role '%s', failed with code: '%s' and message: '%s'",
+					"unable to revoke grants from role '%s', failed with code: '%s' and message: '%s'",
 					role.Spec.RoleName,
 					pgErr.Code,
 					pgErr.Message,
@@ -200,7 +209,7 @@ func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 			if errors.As(err, &pgErr) {
 
 				log.Errorf(
-					"unable to grant permissions to role '%s', failed with code: '%s' and message: '%s'",
+					"unable to apply grants to role '%s', failed with code: '%s' and message: '%s'",
 					r,
 					pgErr.Code,
 					pgErr.Message,
