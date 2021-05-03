@@ -118,7 +118,11 @@ func (r *roleRepository) SetPassword(name string, password string) error {
 
 	_, err := r.conn.Exec(
 		context.Background(),
-		fmt.Sprintf("ALTER ROLE %s WITH PASSWORD '%s';", name, password),
+		fmt.Sprintf(
+			"ALTER ROLE %s WITH PASSWORD '%s';",
+			SanitizeString(name),
+			password,
+		),
 	)
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
