@@ -171,7 +171,7 @@ func (role *Role) reconcileRole(instances map[string]*Instance, secrets map[stri
 		return err
 	}
 
-	err = roleRepository.Alter(role.Spec.RoleName, role.Spec.Options)
+	err = roleRepository.Alter((*v1alpha1.Role)(role))
 	if err != nil {
 		return err
 	}
