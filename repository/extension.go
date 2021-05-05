@@ -7,6 +7,7 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
+	log "github.com/sirupsen/logrus"
 )
 
 type extensionRepository struct {
@@ -61,6 +62,8 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) 
 	// check if existing extension is desired
 	for _, existingExtension := range existingExtensions {
 		var desired bool
+		var dependencies []string
+
 		for _, desiredExtension := range desiredExtensions {
 			if existingExtension.Name == desiredExtension.Name {
 				desired = true
@@ -69,14 +72,27 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) 
 
 		// delete existing extension if it is not desired
 		if desired != true {
-			err = deleteExtension(r.conn, existingExtension)
+
+			// check if existingExtension is dependencie of other extension
+			err, dependencies = r.IsDependency(existingExtension)
+
 			if err != nil {
 				return err
 			}
+
+			if len(dependencies) > 0 {
+				log.Infof("extension '%s' is an dependency for extensions:%s, skipping deletion",
+					existingExtension.Name,
+					dependencies,
+				)
+			} else {
+				err = deleteExtension(r.conn, existingExtension)
+				if err != nil {
+					return err
+				}
+			}
 		}
-
 	}
-
 	return nil
 }
 
