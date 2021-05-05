@@ -10,12 +10,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type extensionRepository struct {
+type databaseRepository struct {
 	conn *pgx.Conn
 }
 
-func NewDatabaseRepository(conn *pgx.Conn) extensionRepository {
-	return extensionRepository{
+func NewDatabaseRepository(conn *pgx.Conn) databaseRepository {
+	return databaseRepository{
 		conn: conn,
 	}
 }
@@ -50,6 +50,7 @@ func (r *databaseRepository) DoesDatabaseExist(name string) (bool, error) {
 	return true, nil
 }
 
+func (r *databaseRepository) Create(name string) error {
 
 	_, err := r.conn.Exec(
 		context.Background(),
@@ -77,7 +78,7 @@ func (r *databaseRepository) DoesDatabaseExist(name string) (bool, error) {
 	return nil
 }
 
-func (r *extensionRepository) Delete(name string) error {
+func (r *databaseRepository) Delete(name string) error {
 
 	_, err := r.conn.Query(
 		context.Background(),
@@ -100,7 +101,7 @@ func (r *extensionRepository) Delete(name string) error {
 	return nil
 }
 
-func (r *extensionRepository) AlterOwner(db string, name string) error {
+func (r *databaseRepository) AlterOwner(db string, name string) error {
 
 	var currentOwner string
 	err := r.conn.QueryRow(
