@@ -136,3 +136,20 @@ func deleteExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 	)
 	return err
 }
+
+func (r *extensionRepository) IsDependency(extension *v1alpha1.Extension) (error, []string) {
+	var dependencies []string
+
+	err := pgxscan.Select(
+		context.Background(),
+		r.conn,
+		&dependencies,
+		"select extname from pg_depend join pg_extension on objid = oid where refobjid=(select oid from pg_extension where extname = $1)",
+		extension.Name,
+	)
+
+	if err != nil {
+		return err, nil
+	}
+	return nil, dependencies
+}
