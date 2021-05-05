@@ -20,7 +20,36 @@ func NewDatabaseRepository(conn *pgx.Conn) extensionRepository {
 	}
 }
 
-func (r *extensionRepository) Create(name string) error {
+func (r *databaseRepository) DoesDatabaseExist(name string) (bool, error) {
+
+	var exist bool
+	err := r.conn.QueryRow(
+		context.Background(),
+		"SELECT true FROM pg_database WHERE datname = $1",
+		name,
+	).Scan(&exist)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+
+			log.Errorf(
+				"unable to check database '%s', failed with code: '%s' and message: '%s'",
+				name,
+				pgErr.Code,
+				pgErr.Message,
+			)
+
+			return false, err
+		}
+		if err.Error() == "no rows in result set" {
+			return false, nil
+		}
+	}
+
+	return true, nil
+}
+
 
 	_, err := r.conn.Exec(
 		context.Background(),
