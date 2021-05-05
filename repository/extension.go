@@ -100,7 +100,7 @@ func createExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 	if extension.Version == "latest" || extension.Version == "" {
 		_, err := conn.Exec(
 			context.Background(),
-			fmt.Sprintf("CREATE EXTENSION %s", SanitizeString(extension.Name)),
+			fmt.Sprintf("CREATE EXTENSION %s CASCADE", SanitizeString(extension.Name)),
 		)
 
 		return err
@@ -108,7 +108,7 @@ func createExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 		_, err := conn.Exec(
 			context.Background(),
 			fmt.Sprintf(
-				"CREATE EXTENSION %s WITH VERSION %s",
+				"CREATE EXTENSION %s WITH VERSION %s CASCADE",
 				SanitizeString(extension.Name),
 				SanitizeString(extension.Version),
 			),
