@@ -22,15 +22,13 @@ func NewRoleRepository(conn *pgx.Conn) roleRepository {
 	}
 }
 
-func (r roleRepository) DoesRoleExist(name string) (bool, error) {
+func (r *roleRepository) DoesRoleExist(name string) (bool, error) {
 
 	var exist bool
 	err := r.conn.QueryRow(
 		context.Background(),
-		fmt.Sprintf(
-			"SELECT true FROM pg_roles WHERE rolname = '%s'",
-			SanitizeString(name),
-		),
+		"SELECT true FROM pg_roles WHERE rolname = $1",
+		name,
 	).Scan(&exist)
 
 	if err != nil {

@@ -9,6 +9,10 @@ import (
 	"github.com/orbatschow/kubepost/api/v1alpha1"
 )
 
+type extensionRepository struct {
+	conn *pgx.Conn
+}
+
 func NewExtensionRepository(conn *pgx.Conn) extensionRepository {
 	return extensionRepository{
 		conn: conn,

@@ -157,9 +157,23 @@ func (database *Database) createDatabase(instances map[string]*Instance, secrets
 
 	databaseRepository := repository.NewDatabaseRepository(conn)
 
-	err = databaseRepository.Create(database.Spec.DatabaseName)
+	var exists bool
+	exists, err = databaseRepository.DoesDatabaseExist(database.Spec.DatabaseName)
 	if err != nil {
 		return err
+	}
+
+	if exists {
+		log.Infof(
+			"database '%s' in namespace '%s' already exists, skipping creation",
+			database.Spec.DatabaseName,
+			database.Namespace,
+		)
+	} else {
+		err = databaseRepository.Create(database.Spec.DatabaseName)
+		if err != nil {
+			return err
+		}
 	}
 
 	if len(database.Spec.DatabaseOwner) > 0 {

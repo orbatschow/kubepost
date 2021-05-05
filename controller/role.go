@@ -156,9 +156,24 @@ func (role *Role) reconcileRole(instances map[string]*Instance, secrets map[stri
 	}
 
 	roleRepository := repository.NewRoleRepository(conn)
-	err = roleRepository.Create(role.Spec.RoleName)
+
+	var exists bool
+	exists, err = roleRepository.DoesRoleExist(role.Spec.RoleName)
 	if err != nil {
 		return err
+	}
+
+	if exists {
+		log.Infof(
+			"role '%s' in namespace '%s' already exists, skipping creation",
+			role.Spec.RoleName,
+			role.Namespace,
+		)
+	} else {
+		err = roleRepository.Create(role.Spec.RoleName)
+		if err != nil {
+			return err
+		}
 	}
 
 	password, err := role.getRolePassword(secrets)
