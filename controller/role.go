@@ -164,7 +164,11 @@ func (role *Role) reconcileRole(instances map[string]*Instance, secrets map[stri
 	}
 
 	if exists {
-		log.Infof("role %s already exists, skipping creation", role.Spec.RoleName)
+		log.Infof(
+			"role '%s' in namespace '%s' already exists, skipping creation",
+			role.Spec.RoleName,
+			role.Namespace,
+		)
 	} else {
 		err = roleRepository.Create(role.Spec.RoleName)
 		if err != nil {

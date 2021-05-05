@@ -34,7 +34,7 @@ func (r *databaseRepository) DoesDatabaseExist(name string) (bool, error) {
 		if errors.As(err, &pgErr) {
 
 			log.Errorf(
-				"unable to check database '%s', failed with code: '%s' and message: '%s'",
+				"unable to check if database '%s' exists, failed with code: '%s' and message: '%s'",
 				name,
 				pgErr.Code,
 				pgErr.Message,

@@ -165,8 +165,9 @@ func (database *Database) createDatabase(instances map[string]*Instance, secrets
 
 	if exists {
 		log.Infof(
-			"database %s already exists, skipping creation",
+			"database '%s' in namespace '%s' already exists, skipping creation",
 			database.Spec.DatabaseName,
+			database.Namespace,
 		)
 	} else {
 		err = databaseRepository.Create(database.Spec.DatabaseName)
