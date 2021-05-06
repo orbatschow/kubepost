@@ -10,6 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type Instance v1alpha1.Instance
+
 type extensionRepository struct {
 	conn *pgx.Conn
 }
@@ -20,7 +22,7 @@ func NewExtensionRepository(conn *pgx.Conn) extensionRepository {
 	}
 }
 
-func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) error {
+func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension, instance *v1alpha1.Instance) error {
 
 	var existingExtensions []*v1alpha1.Extension
 
@@ -62,7 +64,6 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) 
 	// check if existing extension is desired
 	for _, existingExtension := range existingExtensions {
 		var desired bool
-		var dependencies []string
 
 		for _, desiredExtension := range desiredExtensions {
 			if existingExtension.Name == desiredExtension.Name {
@@ -74,15 +75,19 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) 
 		if desired != true {
 
 			// check if existingExtension is dependencie of other extension
-			err, dependencies = r.IsDependency(existingExtension)
+			var dependencies []string
+			err, dependencies = r.GetDependencies(existingExtension)
 
 			if err != nil {
 				return err
 			}
 
 			if len(dependencies) > 0 {
-				log.Infof("extension '%s' is an dependency for extensions:%s, skipping deletion",
+				log.Infof(
+					"extension '%s' in database '%s' in namespace '%s' is an dependency for extensions:%s, skipping deletion",
 					existingExtension.Name,
+					instance.Spec.Database,
+					instance.Namespace,
 					dependencies,
 				)
 			} else {
@@ -153,7 +158,7 @@ func deleteExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 	return err
 }
 
-func (r *extensionRepository) IsDependency(extension *v1alpha1.Extension) (error, []string) {
+func (r *extensionRepository) GetDependencies(extension *v1alpha1.Extension) (error, []string) {
 	var dependencies []string
 
 	err := pgxscan.Select(

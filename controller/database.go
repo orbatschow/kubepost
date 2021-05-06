@@ -204,7 +204,7 @@ func (database *Database) reconcileExtensions(instance *Instance, secret *v1.Sec
 	}
 
 	extensionRepository := repository.NewExtensionRepository(conn)
-	err = extensionRepository.Reconcile(database.Spec.Extensions)
+	err = extensionRepository.Reconcile(database.Spec.Extensions, (*v1alpha1.Instance)(instance))
 	if err != nil {
 		return err
 	}
