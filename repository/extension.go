@@ -75,20 +75,20 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension, 
 		if desired != true {
 
 			// check if existingExtension is dependencie of other extension
-			var dependencies []string
-			err, dependencies = r.GetDependencies(existingExtension)
+			var dependendExtensions []string
+			err, dependendExtensions = r.GetDependendExtensions(existingExtension)
 
 			if err != nil {
 				return err
 			}
 
-			if len(dependencies) > 0 {
+			if len(dependendExtensions) > 0 {
 				log.Infof(
-					"extension '%s' in database '%s' in namespace '%s' is an dependency for extensions:%s, skipping deletion",
+					"extension '%s' in database '%s' in namespace '%s' is a dependency for extension(s): %s, skipping deletion",
 					existingExtension.Name,
 					instance.Spec.Database,
 					instance.Namespace,
-					dependencies,
+					dependendExtensions,
 				)
 			} else {
 				err = deleteExtension(r.conn, existingExtension)
@@ -158,13 +158,13 @@ func deleteExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 	return err
 }
 
-func (r *extensionRepository) GetDependencies(extension *v1alpha1.Extension) (error, []string) {
-	var dependencies []string
+func (r *extensionRepository) GetDependendExtensions(extension *v1alpha1.Extension) (error, []string) {
+	var dependendExtensions []string
 
 	err := pgxscan.Select(
 		context.Background(),
 		r.conn,
-		&dependencies,
+		&dependendExtensions,
 		"select extname from pg_depend join pg_extension on objid = oid where refobjid=(select oid from pg_extension where extname = $1)",
 		extension.Name,
 	)
@@ -172,5 +172,5 @@ func (r *extensionRepository) GetDependencies(extension *v1alpha1.Extension) (er
 	if err != nil {
 		return err, nil
 	}
-	return nil, dependencies
+	return nil, dependendExtensions
 }
