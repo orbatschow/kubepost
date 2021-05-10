@@ -10,8 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Instance v1alpha1.Instance
-
 type extensionRepository struct {
 	conn *pgx.Conn
 }
@@ -74,7 +72,7 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension, 
 		// delete existing extension if it is not desired
 		if desired != true {
 
-			// check if existingExtension is dependencie of other extension
+			// check if existingExtension is dependency of other extension
 			var dependendExtensions []string
 			err, dependendExtensions = r.GetDependendExtensions(existingExtension)
 
