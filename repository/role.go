@@ -168,42 +168,25 @@ func (r *roleRepository) Alter(role *v1alpha1.Role) error {
 	return nil
 }
 
-func (r *roleRepository) Grant(role *v1alpha1.Role) error {
+func (r *roleRepository) Grant(role *v1alpha1.Role, grant *v1alpha1.Grant) error {
 
-	// grant/revoke all grants
-	for _, grant := range role.Spec.Grants {
+	// TODO matching of existing grants and revoking unwanted !!!
 
-		if grant.Database == "" && grant.Schema == "" {
-			log.Error("either schema or database has to be defined within a grant")
-			return errors.New("either schema or database has to be defined within a grant")
-		}
-
-		// revoke permissions
-		_, err := r.conn.Exec(
-			context.Background(),
-			createRevokeQuery(role.Spec.RoleName, &grant),
+	for _, grantObject := range grant.Objects {
+		query, err := createGrantQuery(
+			role.Spec.RoleName,
+			&grantObject,
 		)
 
+		// if creation of statement failed
 		if err != nil {
-			var pgErr *pgconn.PgError
-
-			if errors.As(err, &pgErr) {
-
-				log.Errorf(
-					"unable to revoke grants from role '%s', failed with code: '%s' and message: '%s'",
-					role.Spec.RoleName,
-					pgErr.Code,
-					pgErr.Message,
-				)
-
-				return err
-			}
+			log.Errorf(err.Error())
+			continue // Continue with next grant-statement
 		}
 
-		// grant permissions
 		_, err = r.conn.Exec(
 			context.Background(),
-			createGrantQuery(role.Spec.RoleName, &grant),
+			query,
 		)
 
 		if err != nil {
@@ -211,7 +194,7 @@ func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 			if errors.As(err, &pgErr) {
 
 				log.Errorf(
-					"unable to apply grants to role '%s', failed with code: '%s' and message: '%s'",
+					"unable to apply grant to role '%s', failed with code: '%s' and message: '%s'",
 					r,
 					pgErr.Code,
 					pgErr.Message,
@@ -221,7 +204,6 @@ func (r *roleRepository) Grant(role *v1alpha1.Role) error {
 			}
 		}
 	}
-
 	return nil
 }
 
