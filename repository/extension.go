@@ -7,6 +7,7 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
+	log "github.com/sirupsen/logrus"
 )
 
 type extensionRepository struct {
@@ -19,7 +20,7 @@ func NewExtensionRepository(conn *pgx.Conn) extensionRepository {
 	}
 }
 
-func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) error {
+func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension, instance *v1alpha1.Instance) error {
 
 	var existingExtensions []*v1alpha1.Extension
 
@@ -61,6 +62,7 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) 
 	// check if existing extension is desired
 	for _, existingExtension := range existingExtensions {
 		var desired bool
+
 		for _, desiredExtension := range desiredExtensions {
 			if existingExtension.Name == desiredExtension.Name {
 				desired = true
@@ -69,14 +71,31 @@ func (r *extensionRepository) Reconcile(desiredExtensions []v1alpha1.Extension) 
 
 		// delete existing extension if it is not desired
 		if desired != true {
-			err = deleteExtension(r.conn, existingExtension)
+
+			// check if existingExtension is dependency of other extension
+			var dependendExtensions []string
+			err, dependendExtensions = r.GetDependendExtensions(existingExtension)
+
 			if err != nil {
 				return err
 			}
+
+			if len(dependendExtensions) > 0 {
+				log.Infof(
+					"extension '%s' in database '%s' in namespace '%s' is a dependency for extension(s): %s, skipping deletion",
+					existingExtension.Name,
+					instance.Spec.Database,
+					instance.Namespace,
+					dependendExtensions,
+				)
+			} else {
+				err = deleteExtension(r.conn, existingExtension)
+				if err != nil {
+					return err
+				}
+			}
 		}
-
 	}
-
 	return nil
 }
 
@@ -84,7 +103,7 @@ func createExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 	if extension.Version == "latest" || extension.Version == "" {
 		_, err := conn.Exec(
 			context.Background(),
-			fmt.Sprintf("CREATE EXTENSION %s", SanitizeString(extension.Name)),
+			fmt.Sprintf("CREATE EXTENSION %s CASCADE", SanitizeString(extension.Name)),
 		)
 
 		return err
@@ -92,7 +111,7 @@ func createExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 		_, err := conn.Exec(
 			context.Background(),
 			fmt.Sprintf(
-				"CREATE EXTENSION %s WITH VERSION %s",
+				"CREATE EXTENSION %s WITH VERSION %s CASCADE",
 				SanitizeString(extension.Name),
 				SanitizeString(extension.Version),
 			),
@@ -135,4 +154,21 @@ func deleteExtension(conn *pgx.Conn, extension *v1alpha1.Extension) error {
 		),
 	)
 	return err
+}
+
+func (r *extensionRepository) GetDependendExtensions(extension *v1alpha1.Extension) (error, []string) {
+	var dependendExtensions []string
+
+	err := pgxscan.Select(
+		context.Background(),
+		r.conn,
+		&dependendExtensions,
+		"select extname from pg_depend join pg_extension on objid = oid where refobjid=(select oid from pg_extension where extname = $1)",
+		extension.Name,
+	)
+
+	if err != nil {
+		return err, nil
+	}
+	return nil, dependendExtensions
 }
