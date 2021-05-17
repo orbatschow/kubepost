@@ -181,7 +181,7 @@ func (r *roleRepository) Grant(role *v1alpha1.Role, grant *v1alpha1.Grant) error
 		// if creation of statement failed
 		if err != nil {
 			log.Errorf(err.Error())
-			continue // Continue with next grant-statement
+			continue // continue with next grant-statement
 		}
 
 		_, err = r.conn.Exec(
@@ -221,63 +221,57 @@ func createGrantQuery(roleName string, grantTarget *v1alpha1.GrantObject) (strin
 
 	for _, privilege := range grantTarget.Privileges {
 		if !possiblePrivileges[privilege] {
-			return "", fmt.Errorf("privilege %s unknown", privilege) // TODO  logging
+			return "", fmt.Errorf("privilege %s unknown", privilege)
 		}
 	}
 
 	var query string
+
 	switch strings.ToUpper(grantTarget.Type) {
 	case "TABLE":
-		{
-			query = fmt.Sprintf(
-				"GRANT %s ON TABLE %s TO %s",
-				strings.Join(grantTarget.Privileges, ","),
-				grantTarget.Identifier,
-				roleName,
-			)
-		}
+		query = fmt.Sprintf(
+			"GRANT %s ON TABLE %s TO %s",
+			strings.Join(grantTarget.Privileges, ","),
+			grantTarget.Identifier,
+			roleName,
+		)
+
 	case "SCHEMA":
-		{
-			query = fmt.Sprintf(
-				"GRANT %s ON ALL TABLES IN SCHEMA %s TO %s",
-				strings.Join(grantTarget.Privileges, ","),
-				grantTarget.Identifier,
-				roleName,
-			)
-		}
+		query = fmt.Sprintf(
+			"GRANT %s ON ALL TABLES IN SCHEMA %s TO %s",
+			strings.Join(grantTarget.Privileges, ","),
+			grantTarget.Identifier,
+			roleName,
+		)
+
 	case "FUNCTION":
-		{
-			query = fmt.Sprintf(
-				"GRANT %s ON FUNCTION %s TO %s",
-				strings.Join(grantTarget.Privileges, ","),
-				grantTarget.Identifier,
-				roleName,
-			)
-		}
+		query = fmt.Sprintf(
+			"GRANT %s ON FUNCTION %s TO %s",
+			strings.Join(grantTarget.Privileges, ","),
+			grantTarget.Identifier,
+			roleName,
+		)
+
 	case "SEQUENCE":
-		{
-			query = fmt.Sprintf(
-				"GRANT %s ON SEQUENCE %s TO %s",
-				strings.Join(grantTarget.Privileges, ","),
-				grantTarget.Identifier,
-				roleName,
-			)
-		}
+		query = fmt.Sprintf(
+			"GRANT %s ON SEQUENCE %s TO %s",
+			strings.Join(grantTarget.Privileges, ","),
+			grantTarget.Identifier,
+			roleName,
+		)
+
 	case "ROLE":
-		{
-			query = fmt.Sprintf(
-				"GRANT %s TO %s",
-				grantTarget.Identifier,
-				roleName,
-			)
-			if grantTarget.WithAdminOption {
-				query = " WITH ADMIN OPTION"
-			}
+		query = fmt.Sprintf(
+			"GRANT %s TO %s",
+			grantTarget.Identifier,
+			roleName,
+		)
+		if grantTarget.WithAdminOption {
+			query = " WITH ADMIN OPTION"
 		}
+
 	default:
-		{
-			return "", fmt.Errorf("grant type %s unknown", grantTarget.Type) // TODO  logging
-		}
+		return "", fmt.Errorf("grant type %s unknown", grantTarget.Type)
 	}
 
 	if strings.ToUpper(grantTarget.Type) != "ROLE" && grantTarget.WithGrantOption {
