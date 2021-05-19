@@ -168,6 +168,22 @@ func (r *roleRepository) Alter(role *v1alpha1.Role) error {
 	return nil
 }
 
+func expandGrantObjects(grantObjects []v1alpha1.GrantObject) []v1alpha1.GrantObject {
+
+	buffer := []v1alpha1.GrantObject{}
+
+	for _, grantObject := range grantObjects {
+		for _, privilege := range grantObject.Privileges {
+
+			// create new grantObject for every privilege found
+			buffer = append(buffer, grantObject)
+			buffer[len(buffer)-1].Privileges = []string{privilege}
+		}
+	}
+
+	return buffer
+}
+
 func (r *roleRepository) Grant(role *v1alpha1.Role, grant *v1alpha1.Grant) error {
 
 	// TODO matching of existing grants and revoking unwanted !!!
