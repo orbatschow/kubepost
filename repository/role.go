@@ -184,6 +184,47 @@ func expandGrantObjects(grantObjects []v1alpha1.GrantObject) []v1alpha1.GrantObj
 	return buffer
 }
 
+func (r *roleRepository) getCurrentTableGrants(role *v1alpha1.Role) ([]v1alpha1.GrantObject, error) {
+	tableGrantQuery := `
+	select
+		table_name as identifier,
+		'TABLE' as type,
+		string_to_array(privilege_type, ', ') as previliges,
+		is_grantable::bool as withGrantOption
+	from information_schema.role_table_grants 
+	WHERE grantee=$1`
+
+	var tableGrants []v1alpha1.GrantObject
+
+	rows, err := r.conn.Query(
+		context.Background(),
+		tableGrantQuery,
+		role.Spec.RoleName,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var grant v1alpha1.GrantObject
+		err = rows.Scan(
+			&grant.Identifier,
+			&grant.Type,
+			&grant.Privileges,
+			&grant.WithGrantOption,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		tableGrants = append(tableGrants, grant)
+	}
+
+	return tableGrants, nil
+}
+
 func (r *roleRepository) Grant(role *v1alpha1.Role, grant *v1alpha1.Grant) error {
 
 	// TODO matching of existing grants and revoking unwanted !!!
