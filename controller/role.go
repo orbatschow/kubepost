@@ -191,12 +191,34 @@ func (role *Role) reconcileRole(instances map[string]*Instance, secrets map[stri
         return err
     }
 
-    err = roleRepository.Grant((*v1alpha1.Role)(role))
+    err = role.reconcileGrant(instance, secret)
     if err != nil {
         return err
     }
 
     return nil
+}
+
+func (role *Role) reconcileGrant(instance *Instance, secret *v1.Secret) error {
+
+    // grant/revoke all grants
+    for _, grant := range role.Spec.Grants {
+
+        instance.Spec.Database = grant.Database
+        conn, err := instance.GetConnection(secret)
+
+        if err != nil {
+            return err
+        }
+
+        roleRepository := repository.NewRoleRepository(conn)
+
+        err = roleRepository.Grant((*v1alpha1.Role)(role), &grant)
+	if err != nil {
+		return err
+	}
+    }
+	return nil
 }
 
 func (role *Role) getRolePassword(secrets map[string]*v1.Secret) (string, error) {
