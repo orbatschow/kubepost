@@ -1,121 +1,109 @@
 package hook
 
 import (
-	"encoding/json"
-	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/controller"
-	"github.com/orbatschow/kubepost/types"
-	"io/ioutil"
-	v1 "k8s.io/api/core/v1"
-	"net/http"
+    "github.com/gofiber/fiber/v2"
+    "github.com/orbatschow/kubepost/api/v1alpha1"
+    "github.com/orbatschow/kubepost/controller"
+    "github.com/orbatschow/kubepost/types"
+    log "github.com/sirupsen/logrus"
+    v1 "k8s.io/api/core/v1"
 )
 
 type syncRoleRequest struct {
-	Role    controller.Role `json:"object"`
-	Related struct {
-		Instances map[string]*controller.Instance `json:"Instance.kubepost.io/v1alpha1"`
-		Secrets   map[string]*v1.Secret           `json:"Secret.v1"`
-	} `json:"related"`
-	Finalizing bool `json:"finalizing"`
+    Role    controller.Role `json:"object"`
+    Related struct {
+        Instances map[string]*controller.Instance `json:"Instance.kubepost.io/v1alpha1"`
+        Secrets   map[string]*v1.Secret           `json:"Secret.v1"`
+    } `json:"related"`
+    Finalizing bool `json:"finalizing"`
 }
 
 type syncRoleResponse struct {
-	Status v1alpha1.RoleStatus `json:"status"`
+    Status v1alpha1.RoleStatus `json:"status"`
 }
 
 type finalizeRoleResponse struct {
-	Status    v1alpha1.RoleStatus `json:"status"`
-	Finalized bool                `json:"finalized"`
+    Status    v1alpha1.RoleStatus `json:"status"`
+    Finalized bool                `json:"finalized"`
 }
 
-func syncRole(request *syncRoleRequest) (*syncRoleResponse, error) {
-	response := &syncRoleResponse{}
-
-	role := request.Role
-	instances := request.Related.Instances
-	secrets := request.Related.Secrets
-
-	switch role.Status.Status {
-	case types.Pending:
-		role.HandleRolePendingState(instances, secrets)
-	case types.Healthy:
-		role.HandleRoleHealthyState(instances, secrets)
-	case types.Unhealthy:
-		role.HandleRoleUnhealthyState(instances, secrets)
-	default:
-		role.HandleRoleUnknownState()
-	}
-
-	response.Status = role.Status
-	return response, nil
+func RegisterRoleHandlerGroup(app *fiber.App) {
+    instanceRouter := app.Group("/role")
+    instanceRouter.All("/sync", syncRole)
+    instanceRouter.All("/customize", customizeRole)
 }
 
-func finalizeRole(request *syncRoleRequest) (*finalizeRoleResponse, error) {
-	response := &finalizeRoleResponse{}
+func syncRole(c *fiber.Ctx) error {
 
-	role := request.Role
-	instances := request.Related.Instances
-	secrets := request.Related.Secrets
+    request := &syncRoleRequest{}
+    if err := c.BodyParser(request); err != nil {
+        log.Errorf("could not parse request: %s", err)
+        return fiber.ErrBadRequest
+    }
 
-	role.HandleFinalizeRoleState(instances, secrets)
+    if request.Finalizing {
+        return finalizeRole(c, request)
+    } else {
+        return reconcileRole(c, request)
+    }
 
-	response.Status = role.Status
-	if role.Status.Status == types.Deleting {
-		response.Finalized = true
-	} else {
-		response.Finalized = false
-	}
-
-	return response, nil
 }
 
-func RoleSyncHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+func reconcileRole(c *fiber.Ctx, request *syncRoleRequest) error {
+    response := &syncRoleResponse{}
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	request := &syncRoleRequest{}
-	if err := json.Unmarshal(body, request); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+    role := request.Role
+    instances := request.Related.Instances
+    secrets := request.Related.Secrets
 
-	var response interface{}
-	if !request.Finalizing {
-		response, err = syncRole(request)
-	} else {
-		response, err = finalizeRole(request)
-	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	body, err = json.Marshal(&response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(body)
+    switch role.Status.Status {
+    case types.Pending:
+        role.HandleRolePendingState(instances, secrets)
+    case types.Healthy:
+        role.HandleRoleHealthyState(instances, secrets)
+    case types.Unhealthy:
+        role.HandleRoleUnhealthyState(instances, secrets)
+    default:
+        role.HandleRoleUnknownState()
+    }
+
+    response.Status = role.Status
+    return c.JSON(response)
 }
 
-func RoleCustomizeHandler(w http.ResponseWriter, r *http.Request) {
+func finalizeRole(c *fiber.Ctx, request *syncRoleRequest) error {
+    response := &finalizeRoleResponse{}
 
-	relatedResources := []RelatedResource{
-		{
-			ApiVersion: "kubepost.io/v1alpha1",
-			Resource:   "instances",
-		},
-		{
-			ApiVersion: "v1",
-			Resource:   "secrets",
-		},
-	}
+    role := request.Role
+    instances := request.Related.Instances
+    secrets := request.Related.Secrets
 
-	response := CustomizeResponse{RelatedResources: relatedResources}
+    role.HandleFinalizeRoleState(instances, secrets)
 
-	CustomizeHandler(w, r, &response)
+    response.Status = role.Status
+    if role.Status.Status == types.Deleting {
+        response.Finalized = true
+    } else {
+        response.Finalized = false
+    }
 
+    return c.JSON(response)
+}
+
+func customizeRole(c *fiber.Ctx) error {
+
+    relatedResources := []RelatedResource{
+        {
+            ApiVersion: "kubepost.io/v1alpha1",
+            Resource:   "instances",
+        },
+        {
+            ApiVersion: "v1",
+            Resource:   "secrets",
+        },
+    }
+
+    return c.JSON(CustomizeResponse{
+        RelatedResources: relatedResources,
+    })
 }

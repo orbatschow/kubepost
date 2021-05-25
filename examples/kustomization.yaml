@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: kubepost
 
 resources:
+  - namespace.yaml
   - postgres.yaml
   - kubepost-instance-credentials.yaml
   - kubepost-role-credentials.yaml

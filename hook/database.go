@@ -1,121 +1,110 @@
 package hook
 
 import (
-	"encoding/json"
-	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/controller"
-	"github.com/orbatschow/kubepost/types"
-	"io/ioutil"
-	v1 "k8s.io/api/core/v1"
-	"net/http"
+    "github.com/gofiber/fiber/v2"
+    "github.com/orbatschow/kubepost/api/v1alpha1"
+    "github.com/orbatschow/kubepost/controller"
+    "github.com/orbatschow/kubepost/types"
+    log "github.com/sirupsen/logrus"
+    v1 "k8s.io/api/core/v1"
 )
 
 type syncDatabaseRequest struct {
-	Database controller.Database `json:"object"`
-	Related  struct {
-		Instances map[string]*controller.Instance `json:"Instance.kubepost.io/v1alpha1"`
-		Secrets   map[string]*v1.Secret           `json:"Secret.v1"`
-	} `json:"related"`
-	Finalizing bool `json:"finalizing"`
+    Database controller.Database `json:"object"`
+    Related  struct {
+        Instances map[string]*controller.Instance `json:"Instance.kubepost.io/v1alpha1"`
+        Secrets   map[string]*v1.Secret           `json:"Secret.v1"`
+    } `json:"related"`
+    Finalizing bool `json:"finalizing"`
 }
 
 type syncDatabaseResponse struct {
-	Status v1alpha1.DatabaseStatus `json:"status"`
+    Status v1alpha1.DatabaseStatus `json:"status"`
 }
 
 type finalizeDatabaseResponse struct {
-	Status    v1alpha1.DatabaseStatus `json:"status"`
-	Finalized bool                    `json:"finalized"`
+    Status    v1alpha1.DatabaseStatus `json:"status"`
+    Finalized bool                    `json:"finalized"`
 }
 
-func syncDatabase(request *syncDatabaseRequest) (*syncDatabaseResponse, error) {
-	response := &syncDatabaseResponse{}
-
-	database := request.Database
-	instances := request.Related.Instances
-	secrets := request.Related.Secrets
-
-	switch database.Status.Status {
-	case types.Pending:
-		database.HandleDatabasePendingState(instances, secrets)
-	case types.Healthy:
-		database.HandleDatabaseHealthyState(instances, secrets)
-	case types.Unhealthy:
-		database.HandleDatabaseUnhealthyState(instances, secrets)
-	default:
-		database.HandleDatabaseUnknownState()
-	}
-
-	response.Status = database.Status
-	return response, nil
+func RegisterDatabaseHandlerGroup(app *fiber.App) {
+    instanceRouter := app.Group("/database")
+    instanceRouter.All("/sync", syncDatabase)
+    instanceRouter.All("/customize", customizeDatabase)
 }
 
-func finalizeDatabase(request *syncDatabaseRequest) (*finalizeDatabaseResponse, error) {
-	response := &finalizeDatabaseResponse{}
+func syncDatabase(c *fiber.Ctx) error {
 
-	database := request.Database
-	instances := request.Related.Instances
-	secrets := request.Related.Secrets
+    request := &syncDatabaseRequest{}
+    if err := c.BodyParser(request); err != nil {
+        log.Errorf("could not parse request: %s", err)
+        return fiber.ErrBadRequest
+    }
 
-	database.HandleFinalizeDatabaseState(instances, secrets)
+    if request.Finalizing {
+        return finalizeDatabase(c, request)
+    } else {
+        return reconcileDatabase(c, request)
+    }
 
-	response.Status = database.Status
-	if database.Status.Status == types.Deleting {
-		response.Finalized = true
-	} else {
-		response.Finalized = false
-	}
-
-	return response, nil
 }
 
-func DatabaseSyncHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+func reconcileDatabase(c *fiber.Ctx, request *syncDatabaseRequest) error {
+    response := &syncDatabaseResponse{}
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	request := &syncDatabaseRequest{}
-	if err := json.Unmarshal(body, request); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+    database := request.Database
+    instances := request.Related.Instances
+    secrets := request.Related.Secrets
 
-	var response interface{}
-	if !request.Finalizing {
-		response, err = syncDatabase(request)
-	} else {
-		response, err = finalizeDatabase(request)
-	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	body, err = json.Marshal(&response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(body)
+    switch database.Status.Status {
+    case types.Pending:
+        database.HandleDatabasePendingState(instances, secrets)
+    case types.Healthy:
+        database.HandleDatabaseHealthyState(instances, secrets)
+    case types.Unhealthy:
+        database.HandleDatabaseUnhealthyState(instances, secrets)
+    default:
+        database.HandleDatabaseUnknownState()
+    }
+
+    response.Status = database.Status
+    return c.JSON(response)
 }
 
-func DatabaseCustomizeHandler(w http.ResponseWriter, r *http.Request) {
+func finalizeDatabase(c *fiber.Ctx, request *syncDatabaseRequest) error {
+    response := &finalizeDatabaseResponse{}
 
-	relatedResources := []RelatedResource{
-		{
-			ApiVersion: "kubepost.io/v1alpha1",
-			Resource:   "instances",
-		},
-		{
-			ApiVersion: "v1",
-			Resource:   "secrets",
-		},
-	}
+    database := request.Database
+    instances := request.Related.Instances
+    secrets := request.Related.Secrets
 
-	response := CustomizeResponse{RelatedResources: relatedResources}
+    database.HandleFinalizeDatabaseState(instances, secrets)
 
-	CustomizeHandler(w, r, &response)
+    response.Status = database.Status
+    if database.Status.Status == types.Deleting {
+        response.Finalized = true
+    } else {
+        response.Finalized = false
+    }
+
+    return c.JSON(response)
+}
+
+func customizeDatabase(c *fiber.Ctx) error {
+
+    relatedResources := []RelatedResource{
+        {
+            ApiVersion: "kubepost.io/v1alpha1",
+            Resource:   "instances",
+        },
+        {
+            ApiVersion: "v1",
+            Resource:   "secrets",
+        },
+    }
+
+    return c.JSON(CustomizeResponse{
+        RelatedResources: relatedResources,
+    })
 
 }
