@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 //+kubebuilder:object:root=true
@@ -9,11 +9,11 @@ import (
 
 // Role is the Schema for the roles API
 type Role struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+    metav1.TypeMeta   `json:",inline"`
+    metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   RoleSpec   `json:"spec"`
-	Status RoleStatus `json:"status,omitempty"`
+    Spec   RoleSpec   `json:"spec"`
+    Status RoleStatus `json:"status,omitempty"`
 }
 
 type RoleSpec struct {
@@ -56,7 +56,7 @@ type GrantObject struct {
 }
 
 type RoleStatus struct {
-	Status string `json:"status"`
+    Status string `json:"status"`
 }
 
 //+kubebuilder:object:root=true

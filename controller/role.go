@@ -214,11 +214,11 @@ func (role *Role) reconcileGrant(instance *Instance, secret *v1.Secret) error {
         roleRepository := repository.NewRoleRepository(conn)
 
         err = roleRepository.Grant((*v1alpha1.Role)(role), &grant)
-	if err != nil {
-		return err
-	}
+        if err != nil {
+            return err
+        }
     }
-	return nil
+    return nil
 }
 
 func (role *Role) getRolePassword(secrets map[string]*v1.Secret) (string, error) {

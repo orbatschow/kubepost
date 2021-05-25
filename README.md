@@ -123,7 +123,8 @@ spec:
 ### Role
 
 This role uses the previously mentioned instance CRD to connect to the database instance and creates a role with the
-name `kubepost`. It then grants this role `ALL PRIVILEGES` on schema `public` in database`kubepost`. The grant section is optional.
+name `kubepost`. It then grants this role `ALL PRIVILEGES` on schema `public` in database`kubepost`. The grant section
+is optional.
 
 ```yaml
 apiVersion: kubepost.io/v1alpha1
