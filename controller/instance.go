@@ -112,7 +112,7 @@ func (instance *Instance) HandleFinalizeInstanceState(databases map[string]*Data
         }
     }
 
-    instance.Status.Status = types.Pending
+    instance.Status.Status = types.Deleting
 }
 
 func (instance *Instance) GetSecret(secrets map[string]*v1.Secret) (*v1.Secret, error) {
