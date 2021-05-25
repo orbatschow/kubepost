@@ -18,5 +18,5 @@ spec:
       objects:
         - identifier: public
           type: SCHEMA
-          privileges: ["ALL"]
+          privileges: [ "ALL" ]
           withGrantOption: true
