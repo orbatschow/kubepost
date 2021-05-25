@@ -43,17 +43,30 @@ spec:
                   properties:
                     database:
                       type: string
-                    objectType:
-                      type: string
-                    privileges:
+                    objects:
                       items:
-                        type: string
+                        properties:
+                          identifier:
+                            type: string
+                          privileges:
+                            items:
+                              type: string
+                            type: array
+                          type:
+                            type: string
+                          withAdminOption:
+                            type: boolean
+                          withGrantOption:
+                            type: boolean
+                        required:
+                        - identifier
+                        - privileges
+                        - type
+                        type: object
                       type: array
-                    schema:
-                      type: string
                   required:
-                  - objectType
-                  - privileges
+                  - database
+                  - objects
                   type: object
                 type: array
               instanceRef:

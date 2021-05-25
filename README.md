@@ -123,7 +123,7 @@ spec:
 ### Role
 
 This role uses the previously mentioned instance CRD to connect to the database instance and creates a role with the
-name `kubepost`. It then grants this role `ALL PRIVILEGES` on the database `kubepost`. The grant section is optional.
+name `kubepost`. It then grants this role `ALL PRIVILEGES` on schema `public` in database`kubepost`. The grant section is optional.
 
 ```yaml
 apiVersion: kubepost.io/v1alpha1
@@ -139,9 +139,23 @@ spec:
     - SUPERUSER
     - LOGIN
   grants:
-    database: kubepost
-    objectType: database
-    privileges:
-      - ALL PRIVILEGES
+    # This field specifies the database to which kubepost will connect for all following grants.
+    - database: kubepost
 
+      # This is an array of database-objects and belonging user previliges.
+      objects:
+         # the identifiert can be chosen like the corresponding identifier in postgres
+         # for example one table with schema: public.test_table
+        - identifier: public
+          
+          # possible options: ["TABLE", "SCHEMA", "FUNCTION", "SEQUENCE", "ROLE"]
+          # SCHEMA will result in an 'GRANT PREVILIGES TO ALL TABLES IN SCHEMA'
+          # every other option will result in GRANT-Querys similar to:
+          # https://www.postgresql.org/docs/current/sql-grant.html
+          type: SCHEMA
+          
+          # possible options: ["ALL", "INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
+          privileges: ["ALL"]
+          
+          withGrantOption: true
 ```
