@@ -1,16 +1,16 @@
 name: pre-check
 
-on: 
+on:
   push:
 
 jobs:
   pre-check:
     runs-on: ubuntu-20.04
-    
+
     steps:
       - uses: actions/checkout@v2
 
-      # neccessary step, because ubuntu-20.04 has only glibc 2.31 installed 
+      # neccessary step, because ubuntu-20.04 has only glibc 2.31 installed
       - name: install golang and glibc >= 2.32
         run: |
           sudo apt update
@@ -27,6 +27,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository:  hyutota/kubepost 
+          repository: orbatschow/kubepost
           event-type: pre-check-successful
           client-payload: '{"ref": "${{ github.ref }}"}'
