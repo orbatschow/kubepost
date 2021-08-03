@@ -46,14 +46,21 @@ type Grant struct {
 }
 
 type GrantObject struct {
-    Identifier string   `json:"identifier"`
-    Type       string   `json:"type"`
-    Privileges []string `json:"privileges"`
+    Identifier string `json:"identifier"`
+    Schema     string `json:"schema"`
+    // +kubebuilder:validation:Required
+    // +kubebuilder:validation:Enum=TABLE;SCHEMA;ROLE;SEQUENCE;FUNCTION
+    Type string `json:"type"`
+    // +kubebuilder:validation:Optional
+    Privileges []Privilege `json:"privileges"`
     //+kubebuilder:validation:Optional
     WithGrantOption bool `json:"withGrantOption"`
     //+kubebuilder:validation:Optional
     WithAdminOption bool `json:"withAdminOption"`
 }
+
+// +kubebuilder:validation:Enum=ALL;SELECT;INSERT;UPDATE;DELETE;TRUNCATE;REFERENCES;TRIGGER;USAGE;CREATE;CONNECT;TEMPORARY;TEMP;EXECUTE
+type Privilege string
 
 type RoleStatus struct {
     Status string `json:"status"`
