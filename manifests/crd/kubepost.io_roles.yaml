@@ -50,9 +50,32 @@ spec:
                             type: string
                           privileges:
                             items:
+                              enum:
+                              - ALL
+                              - SELECT
+                              - INSERT
+                              - UPDATE
+                              - DELETE
+                              - TRUNCATE
+                              - REFERENCES
+                              - TRIGGER
+                              - USAGE
+                              - CREATE
+                              - CONNECT
+                              - TEMPORARY
+                              - TEMP
+                              - EXECUTE
                               type: string
                             type: array
+                          schema:
+                            type: string
                           type:
+                            enum:
+                            - TABLE
+                            - SCHEMA
+                            - ROLE
+                            - SEQUENCE
+                            - FUNCTION
                             type: string
                           withAdminOption:
                             type: boolean
@@ -60,7 +83,7 @@ spec:
                             type: boolean
                         required:
                         - identifier
-                        - privileges
+                        - schema
                         - type
                         type: object
                       type: array
