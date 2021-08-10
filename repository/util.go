@@ -76,3 +76,9 @@ func SubtractPrivilegeIntersection(a, b *v1alpha1.GrantObject) int {
     return counter
 }
 
+func getPrivilegeMap() map[string][]v1alpha1.Privilege {
+    return map[string][]v1alpha1.Privilege{
+        "TABLE":  {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
+        "SCHEMA": {"USAGE", "CREATE"},
+    }
+}
