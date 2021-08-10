@@ -227,15 +227,62 @@ func (r *roleRepository) getCurrentTableGrants(role *v1alpha1.Role) ([]v1alpha1.
 
 func (r *roleRepository) Grant(role *v1alpha1.Role, grant *v1alpha1.Grant) error {
 
-    // TODO matching of existing grants and revoking unwanted !!!
+    currentGrants, err := r.getAllCurrentGrants(role)
 
-    for _, grantObject := range grant.Objects {
+    if err != nil {
+        return err
+    }
+
+    //expandedGrantObjects := expandGrantObjects(grant.Objects)
+    desiredGrants := grant.Objects
+    privilegeMap := getPrivilegeMap()
+
+    for outerIndex := 0; outerIndex < len(desiredGrants); {
+        desiredGrant := &desiredGrants[outerIndex]
+
+        // In case "ALL" is choosen as privilege, replace it with an expanded version
+        for _, privilege := range desiredGrant.Privileges {
+            if privilege == "ALL" {
+                desiredGrant.Privileges = privilegeMap[desiredGrant.Type]
+            }
+        }
+
+        for innerIndex := 0; innerIndex < len(currentGrants); {
+            currentGrant := currentGrants[innerIndex]
+
+            // This function will subtract all intersections between both arrays
+            // of privileges in both grantObjects
+            SubtractPrivilegeIntersection(desiredGrant, &currentGrant)
+
+            // In case there are no privileges left in currentGrant: remove it
+            if currentGrant.Privileges == nil {
+
+                currentGrants[innerIndex] = currentGrants[len(currentGrants)-1] // Copy last element to index
+                currentGrants = currentGrants[:len(currentGrants)-1]            // Truncate slice.
+
+            } else {
+                innerIndex++
+            }
+        }
+
+        // In case there are no privileges left in desiredGrant: remove it
+        if desiredGrant.Privileges == nil {
+
+            desiredGrants[outerIndex] = desiredGrants[len(desiredGrants)-1] // Copy last element to index
+            desiredGrants = desiredGrants[:len(desiredGrants)-1]            // Truncate slice.
+
+        } else {
+            outerIndex++
+        }
+    }
+
+    for _, desiredGrant := range desiredGrants {
+
         query, err := createGrantQuery(
             role.Spec.RoleName,
-            &grantObject,
+            &desiredGrant,
         )
 
-        // if creation of statement failed
         if err != nil {
             log.Errorf(err.Error())
             continue // continue with next grant-statement
@@ -256,11 +303,43 @@ func (r *roleRepository) Grant(role *v1alpha1.Role, grant *v1alpha1.Grant) error
                     pgErr.Code,
                     pgErr.Message,
                 )
-
                 return err
             }
         }
     }
+
+    for _, undesiredGrant := range currentGrants {
+
+        query, err := createRevokeQuery(
+            role.Spec.RoleName,
+            &undesiredGrant,
+        )
+
+        if err != nil {
+            log.Errorf(err.Error())
+            continue // continue with next grant-statement
+        }
+
+        _, err = r.conn.Exec(
+            context.Background(),
+            query,
+        )
+
+        if err != nil {
+            var pgErr *pgconn.PgError
+            if errors.As(err, &pgErr) {
+
+                log.Errorf(
+                    "unable to apply revoke to role '%s', failed with code: '%s' and message: '%s'",
+                    r,
+                    pgErr.Code,
+                    pgErr.Message,
+                )
+                return err
+            }
+        }
+    }
+
     return nil
 }
 
