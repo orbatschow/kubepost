@@ -134,6 +134,9 @@ metadata:
 spec:
   roleName: kubepost
   preventDeletion: false
+  passwordRef:
+    name: kubepost-role-credentials
+    passwordKey: password
   instanceRef:
     name: kubepost
   options:

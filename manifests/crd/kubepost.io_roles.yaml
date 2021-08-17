@@ -68,6 +68,7 @@ spec:
                               type: string
                             type: array
                           schema:
+                            default: public
                             type: string
                           type:
                             enum:
