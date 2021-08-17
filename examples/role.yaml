@@ -16,7 +16,6 @@ spec:
   grants:
     - database: kubepost
       objects:
-        - identifier: public
-          type: SCHEMA
-          privileges: [ "ALL" ]
-          withGrantOption: true
+        - identifier: kubepost-admin
+          type: ROLE
+          schema: public
