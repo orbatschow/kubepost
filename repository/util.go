@@ -3,7 +3,6 @@ package repository
 import (
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/thoas/go-funk"
 )
 
 func SanitizeString(input string) string {
@@ -20,16 +19,14 @@ func StringArrayToPrivilegArray(sa []string) []v1alpha1.Privilege {
 	return buffer
 }
 
-func SubtractPrivilegeIntersection(a, b *v1alpha1.GrantObject) int {
+func PrivilegeSymmetricDifference(a, b []v1alpha1.Privilege) ([]v1alpha1.Privilege, []v1alpha1.Privilege) {
 	var aBuffer []v1alpha1.Privilege
 	var bBuffer []v1alpha1.Privilege
-	counter := 0
-
 	privilegeIntersectionMap := map[v1alpha1.Privilege]int{}
 
-	for _, privilege1 := range a.Privileges {
+	for _, privilege1 := range a {
 
-		for _, privilege2 := range b.Privileges {
+		for _, privilege2 := range b {
 
 			if privilege1 == privilege2 {
 				_, contains := privilegeIntersectionMap[privilege1]
@@ -37,37 +34,34 @@ func SubtractPrivilegeIntersection(a, b *v1alpha1.GrantObject) int {
 					privilegeIntersectionMap[privilege1] = 0
 				}
 				privilegeIntersectionMap[privilege1]++
-				counter++
 			}
 		}
 	}
 
-	for _, privilege := range a.Privileges {
+	for _, privilege := range a {
 		_, contains := privilegeIntersectionMap[privilege]
 		if !contains {
 			aBuffer = append(aBuffer, privilege)
 		}
 	}
 
-	a.Privileges = aBuffer
-
-	for _, privilege := range b.Privileges {
+	for _, privilege := range b {
 		_, contains := privilegeIntersectionMap[privilege]
 		if !contains {
 			bBuffer = append(bBuffer, privilege)
 		}
 	}
 
-	b.Privileges = bBuffer
-
-	return counter
+	return aBuffer, bBuffer
 }
 
-func SubtractGrantIntersection(desiredGrants, currentGrants []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, []v1alpha1.GrantObject) {
+// TODO umbenennung
+func GrantSymmetricDifference(a, b []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, []v1alpha1.GrantObject) {
 
 	privilegeMap := getPrivilegeMap()
-	for outerIndex := 0; outerIndex < len(desiredGrants); outerIndex++ {
-		desiredGrant := &desiredGrants[outerIndex]
+
+	for outerIndex := 0; outerIndex < len(a); outerIndex++ {
+		desiredGrant := &a[outerIndex]
 
 		// In case "ALL" is choosen as privilege, replace it with an expanded version
 		for _, privilege := range desiredGrant.Privileges {
@@ -76,91 +70,136 @@ func SubtractGrantIntersection(desiredGrants, currentGrants []v1alpha1.GrantObje
 			}
 		}
 
-		for innerIndex := 0; innerIndex < len(currentGrants); innerIndex++ {
-			currentGrant := &currentGrants[innerIndex]
+		for innerIndex := 0; innerIndex < len(b); innerIndex++ {
+			currentGrant := &b[innerIndex]
 
 			if desiredGrant.Identifier != currentGrant.Identifier {
-				innerIndex++
 				continue
 			}
 
 			if desiredGrant.Type != currentGrant.Type {
-				innerIndex++
 				continue
 			}
 
 			if desiredGrant.Schema != currentGrant.Schema {
-				innerIndex++
 				continue
 			}
 
-			if desiredGrant.Type != "ROLE" {
-				// This function will subtract all intersections between both arrays
-				// of privileges in both grantObjects
-				SubtractPrivilegeIntersection(desiredGrant, currentGrant)
-			}
+			desiredGrant.Privileges, currentGrant.Privileges = PrivilegeSymmetricDifference(
+				desiredGrant.Privileges,
+				currentGrant.Privileges,
+			)
 
 			// In case there are no privileges left in currentGrant: remove it
 			if currentGrant.Privileges == nil {
 
-				currentGrants[innerIndex] = currentGrants[len(currentGrants)-1] // Copy last element to index
-				currentGrants = currentGrants[:len(currentGrants)-1]            // Truncate slice.
+				b[innerIndex] = b[len(b)-1] // Copy last element to index
+				b = b[:len(b)-1]            // Truncate slice.
 				innerIndex--
 			}
 
 			if desiredGrant.Privileges == nil {
 
-				desiredGrants[outerIndex] = desiredGrants[len(desiredGrants)-1] // Copy last element to index
-				desiredGrants = desiredGrants[:len(desiredGrants)-1]            // Truncate slice.
+				a[outerIndex] = a[len(a)-1] // Copy last element to index
+				a = a[:len(a)-1]            // Truncate slice.
 				outerIndex--
+				break
 			}
 
 		}
 	}
-	return desiredGrants, currentGrants
-}
-
-func expandIdentifier(grantObjects []v1alpha1.GrantObject) []v1alpha1.GrantObject {
-
-	var buffer []v1alpha1.GrantObject
-
-	for _, grantObject := range grantObjects {
-
-		expandedIdentifiers := []string{"query"}
-
-		for _, expandedIdentifier := range expandedIdentifiers {
-
-			// check if buffer already contains the current identifier
-			match := funk.IndexOf(buffer, func(b v1alpha1.GrantObject) bool {
-				return b.Identifier == expandedIdentifier && b.Type == grantObject.Type
-			})
-
-			if match != -1 {
-				// combine privileges of existing identifier, with current identifier
-				//combinedPrivileges := append(buffer[match].Privileges, grantObject.Privileges...)
-				//buffer[match].Privileges = funk.UniqString(combinedPrivileges)
-				continue
-			}
-
-			// append new identifier to buffer
-			buffer = append(buffer, v1alpha1.GrantObject{
-				Identifier:      expandedIdentifier,
-				Type:            grantObject.Type,
-				Privileges:      grantObject.Privileges,
-				WithGrantOption: grantObject.WithGrantOption,
-				WithAdminOption: grantObject.WithAdminOption,
-			})
-		}
-
-	}
-
-	return buffer
-
+	return a, b
 }
 
 func getPrivilegeMap() map[string][]v1alpha1.Privilege {
 	return map[string][]v1alpha1.Privilege{
-		"TABLE":  {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
-		"SCHEMA": {"USAGE", "CREATE"},
+		"SCHEMA":   {"USAGE", "CREATE"},
+		"TABLE":    {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
+		"COLUMN":   {"SELECT", "UPDATE", "INSERT", "REFERENCES"},
+		"FUNCTION": {"EXECUTE"},
+		"SEQUENCE": {"USAGE", "SELECT", "UPDATE"},
+	}
+}
+
+func getGrantQuerieMap() map[string]string {
+	return map[string]string{
+		"TABLE": `
+        select
+		'TABLE' as type,
+		table_schema as schema,
+		'' as table,
+        table_name as identifier,
+        array_agg(cast(privilege_type AS text)) as privileges,
+        is_grantable::bool as withGrantOption
+        from information_schema.role_table_grants
+        WHERE grantee=$1
+        GROUP BY identifier, schema, withGrantOption`,
+
+		"SCHEMA": `
+        SELECT
+        type,
+		schema,
+		'' as table,
+        identifier,
+        array_agg(privileges),
+        withGrantOption
+        FROM
+        (SELECT
+        nspname as identifier,
+        'SCHEMA' as type,
+        'public' as schema,
+        (aclexplode(nspacl)).privilege_type as privileges,
+        (aclexplode(nspacl)).is_grantable as withGrantOption,
+        (aclexplode(nspacl)).grantee as grantee
+        FROM pg_catalog.pg_namespace) sub
+        WHERE grantee = (SELECT oid FROM pg_catalog.pg_roles where rolname=$1)
+        GROUP BY identifier, type, schema, withGrantOption`,
+
+		"COLUMN": `
+	    select
+		'COLUMN' as type,
+	    table_schema as schema,
+	    table_name as table,
+		column_name as identifier,
+	    array_agg(cast(privilege_type AS text)) as privileges,
+	    is_grantable::bool as withGrantOption
+		from information_schema.column_privileges
+		where grantee = $1
+		GROUP BY type, schema, table_name, identifier, withGrantOption`,
+
+		"FUNCTION": `
+		select
+        'FUNCTION' as type,
+        routine_schema as schema,
+        '' as table,
+        routine_name as identifier,
+        array_agg(privilege_type) as priviliges,
+        is_grantable::bool as withGrantOption
+        from information_schema.role_routine_grants 
+        WHERE grantee=$1
+        GROUP BY identifier, type, schema, table, withGrantOption`,
+
+		"SEQUENCE": `
+        select
+        'FUNCTION' as type,
+        squence_schema as schema,
+        '' as table_name,
+        squence_name as identifier,
+        array_agg(privilege_type) as priviliges,
+        is_grantable::bool as withGrantOption
+        from information_schema.role_routine_grants 
+        WHERE grantee=$1
+        GROUP BY identifier, type, schema, table_name, withGrantOption`,
+	}
+}
+
+func getRegexQueryByType() map[string]string {
+	return map[string]string{
+		"SCHEMA":   "select nspname from pg_namespace where nspname ~ '$1'",
+		"TABLE":    "select tablename from pg_tables where schemaname ~ '$1' and tablename ~ '$2';",
+		"COLUMN":   "select column_name from information_schema.columns where table_schema ~ '$1' and table_name ~ '$2' and column_name ~ '$3'",
+		"ROLE":     "select rolname from pg_authid where rolname ~ '1$'",
+		"FUNCTION": "select routine_name from  information_schema.routines where routine_schema ~ '$1' and routine_name ~ '$2'",
+		"SEQUENCE": "",
 	}
 }

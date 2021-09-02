@@ -32,6 +32,8 @@ type RoleSpec struct {
 	//+kubebuilder:validation:Optional
 	PasswordRef PasswordRef `json:"passwordRef"`
 	//+kubebuilder:validation:Optional
+	Groups []GroupGrantObject `json:"groups"`
+	//+kubebuilder:validation:Optional
 	Grants []Grant `json:"grants"`
 }
 
@@ -44,22 +46,32 @@ type Grant struct {
 	Database string        `json:"database"`
 	Objects  []GrantObject `json:"objects"`
 }
-
+type GroupGrantObject struct {
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	//+kubebuilder:default:=false
+	WithAdminOption bool `json:"withAdminOption"`
+}
 type GrantObject struct {
-	Identifier string `json:"identifier"`
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=TABLE;SCHEMA;SEQUENCE;FUNCTION
+	Type string `json:"type"`
 
-	//+kubebuilder:default:=public
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=public
 	Schema string `json:"schema"`
 
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=''
+	Table string `json:"table"`
+
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=TABLE;SCHEMA;ROLE;SEQUENCE;FUNCTION
-	Type string `json:"type"`
+	Identifier string `json:"identifier"`
+
 	// +kubebuilder:validation:Optional
 	Privileges []Privilege `json:"privileges"`
 	//+kubebuilder:validation:Optional
 	WithGrantOption bool `json:"withGrantOption"`
-	//+kubebuilder:validation:Optional
-	WithAdminOption bool `json:"withAdminOption"`
 }
 
 // +kubebuilder:validation:Enum=ALL;SELECT;INSERT;UPDATE;DELETE;TRUNCATE;REFERENCES;TRIGGER;USAGE;CREATE;CONNECT;TEMPORARY;TEMP;EXECUTE

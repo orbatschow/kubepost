@@ -70,27 +70,39 @@ spec:
                           schema:
                             default: public
                             type: string
+                          table:
+                            default: ''''''
+                            type: string
                           type:
                             enum:
                             - TABLE
                             - SCHEMA
-                            - ROLE
                             - SEQUENCE
                             - FUNCTION
                             type: string
-                          withAdminOption:
-                            type: boolean
                           withGrantOption:
                             type: boolean
                         required:
                         - identifier
-                        - schema
                         - type
                         type: object
                       type: array
                   required:
                   - database
                   - objects
+                  type: object
+                type: array
+              groups:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    withAdminOption:
+                      default: false
+                      type: boolean
+                  required:
+                  - name
+                  - withAdminOption
                   type: object
                 type: array
               instanceRef:

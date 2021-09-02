@@ -17,10 +17,9 @@ spec:
       objects:
         - identifier: public
           type: SCHEMA
-          schema: public
           privileges: [ALL]
           withGrantOption: true
-        - identifier: pg_stat_statements
+        - identifier: test
           schema: public
           type: TABLE
           privileges: [ALL]

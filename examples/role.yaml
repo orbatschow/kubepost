@@ -13,9 +13,6 @@ spec:
   options:
     - SUPERUSER
     - LOGIN
-  grants:
-    - database: kubepost
-      objects:
-        - identifier: kubepost-admin
-          type: ROLE
-          schema: public
+  groups:
+    - name: kubepost-admin
+      withAdminOption: true
