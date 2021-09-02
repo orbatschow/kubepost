@@ -126,6 +126,17 @@ This role uses the previously mentioned instance CRD to connect to the database 
 name `kubepost`. It then grants this role `ALL PRIVILEGES` on schema `public` in database`kubepost`. The grant section
 is optional.
 
+Completed features:
+- table
+- schema
+- groups
+
+In development:
+- sequences
+- functions
+- columns
+- views
+
 ```yaml
 apiVersion: kubepost.io/v1alpha1
 kind: Role
@@ -142,21 +153,52 @@ spec:
   options:
     - SUPERUSER
     - LOGIN
+
+  # Group section
+  # lists the membership in groups
+  groups:
+    - name: kubepost-admin
+      withAdminOption: true
   grants:
     # This field specifies the database to which kubepost will connect for all following grants.
     - database: kubepost
 
       # This is an array of database-objects and belonging user previliges.
       objects:
-         # the identifiert can be chosen like the corresponding identifier in postgres
-         # for example one table with schema: public.test_table
+        # Schema grant
+          # the identifiert can be chosen like the corresponding identifier in postgres
+          # for example one table with schema: public.test_table
+          # implicitly for finding matching objects the identifier will be used
+          # as a POSIX regex expression
+          # to prevent setting privileges to all objects that contain the identifier
+          # string it will be wrapped like this: ^identifier$ automaticly
         - identifier: public
-          
+
           # possible options: ["TABLE", "SCHEMA", "FUNCTION", "SEQUENCE", "ROLE"]
           # SCHEMA will result in an 'GRANT PREVILIGES TO ALL TABLES IN SCHEMA'
           # every other option will result in GRANT-Querys similar to:
           # https://www.postgresql.org/docs/current/sql-grant.html
           type: SCHEMA
+          
+          # possible options are: 
+          # ["ALL", "INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
+          privileges: ["ALL"]
+          
+          withGrantOption: true
+
+        # Table grant
+        - identifier: test
+          
+          # the default is public
+          # this string can also be used as a POSIX regex expression just like
+          # identifier
+          schema: public
+        
+          # possible options: ["TABLE", "SCHEMA", "FUNCTION", "SEQUENCE", "ROLE"]
+          # SCHEMA will result in an 'GRANT PREVILIGES TO ALL TABLES IN SCHEMA'
+          # every other option will result in GRANT-Querys similar to:
+          # https://www.postgresql.org/docs/current/sql-grant.html
+          type: TABLE
           
           # possible options: ["ALL", "INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
           privileges: ["ALL"]
