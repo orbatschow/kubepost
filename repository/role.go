@@ -479,9 +479,8 @@ func createGrantQuery(roleName string, grantTarget *v1alpha1.GrantObject) (strin
 
 	case "SCHEMA":
 		query = fmt.Sprintf(
-			"GRANT %s ON  SCHEMA %s.%s TO %s",
+			"GRANT %s ON  SCHEMA %s TO %s",
 			getJoinedPrivileges(grantTarget),
-			SanitizeString(grantTarget.Schema),
 			SanitizeString(grantTarget.Identifier),
 			SanitizeString(roleName),
 		)
