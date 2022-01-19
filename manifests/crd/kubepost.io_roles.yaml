@@ -75,10 +75,11 @@ spec:
                             type: string
                           type:
                             enum:
+                            - COLUMN
                             - TABLE
                             - SCHEMA
-                            - SEQUENCE
                             - FUNCTION
+                            - SEQUENCE
                             type: string
                           withGrantOption:
                             type: boolean
