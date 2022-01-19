@@ -313,7 +313,7 @@ func (role *Role) reconcileGrants(instance *Instance, secret *v1.Secret) error {
 
 		// get desired and undesired grants by subtracting the intersections of
 		// current and desired grants
-		desiredGrants, undesiredGrants := repository.GrantSymmetricDifference(
+		desiredGrants, undesiredGrants := repository.GetGrantSymmetricDifference(
 			grantObjects,
 			currentGrants,
 		)
