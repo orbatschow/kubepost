@@ -605,9 +605,8 @@ func createRevokeQuery(roleName string, revokeTarget *v1alpha1.GrantObject) (str
 
 	case "SCHEMA":
 		query = fmt.Sprintf(
-			"REVOKE %s ON SCHEMA %s.%s FROM %s",
+			"REVOKE %s ON SCHEMA %s FROM %s",
 			getJoinedPrivileges(revokeTarget),
-			SanitizeString(revokeTarget.Schema),
 			SanitizeString(revokeTarget.Identifier),
 			SanitizeString(roleName),
 		)
