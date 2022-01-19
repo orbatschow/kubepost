@@ -19,6 +19,30 @@ func StringArrayToPrivilegArray(sa []string) []v1alpha1.Privilege {
 	return buffer
 }
 
+func SubstractPrivilegeConjunction(a, b []v1alpha1.Privilege) []v1alpha1.Privilege {
+	buffer := map[v1alpha1.Privilege]int{}
+	var result []v1alpha1.Privilege
+	var found bool
+
+	for _, privilegeA := range a {
+		found = false
+		for _, privilegeB := range b {
+			if privilegeA == privilegeB {
+				found = true
+				break
+			}
+		}
+		if !found {
+			buffer[privilegeA] = 1
+		}
+	}
+
+	for key, _ := range buffer {
+		result = append(result, key)
+	}
+	return result
+}
+
 func PrivilegeSymmetricDifference(a, b []v1alpha1.Privilege) ([]v1alpha1.Privilege, []v1alpha1.Privilege) {
 	var aBuffer []v1alpha1.Privilege
 	var bBuffer []v1alpha1.Privilege
