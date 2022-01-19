@@ -403,7 +403,6 @@ func (r *roleRepository) GetCurrentGrants(role *v1alpha1.Role) ([]v1alpha1.Grant
 	var currentGrants []v1alpha1.GrantObject
 	var buffer []v1alpha1.GrantObject
 
-	// get table grants
 	buffer, err := r.getGrantsByType(role, "TABLE")
 	currentGrants = append(currentGrants, buffer...)
 
@@ -411,7 +410,6 @@ func (r *roleRepository) GetCurrentGrants(role *v1alpha1.Role) ([]v1alpha1.Grant
 		return nil, err
 	}
 
-	// get schema grants
 	buffer, err = r.getGrantsByType(role, "SCHEMA")
 	currentGrants = append(currentGrants, buffer...)
 
@@ -419,7 +417,28 @@ func (r *roleRepository) GetCurrentGrants(role *v1alpha1.Role) ([]v1alpha1.Grant
 		return nil, err
 	}
 
-	return currentGrants, err
+	buffer, err = r.getGrantsByType(role, "COLUMN")
+	currentGrants = append(currentGrants, buffer...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	buffer, err = r.getGrantsByType(role, "FUNCTION")
+	currentGrants = append(currentGrants, buffer...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	buffer, err = r.getGrantsByType(role, "SEQUENCE")
+	currentGrants = append(currentGrants, buffer...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return currentGrants, nil
 }
 
 func (r *roleRepository) Grant(role *v1alpha1.Role, desiredGrants []v1alpha1.GrantObject) error {
