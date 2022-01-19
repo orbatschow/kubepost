@@ -272,8 +272,18 @@ func (r *roleRepository) GetGroups(role *v1alpha1.Role) ([]v1alpha1.GroupGrantOb
 
 func (r *roleRepository) RegexExpandGrantObjects(grantObjects []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, error) {
 	grantObjectsExpanded := []v1alpha1.GrantObject{}
+	privilegeMap := getPrivilegeMap()
 	var err error
 	var rows pgx.Rows
+
+	// In case "ALL" is choosen as privilege, replace it with an expanded version
+	for index, grant := range grantObjects {
+		for _, privilege := range grant.Privileges {
+			if privilege == "ALL" {
+				grantObjects[index].Privileges = privilegeMap[grant.Type]
+			}
+		}
+	}
 
 	for _, grantObject := range grantObjects {
 		switch grantObject.Type {
@@ -286,7 +296,46 @@ func (r *roleRepository) RegexExpandGrantObjects(grantObjects []v1alpha1.GrantOb
 		case "TABLE":
 			rows, err = r.conn.Query(
 				context.Background(),
-				`select tablename from pg_tables where schemaname ~ $1 and tablename ~ $2`,
+				`select 
+					tablename
+				from pg_tables
+				where schemaname ~ $1
+				and tablename ~ $2`,
+				"^"+grantObject.Schema+"$",
+				"^"+grantObject.Identifier+"$",
+			)
+		case "COLUMN":
+			rows, err = r.conn.Query(
+				context.Background(),
+				`select
+					column_name
+				from information_schema.columns
+				where table_schema ~ $1
+				and table_name ~ $2
+				and column_name ~ $3`,
+				"^"+grantObject.Schema+"$",
+				"^"+grantObject.Table+"$",
+				"^"+grantObject.Identifier+"$",
+			)
+		case "FUNCTION":
+			rows, err = r.conn.Query(
+				context.Background(),
+				`select 
+					routine_name
+				from information_schema.routines 
+				where routine_schema ~ $1 
+				and routine_name ~ $2`,
+				"^"+grantObject.Schema+"$",
+				"^"+grantObject.Identifier+"$",
+			)
+		case "SEQUENCE":
+			rows, err = r.conn.Query(
+				context.Background(),
+				`select 
+					sequence_name
+				from information_schema.sequences 
+				where sequence_schema ~ $1 
+				and sequence_name ~ $2`,
 				"^"+grantObject.Schema+"$",
 				"^"+grantObject.Identifier+"$",
 			)
