@@ -46,86 +46,95 @@ func SubstractPrivilegeConjunction(a, b []v1alpha1.Privilege) []v1alpha1.Privile
 func PrivilegeSymmetricDifference(a, b []v1alpha1.Privilege) ([]v1alpha1.Privilege, []v1alpha1.Privilege) {
 	var aBuffer []v1alpha1.Privilege
 	var bBuffer []v1alpha1.Privilege
-	privilegeIntersectionMap := map[v1alpha1.Privilege]int{}
 
-	for _, privilege1 := range a {
-
-		for _, privilege2 := range b {
-
-			if privilege1 == privilege2 {
-				_, contains := privilegeIntersectionMap[privilege1]
-				if !contains {
-					privilegeIntersectionMap[privilege1] = 0
-				}
-				privilegeIntersectionMap[privilege1]++
-			}
-		}
-	}
-
-	for _, privilege := range a {
-		_, contains := privilegeIntersectionMap[privilege]
-		if !contains {
-			aBuffer = append(aBuffer, privilege)
-		}
-	}
-
-	for _, privilege := range b {
-		_, contains := privilegeIntersectionMap[privilege]
-		if !contains {
-			bBuffer = append(bBuffer, privilege)
-		}
-	}
+	aBuffer = SubstractPrivilegeConjunction(a, b)
+	bBuffer = SubstractPrivilegeConjunction(b, a)
 
 	return aBuffer, bBuffer
 }
 
-// TODO umbenennung
-func GrantSymmetricDifference(a, b []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, []v1alpha1.GrantObject) {
+func GrantObjectGotSameTarget(a, b *v1alpha1.GrantObject) bool {
+	if a.Type != b.Type {
+		return false
+	}
+	if a.Schema != b.Schema {
+		return false
+	}
+	if a.Type == "COLUMN" && a.Table != b.Table {
+		return false
+	}
+	if a.Identifier != b.Identifier {
+		return false
+	}
+	if a.WithGrantOption != b.WithGrantOption {
+		return false
+	}
+	return true
+}
 
-	privilegeMap := getPrivilegeMap()
-
-	for outerIndex := 0; outerIndex < len(a); outerIndex++ {
-		desiredGrant := &a[outerIndex]
-
-		// In case "ALL" is choosen as privilege, replace it with an expanded version
-		for _, privilege := range desiredGrant.Privileges {
-			if privilege == "ALL" {
-				desiredGrant.Privileges = privilegeMap[desiredGrant.Type]
-			}
+func GrantObjectIncludesTarget(a, b *v1alpha1.GrantObject) bool {
+	if a.Type == "COLUMN" && b.Type == "TABLE" {
+		if a.Schema != b.Schema {
+			return false
 		}
+		if a.Table != b.Identifier {
+			return false
+		}
+		if a.WithGrantOption != b.WithGrantOption {
+			return false
+		}
+		return true
+	}
+	return false
+}
+func RemoveElementFromSlice(a []v1alpha1.GrantObject, index int) {
 
-		for innerIndex := 0; innerIndex < len(b); innerIndex++ {
-			currentGrant := &b[innerIndex]
+}
 
-			if desiredGrant.Identifier != currentGrant.Identifier {
-				continue
+// TODO umbenennung
+func GetGrantSymmetricDifference(a, b []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, []v1alpha1.GrantObject) {
+
+	for outerIndex := 0; outerIndex < len(b); outerIndex++ {
+		currentGrant := &b[outerIndex]
+
+		for innerIndex := 0; innerIndex < len(a); innerIndex++ {
+			desiredGrant := &a[innerIndex]
+
+			if GrantObjectGotSameTarget(desiredGrant, currentGrant) {
+				var aBuffer []v1alpha1.Privilege
+				var bBuffer []v1alpha1.Privilege
+
+				aBuffer = SubstractPrivilegeConjunction(
+					desiredGrant.Privileges,
+					currentGrant.Privileges,
+				)
+
+				bBuffer = SubstractPrivilegeConjunction(
+					currentGrant.Privileges,
+					desiredGrant.Privileges,
+				)
+
+				desiredGrant.Privileges = aBuffer
+				currentGrant.Privileges = bBuffer
 			}
 
-			if desiredGrant.Type != currentGrant.Type {
-				continue
+			if GrantObjectIncludesTarget(desiredGrant, currentGrant) {
+				desiredGrant.Privileges = SubstractPrivilegeConjunction(
+					desiredGrant.Privileges,
+					currentGrant.Privileges,
+				)
 			}
-
-			if desiredGrant.Schema != currentGrant.Schema {
-				continue
-			}
-
-			desiredGrant.Privileges, currentGrant.Privileges = PrivilegeSymmetricDifference(
-				desiredGrant.Privileges,
-				currentGrant.Privileges,
-			)
 
 			// In case there are no privileges left in currentGrant: remove it
-			if currentGrant.Privileges == nil {
-
-				b[innerIndex] = b[len(b)-1] // Copy last element to index
-				b = b[:len(b)-1]            // Truncate slice.
+			if len(desiredGrant.Privileges) == 0 {
+				a[innerIndex] = a[len(a)-1] // Copy last element to index
+				a = a[:len(a)-1]            // Truncate slice.
 				innerIndex--
 			}
 
-			if desiredGrant.Privileges == nil {
-
-				a[outerIndex] = a[len(a)-1] // Copy last element to index
-				a = a[:len(a)-1]            // Truncate slice.
+			if len(currentGrant.Privileges) == 0 {
+				b[outerIndex] = b[len(b)-1] // Copy last element to index
+				b = b[:len(b)-1]            // Truncate slice.
 				outerIndex--
 				break
 			}
