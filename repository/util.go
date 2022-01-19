@@ -189,40 +189,75 @@ func getGrantQuerieMap() map[string]string {
         GROUP BY identifier, type, schema, withGrantOption`,
 
 		"COLUMN": `
-	    select
-		'COLUMN' as type,
-	    table_schema as schema,
-	    table_name as table,
-		column_name as identifier,
-	    array_agg(cast(privilege_type AS text)) as privileges,
-	    is_grantable::bool as withGrantOption
-		from information_schema.column_privileges
-		where grantee = $1
-		GROUP BY type, schema, table_name, identifier, withGrantOption`,
+	    Select 
+			t1.type,
+			t1.schema,
+			t1.table,
+			t1.identifier,
+			array_agg(t1.privileges),
+			t1.withgrantoption
+			from
+		(select
+		        'COLUMN' as type,
+		        table_schema as schema,
+		        table_name as table,
+		        column_name as identifier,
+		        cast(privilege_type AS text) as privileges,
+		        is_grantable::bool as withGrantOption
+		        from information_schema.column_privileges
+		        where grantee=$1
+		except
+		select
+		        'COLUMN' as type,
+		        t.table_schema as schema,
+		        t.table_name as table,
+		        c.column_name as identifier,
+		        cast(t.privilege_type AS text) as privileges,
+		        t.is_grantable::bool as withGrantOption
+		        from information_schema.role_table_grants t
+		        LEFT JOIN information_schema.columns c
+		        on (t.table_name = c.table_name
+		        AND t.table_schema = c.table_schema)
+		        WHERE grantee=$1)
+		as t1
+		group by t1.type, t1.schema, t1.table, t1.identifier, t1.withgrantoption`,
 
 		"FUNCTION": `
 		select
         'FUNCTION' as type,
         routine_schema as schema,
-        '' as table,
-        routine_name as identifier,
-        array_agg(privilege_type) as priviliges,
-        is_grantable::bool as withGrantOption
-        from information_schema.role_routine_grants 
-        WHERE grantee=$1
-        GROUP BY identifier, type, schema, table, withGrantOption`,
-
-		"SEQUENCE": `
-        select
-        'FUNCTION' as type,
-        squence_schema as schema,
         '' as table_name,
-        squence_name as identifier,
-        array_agg(privilege_type) as priviliges,
+        routine_name as identifier,
+		array_agg('EXECUTE'::varchar) as priviliges,
         is_grantable::bool as withGrantOption
         from information_schema.role_routine_grants 
         WHERE grantee=$1
         GROUP BY identifier, type, schema, table_name, withGrantOption`,
+
+		"SEQUENCE": `
+        select
+			sq.type,
+			sq.schema,
+			'' as table_name,
+			sq.identifier,
+			array_agg(sq.priviliges) as priviliges,
+			sq.withGrantOption
+		from (
+			select
+			    'SEQUENCE' as type,
+			    nspname as schema,
+			    relname as identifier,
+			    (aclexplode(relacl)).privilege_type as priviliges,
+			    (aclexplode(relacl)).is_grantable as withGrantOption,
+			    (aclexplode(relacl)).grantee as grantee
+			from pg_class cl
+			join pg_namespace nsp on (cl.relnamespace = nsp.oid)
+			join pg_sequence sq on (cl.oid = sq.seqrelid)
+			where relkind='S'
+		) as sq
+		join pg_authid au on (sq.grantee = au.oid)
+		where rolname=$1
+		GROUP BY identifier, type, schema, table_name, withGrantOption`,
 	}
 }
 
