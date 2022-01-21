@@ -43,16 +43,6 @@ func SubstractPrivilegeConjunction(a, b []v1alpha1.Privilege) []v1alpha1.Privile
 	return result
 }
 
-func PrivilegeSymmetricDifference(a, b []v1alpha1.Privilege) ([]v1alpha1.Privilege, []v1alpha1.Privilege) {
-	var aBuffer []v1alpha1.Privilege
-	var bBuffer []v1alpha1.Privilege
-
-	aBuffer = SubstractPrivilegeConjunction(a, b)
-	bBuffer = SubstractPrivilegeConjunction(b, a)
-
-	return aBuffer, bBuffer
-}
-
 func GrantObjectGotSameTarget(a, b *v1alpha1.GrantObject) bool {
 	if a.Type != b.Type {
 		return false
@@ -87,11 +77,7 @@ func GrantObjectIncludesTarget(a, b *v1alpha1.GrantObject) bool {
 	}
 	return false
 }
-func RemoveElementFromSlice(a []v1alpha1.GrantObject, index int) {
 
-}
-
-// TODO umbenennung
 func GetGrantSymmetricDifference(a, b []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, []v1alpha1.GrantObject) {
 
 	for outerIndex := 0; outerIndex < len(b); outerIndex++ {
@@ -258,16 +244,5 @@ func getGrantQuerieMap() map[string]string {
 		join pg_authid au on (sq.grantee = au.oid)
 		where rolname=$1
 		GROUP BY identifier, type, schema, table_name, withGrantOption`,
-	}
-}
-
-func getRegexQueryByType() map[string]string {
-	return map[string]string{
-		"SCHEMA":   "select nspname from pg_namespace where nspname ~ '$1'",
-		"TABLE":    "select tablename from pg_tables where schemaname ~ '$1' and tablename ~ '$2';",
-		"COLUMN":   "select column_name from information_schema.columns where table_schema ~ '$1' and table_name ~ '$2' and column_name ~ '$3'",
-		"ROLE":     "select rolname from pg_authid where rolname ~ '1$'",
-		"FUNCTION": "select routine_name from  information_schema.routines where routine_schema ~ '$1' and routine_name ~ '$2'",
-		"SEQUENCE": "",
 	}
 }
