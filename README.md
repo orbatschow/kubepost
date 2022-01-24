@@ -179,27 +179,30 @@ spec:
           type: SCHEMA
           
           # possible options are: 
-          # ["ALL", "INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
-          privileges: ["ALL"]
+          # possible options: ["ALL", "INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
+          privileges:
+            - ALL
           
+          # this option can be set if the user should be able to grant this privilige himself
           withGrantOption: true
 
         # Table grant
         - identifier: test
-          
-          # the default is public
-          # this string can also be used as a POSIX regex expression just like
-          # identifier
           schema: public
-        
-          # possible options: ["VIEW", ""TABLE", "SCHEMA", "FUNCTION", "SEQUENCE", "ROLE"]
-          # SCHEMA will result in an 'GRANT PREVILIGES TO ALL TABLES IN SCHEMA'
-          # every other option will result in GRANT-Querys similar to:
-          # https://www.postgresql.org/docs/current/sql-grant.html
           type: TABLE
-          
-          # possible options: ["ALL", "INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
-          privileges: ["ALL"]
-          
+          privileges: 
+            - ALL
+          withGrantOption: true
+        
+        # Coloumn grant
+        - identifier: test
+
+          # here you can set the table name to the column
+          # these work with regex aswell
+          table: test
+          schema: public
+          type: TABLE
+          privileges:
+            - ALL
           withGrantOption: true
 ```
