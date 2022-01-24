@@ -293,6 +293,17 @@ func (r *roleRepository) RegexExpandGrantObjects(grantObjects []v1alpha1.GrantOb
 				`select nspname from pg_namespace where nspname ~ $1`,
 				"^"+grantObject.Identifier+"$",
 			)
+		case "VIEW":
+			rows, err = r.conn.Query(
+				context.Background(),
+				`select 
+					viewname
+				from pg_views
+				where schemaname ~ $1
+				and viewname ~ $2`,
+				"^"+grantObject.Schema+"$",
+				"^"+grantObject.Identifier+"$",
+			)
 		case "TABLE":
 			rows, err = r.conn.Query(
 				context.Background(),
@@ -355,6 +366,11 @@ func (r *roleRepository) RegexExpandGrantObjects(grantObjects []v1alpha1.GrantOb
 
 		for _, entry := range entries {
 			grantObject.Identifier = entry
+
+			if grantObject.Type == "VIEW" {
+				grantObject.Type = "TABLE"
+			}
+
 			grantObjectsExpanded = append(grantObjectsExpanded, grantObject)
 		}
 	}
@@ -538,7 +554,7 @@ func createGrantQuery(roleName string, grantTarget *v1alpha1.GrantObject) (strin
 		)
 	case "TABLE":
 		query = fmt.Sprintf(
-			"GRANT %s ON TABLE %s.%s TO %s",
+			"GRANT %s ON %s.%s TO %s",
 			getJoinedPrivileges(grantTarget),
 			SanitizeString(grantTarget.Schema),
 			SanitizeString(grantTarget.Identifier),
@@ -596,7 +612,7 @@ func createRevokeQuery(roleName string, revokeTarget *v1alpha1.GrantObject) (str
 		)
 	case "TABLE":
 		query = fmt.Sprintf(
-			"REVOKE %s ON TABLE %s.%s FROM %s",
+			"REVOKE %s ON %s.%s FROM %s",
 			getJoinedPrivileges(revokeTarget),
 			SanitizeString(revokeTarget.Schema),
 			SanitizeString(revokeTarget.Identifier),

@@ -54,7 +54,7 @@ type GroupGrantObject struct {
 }
 type GrantObject struct {
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=COLUMN;TABLE;SCHEMA;FUNCTION;SEQUENCE
+	// +kubebuilder:validation:Enum=VIEW;COLUMN;TABLE;SCHEMA;FUNCTION;SEQUENCE
 	Type string `json:"type"`
 
 	// +kubebuilder:validation:Optional

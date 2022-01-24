@@ -75,6 +75,7 @@ spec:
                             type: string
                           type:
                             enum:
+                            - VIEW
                             - COLUMN
                             - TABLE
                             - SCHEMA

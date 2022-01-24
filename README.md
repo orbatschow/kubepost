@@ -130,8 +130,6 @@ Completed features:
 - table
 - schema
 - groups
-
-In development:
 - sequences
 - functions
 - columns

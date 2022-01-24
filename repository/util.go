@@ -134,6 +134,7 @@ func getPrivilegeMap() map[string][]v1alpha1.Privilege {
 	return map[string][]v1alpha1.Privilege{
 		"SCHEMA":   {"USAGE", "CREATE"},
 		"TABLE":    {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
+		"VIEW":     {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
 		"COLUMN":   {"SELECT", "UPDATE", "INSERT", "REFERENCES"},
 		"FUNCTION": {"EXECUTE"},
 		"SEQUENCE": {"USAGE", "SELECT", "UPDATE"},
