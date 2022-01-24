@@ -192,7 +192,7 @@ spec:
           # identifier
           schema: public
         
-          # possible options: ["TABLE", "SCHEMA", "FUNCTION", "SEQUENCE", "ROLE"]
+          # possible options: ["VIEW", ""TABLE", "SCHEMA", "FUNCTION", "SEQUENCE", "ROLE"]
           # SCHEMA will result in an 'GRANT PREVILIGES TO ALL TABLES IN SCHEMA'
           # every other option will result in GRANT-Querys similar to:
           # https://www.postgresql.org/docs/current/sql-grant.html
