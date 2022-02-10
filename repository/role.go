@@ -166,6 +166,36 @@ func (r *roleRepository) RemoveGroup(role *v1alpha1.Role, group *v1alpha1.GroupG
 	return nil
 }
 
+func (r *roleRepository) GetGroupGrantObjectSymmetricDifference(desiredGroups, currentGroups []v1alpha1.GroupGrantObject) ([]v1alpha1.GroupGrantObject, []v1alpha1.GroupGrantObject) {
+	for outerIndex := 0; outerIndex < len(desiredGroups); outerIndex++ {
+		desiredGroup := &desiredGroups[outerIndex]
+
+		for innerIndex := 0; innerIndex < len(currentGroups); innerIndex++ {
+			currentGroup := &currentGroups[innerIndex]
+
+			if desiredGroup.Name != currentGroup.Name {
+				continue
+			}
+
+			if desiredGroup.WithAdminOption != currentGroup.WithAdminOption {
+				continue
+			}
+
+			currentGroups[innerIndex] = currentGroups[len(currentGroups)-1] // Copy last element to index
+			currentGroups = currentGroups[:len(currentGroups)-1]            // Truncate slice.
+			innerIndex--
+
+			desiredGroups[outerIndex] = desiredGroups[len(desiredGroups)-1] // Copy last element to index
+			desiredGroups = desiredGroups[:len(desiredGroups)-1]            // Truncate slice.
+			outerIndex--
+
+			break
+		}
+	}
+
+	return desiredGroups, currentGroups
+}
+
 func (r *roleRepository) SetPassword(name string, password string) error {
 
 	_, err := r.conn.Exec(
@@ -595,6 +625,7 @@ func createGrantQuery(roleName string, grantTarget *v1alpha1.GrantObject) (strin
 	if strings.ToUpper(grantTarget.Type) != "ROLE" && grantTarget.WithGrantOption {
 		query += " WITH GRANT OPTION"
 	}
+	log.Info(query)
 	return query, nil
 }
 
@@ -649,5 +680,6 @@ func createRevokeQuery(roleName string, revokeTarget *v1alpha1.GrantObject) (str
 		return "", fmt.Errorf("revoke type %s unknown", revokeTarget.Type)
 	}
 
+	log.Info(query)
 	return query, nil
 }

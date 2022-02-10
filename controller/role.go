@@ -224,31 +224,10 @@ func (role *Role) reconcileGroups(instance *Instance, secret *v1.Secret) error {
 
 	desiredGroups := role.Spec.Groups
 
-	for outerIndex := 0; outerIndex < len(desiredGroups); outerIndex++ {
-		desiredGroup := &desiredGroups[outerIndex]
-
-		for innerIndex := 0; innerIndex < len(currentGroups); innerIndex++ {
-			currentGroup := &currentGroups[innerIndex]
-
-			if desiredGroup.Name != currentGroup.Name {
-				continue
-			}
-
-			if desiredGroup.WithAdminOption != currentGroup.WithAdminOption {
-				continue
-			}
-
-			currentGroups[innerIndex] = currentGroups[len(currentGroups)-1] // Copy last element to index
-			currentGroups = currentGroups[:len(currentGroups)-1]            // Truncate slice.
-			innerIndex--
-
-			desiredGroups[outerIndex] = desiredGroups[len(desiredGroups)-1] // Copy last element to index
-			desiredGroups = desiredGroups[:len(desiredGroups)-1]            // Truncate slice.
-			outerIndex--
-
-			break
-		}
-	}
+	desiredGroups, currentGroups = roleRepository.GetGroupGrantObjectSymmetricDifference(
+		desiredGroups,
+		currentGroups,
+	)
 
 	for _, undesiredGroup := range currentGroups {
 		err := roleRepository.RemoveGroup((*v1alpha1.Role)(role), &undesiredGroup)
