@@ -62,6 +62,9 @@ func GrantObjectGotSameTarget(a, b *v1alpha1.GrantObject) bool {
 	return true
 }
 
+// In case the GrantObjects a and b don't have the same target, there is still
+// the possibility for b (table) including a (columns). This function checks for
+// this case.
 func GrantObjectIncludesTarget(a, b *v1alpha1.GrantObject) bool {
 	if a.Type == "COLUMN" && b.Type == "TABLE" {
 		if a.Schema != b.Schema {
