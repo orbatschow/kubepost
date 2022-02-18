@@ -13,10 +13,6 @@ spec:
   options:
     - SUPERUSER
     - LOGIN
-  grants:
-    - database: kubepost
-      objects:
-        - identifier: public
-          type: SCHEMA
-          privileges: [ "ALL" ]
-          withGrantOption: true
+  groups:
+    - name: kubepost-admin
+      withAdminOption: true

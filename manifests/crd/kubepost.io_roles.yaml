@@ -50,23 +50,61 @@ spec:
                             type: string
                           privileges:
                             items:
+                              enum:
+                              - ALL
+                              - SELECT
+                              - INSERT
+                              - UPDATE
+                              - DELETE
+                              - TRUNCATE
+                              - REFERENCES
+                              - TRIGGER
+                              - USAGE
+                              - CREATE
+                              - CONNECT
+                              - TEMPORARY
+                              - TEMP
+                              - EXECUTE
                               type: string
                             type: array
-                          type:
+                          schema:
+                            default: public
                             type: string
-                          withAdminOption:
-                            type: boolean
+                          table:
+                            default: ''''''
+                            type: string
+                          type:
+                            enum:
+                            - VIEW
+                            - COLUMN
+                            - TABLE
+                            - SCHEMA
+                            - FUNCTION
+                            - SEQUENCE
+                            type: string
                           withGrantOption:
                             type: boolean
                         required:
                         - identifier
-                        - privileges
                         - type
                         type: object
                       type: array
                   required:
                   - database
                   - objects
+                  type: object
+                type: array
+              groups:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    withAdminOption:
+                      default: false
+                      type: boolean
+                  required:
+                  - name
+                  - withAdminOption
                   type: object
                 type: array
               instanceRef:
