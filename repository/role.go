@@ -289,39 +289,39 @@ func createGrantQuery(roleName string, grantTarget *v1alpha1.GrantObject) (strin
         query = fmt.Sprintf(
             "GRANT %s ON TABLE %s TO %s",
             strings.Join(grantTarget.Privileges, ","),
-            grantTarget.Identifier,
-            roleName,
+            SanitizeString(grantTarget.Identifier),
+            SanitizeString(roleName),
         )
 
     case "SCHEMA":
         query = fmt.Sprintf(
             "GRANT %s ON ALL TABLES IN SCHEMA %s TO %s",
             strings.Join(grantTarget.Privileges, ","),
-            grantTarget.Identifier,
-            roleName,
+            SanitizeString(grantTarget.Identifier),
+            SanitizeString(roleName),
         )
 
     case "FUNCTION":
         query = fmt.Sprintf(
             "GRANT %s ON FUNCTION %s TO %s",
             strings.Join(grantTarget.Privileges, ","),
-            grantTarget.Identifier,
-            roleName,
+            SanitizeString(grantTarget.Identifier),
+            SanitizeString(roleName),
         )
 
     case "SEQUENCE":
         query = fmt.Sprintf(
             "GRANT %s ON SEQUENCE %s TO %s",
             strings.Join(grantTarget.Privileges, ","),
-            grantTarget.Identifier,
-            roleName,
+            SanitizeString(grantTarget.Identifier),
+            SanitizeString(roleName),
         )
 
     case "ROLE":
         query = fmt.Sprintf(
             "GRANT %s TO %s",
-            grantTarget.Identifier,
-            roleName,
+            SanitizeString(grantTarget.Identifier),
+            SanitizeString(roleName),
         )
         if grantTarget.WithAdminOption {
             query = " WITH ADMIN OPTION"
