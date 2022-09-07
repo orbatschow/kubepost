@@ -5,19 +5,15 @@ on:
 
 jobs:
   pre-check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
 
-      # neccessary step, because ubuntu-20.04 has only glibc 2.31 installed
-      - name: install golang and glibc >= 2.32
+      - name: install golang
         run: |
           sudo apt update
           sudo apt install -y golang
-          echo "deb http://archive.ubuntu.com/ubuntu/ impish main" | sudo tee -a /etc/apt/sources.list
-          sudo apt update
-          sudo apt install libc6 -y
 
       - name: run checksum.sh
         run: scripts/checksum.sh
