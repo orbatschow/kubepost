@@ -1,0 +1,28 @@
+name: pre-check
+
+on:
+  push:
+
+jobs:
+  pre-check:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install golang
+        run: |
+          sudo apt update
+          sudo apt install -y golang
+
+      - name: run checksum.sh
+        run: scripts/checksum.sh
+        shell: bash
+
+      - name: start build workflow
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: orbatschow/kubepost
+          event-type: pre-check-successful
+          client-payload: '{"ref": "${{ github.ref }}"}'
