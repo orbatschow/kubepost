@@ -31,13 +31,4 @@ resources:
   kind: Database
   path: github.com/orbatschow/kubepost/api/v1alpha1
   version: v1alpha1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: kubepost.io
-  group: postgres
-  kind: Extension
-  path: github.com/orbatschow/kubepost/api/v1alpha1
-  version: v1alpha1
 version: "3"
