@@ -1,44 +1,32 @@
 apiVersion: postgres.kubepost.io/v1alpha1
 kind: Role
 metadata:
-  labels:
-  name: kubepost-group
-spec:
-  preventDeletion: false
-  cascadeDelete: false
-  postgresSelector:
-    matchLabels:
-      name: kubepost
-  options:
-    - SUPERUSER
-    - LOGIN
-  groups:
-    - name: kubepost-admin
-      withAdminOption: true
----
-apiVersion: postgres.kubepost.io/v1alpha1
-kind: Role
-metadata:
   name: kubepost
+  namespace: default
 spec:
-  preventDeletion: false
-  passwordKeyRef:
-    name: sample-role-credentials
-    key: password
-  postgresSelector:
+  instanceSelector:
     matchLabels:
-      name: kubepost
-  options:
-    - SUPERUSER
+      instance: kubepost
+  instanceNamespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: default
+  cascadeDelete: false
   grants:
     - database: kubepost
       objects:
         - identifier: public
+          privileges:
+            - ALL
+          schema: public
           type: SCHEMA
-          privileges: [ ALL ]
           withGrantOption: true
         - identifier: test
+          privileges:
+            - ALL
           schema: public
+          table: example
           type: TABLE
-          privileges: [ ALL ]
           withGrantOption: true
+  options:
+    - SUPERUSER
+  preventDeletion: false

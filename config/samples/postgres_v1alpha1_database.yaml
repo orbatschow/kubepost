@@ -1,12 +1,16 @@
 apiVersion: postgres.kubepost.io/v1alpha1
 kind: Database
 metadata:
-  labels:
-    app.kubernetes.io/name: database
-    app.kubernetes.io/instance: database-sample
-    app.kubernetes.io/part-of: kubepost
-    app.kuberentes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: kubepost
-  name: database-sample
+  name: kubepost
 spec:
-  # TODO(user): Add fields here
+  instanceSelector:
+    matchLabels:
+      instance: kubepost
+  instanceNamespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: default
+  owner: kubepost
+  extensions:
+    - name: pg_stat_statements
+      version: "1.7"
+    - name: postgres_fdw
