@@ -1,7 +1,7 @@
 apiVersion: postgres.kubepost.io/v1alpha1
 kind: Database
 metadata:
-  name: nils
+  name: kubepost
 spec:
   instanceSelector:
     matchLabels:

@@ -31,8 +31,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	_ "github.com/orbatschow/kubepost/logger"
-
 	postgresv1alpha1 "github.com/orbatschow/kubepost/api/v1alpha1"
 	"github.com/orbatschow/kubepost/controllers"
 	//+kubebuilder:scaffold:imports
