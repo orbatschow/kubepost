@@ -1,208 +1,94 @@
-**This is alpha software, use it on your own risk!**
+# kubepost
+// TODO(user): Add simple overview of use/purpose
 
-# kubepost Operator
+## Description
+// TODO(user): An in-depth paragraph about your project and overview of use
 
-The kubepost Operator manages various Postgres objects via standard Kubernetes CRDs. It requires
-[Metacontroller](https://github.com/metacontroller/metacontroller) to be installed within the cluster.
+## Getting Started
+You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
+**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 
-## Features
+### Running on the cluster
+1. Install Instances of Custom Resources:
 
-- Role lifecycle management
-- Database lifecycle management
-- Database extension lifecycle management
-- Permission lifecycle management
-
-## PostgreSQL
-
-At the moment only Postgres 13 is supported, backwards compatibility might be added at a later stage.
-
-## Installation
-
-### Metacontroller
-
-kubepost uses Metacontroller under the hood, so this component hast to be installed within the cluster. You can view
-detailed instructions for the installation
-process [here](https://metacontroller.github.io/metacontroller/guide/install.html).
-
-Create a new kustomization file with the following content:
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: metacontroller
-
-resources:
-  - github.com/metacontroller/metacontroller/manifests//production
+```sh
+kubectl apply -f config/samples/
 ```
 
-And apply it to the desired cluster:
+2. Build and push your image to the location specified by `IMG`:
+	
+```sh
+make docker-build docker-push IMG=<some-registry>/kubepost:tag
+```
+	
+3. Deploy the controller to the cluster with the image specified by `IMG`:
 
-```shell
-kustomize build . | kubectl apply -f -
+```sh
+make deploy IMG=<some-registry>/kubepost:tag
 ```
 
-### kubepost
+### Uninstall CRDs
+To delete the CRDs from the cluster:
 
-After you have installed metacontroller you have to deploy kubepost. Create a new kustomization file with the following
-content:
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: metacontroller
-
-resources:
-  - github.com/orbatschow/kubepost//manifests
+```sh
+make uninstall
 ```
 
-And apply it to the desired cluster:
+### Undeploy controller
+UnDeploy the controller to the cluster:
 
-```shell
-kustomize build . | kubectl apply -f -
+```sh
+make undeploy
 ```
 
-## Usage
+## Contributing
+// TODO(user): Add detailed information on how you would like others to contribute to this project
 
-### Instance
+### How it works
+This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
 
-The instance is used by other CRDs to connect to the desired database instance. It allows a clear segregation between
-roles, databases and the instance itself. To connect to the databse it uses a secret that should be available within the
-Kubernetes cluster.
+It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) 
+which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster 
 
-```yaml
-apiVersion: kubepost.io/v1alpha1
-kind: Instance
-metadata:
-  name: kubepost # this is the instanceRef, used by other CRDs
-spec:
-  host: localhost
-  port: 5432
-  database: postgres
-  secretRef:
-    name: kubepost-instance-credentials
-    userKey: username
-    passwordKey: password
+### Test It Out
+1. Install the CRDs into the cluster:
+
+```sh
+make install
 ```
 
-The corresponding secret might look like this:
+2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
 
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: kubepost-instance-credentials
-data:
-  username: cG9zdGdyZXM=
-  password: cm9vdA==
-
+```sh
+make run
 ```
 
-### Database
+**NOTE:** You can also run this in one step by running: `make install run`
 
-This database uses the previously mentioned instance CRD to connect to the database instance and creates a database with
-the name `kubepost`. After the database is created the extension `pg_stat_statements` will be installed.
+### Modifying the API definitions
+If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
 
-```yaml
-apiVersion: kubepost.io/v1alpha1
-kind: Database
-metadata:
-  name: kubepost
-spec:
-  databaseName: kubepost
-  databaseOwner: kubepost
-  preventDeletion: false
-  instanceRef:
-    name: kubepost
-  extensions:
-    - name: pg_stat_statements
-      version: "1.8"
-      # if no version is specified, latest will be used
-    - name: postgres_fdw
+```sh
+make manifests
 ```
 
-### Role
+**NOTE:** Run `make --help` for more information on all potential `make` targets
 
-This role uses the previously mentioned instance CRD to connect to the database instance and creates a role with the
-name `kubepost`. It then grants this role `ALL PRIVILEGES` on schema `public` in database`kubepost`. The grant section
-is optional.
+More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
-Completed features:
-- table
-- schema
-- groups
-- sequences
-- functions
-- columns
-- views
+## License
 
-```yaml
-apiVersion: kubepost.io/v1alpha1
-kind: Role
-metadata:
-  name: kubepost
-spec:
-  roleName: kubepost
-  preventDeletion: false
-  passwordRef:
-    name: kubepost-role-credentials
-    passwordKey: password
-  instanceRef:
-    name: kubepost
-  options:
-    - SUPERUSER
-    - LOGIN
+Copyright 2022.
 
-  # Group section
-  # lists the membership in groups
-  groups:
-    - name: kubepost-admin
-      withAdminOption: true
-  grants:
-    # This field specifies the database to which kubepost will connect for all following grants.
-    - database: kubepost
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-      # This is an array of database-objects and belonging user previliges.
-      objects:
-        # Schema grant
-          # the identifiert can be chosen like the corresponding identifier in postgres
-          # for example one table with schema: public.test_table
-          # implicitly for finding matching objects the identifier will be used
-          # as a POSIX regex expression
-          # to prevent setting privileges to all objects that contain the identifier
-          # string it will be wrapped like this: ^identifier$ automaticly
-        - identifier: public
+    http://www.apache.org/licenses/LICENSE-2.0
 
-          # possible options: ["TABLE", "SCHEMA", "FUNCTION", "SEQUENCE", "ROLE"]
-          # SCHEMA will result in an 'GRANT PREVILIGES TO ALL TABLES IN SCHEMA'
-          # every other option will result in GRANT-Querys similar to:
-          # https://www.postgresql.org/docs/current/sql-grant.html
-          type: SCHEMA
-          
-          # possible options are: 
-          # possible options: ["ALL", "INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
-          privileges:
-            - ALL
-          
-          # this option can be set if the user should be able to grant this privilige himself
-          withGrantOption: true
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
-        # Table grant
-        - identifier: test
-          schema: public
-          type: TABLE
-          privileges: 
-            - ALL
-          withGrantOption: true
-        
-        # Coloumn grant
-        - identifier: test
-
-          # here you can set the table name to the column
-          # these work with regex aswell
-          table: test
-          schema: public
-          type: TABLE
-          privileges:
-            - ALL
-          withGrantOption: true
-```

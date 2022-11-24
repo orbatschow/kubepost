@@ -1,0 +1,12 @@
+apiVersion: postgres.kubepost.io/v1alpha1
+kind: Instance
+metadata:
+  labels:
+    app.kubernetes.io/name: instance
+    app.kubernetes.io/instance: instance-sample
+    app.kubernetes.io/part-of: kubepost
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: kubepost
+  name: instance-sample
+spec:
+  # TODO(user): Add fields here

@@ -1,0 +1,9 @@
+namespace: kubepost-system
+
+namePrefix: kubepost-
+
+bases:
+- ../crd
+- ../rbac
+- ../manager
+

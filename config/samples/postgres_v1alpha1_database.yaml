@@ -1,0 +1,12 @@
+apiVersion: postgres.kubepost.io/v1alpha1
+kind: Database
+metadata:
+  labels:
+    app.kubernetes.io/name: database
+    app.kubernetes.io/instance: database-sample
+    app.kubernetes.io/part-of: kubepost
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: kubepost
+  name: database-sample
+spec:
+  # TODO(user): Add fields here

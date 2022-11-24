@@ -1,15 +1,16 @@
-apiVersion: kubepost.io/v1alpha1
+apiVersion: postgres.kubepost.io/v1alpha1
 kind: Database
 metadata:
-  name: kubepost
+  name: nils
 spec:
-  databaseName: kubepost
-  databaseOwner: kubepost
-  preventDeletion: false
-  instanceRef:
-    name: kubepost
+  instanceSelector:
+    matchLabels:
+      instance: kubepost
+  instanceNamespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: default
+  owner: kubepost
   extensions:
     - name: pg_stat_statements
-      version: "1.8"
-    # implicit use of latest version for postgres_fdw
+      version: "1.7"
     - name: postgres_fdw

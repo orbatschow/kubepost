@@ -1,12 +1,16 @@
-apiVersion: kubepost.io/v1alpha1
+apiVersion: postgres.kubepost.io/v1alpha1
 kind: Instance
 metadata:
   name: kubepost
+  labels:
+    instance: kubepost
 spec:
-  host: localhost
+  host: a86da10b-caab-42ed-92cc-4ac0f6a9744e.pgunstbl01.px3mqygxmc.pg.eu01.onstackit.cloud
   port: 5432
   database: postgres
-  secretRef:
-    name: kubepost-instance-credentials
-    userKey: username
-    passwordKey: password
+  username:
+      name: postgres.postgres-a86da10b-caab-42ed-92cc-4ac0f6a9744e.credentials.postgresql.acid.zalan.do
+      key: username
+  password:
+      name: postgres.postgres-a86da10b-caab-42ed-92cc-4ac0f6a9744e.credentials.postgresql.acid.zalan.do
+      key: password

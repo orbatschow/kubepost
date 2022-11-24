@@ -1,0 +1,27 @@
+# permissions for end users to view roles.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: role-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: kubepost
+    app.kubernetes.io/part-of: kubepost
+    app.kubernetes.io/managed-by: kustomize
+  name: role-viewer-role
+rules:
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - roles
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - roles/status
+  verbs:
+  - get

@@ -1,57 +1,67 @@
+/*
+Copyright 2022.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// Role is the Schema for the roles API
-type Role struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   RoleSpec   `json:"spec"`
-	Status RoleStatus `json:"status,omitempty"`
-}
-
+// RoleSpec defines the desired state of Role
 type RoleSpec struct {
-	InstanceRef InstanceRef `json:"instanceRef"`
-	RoleName    string      `json:"roleName"`
+	InstanceSelector          metav1.LabelSelector `json:"instanceSelector"`
+	InstanceNamespaceSelector metav1.LabelSelector `json:"instanceNamespaceSelector"`
+
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:default:=true
 	PreventDeletion bool `json:"preventDeletion"`
+
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:default:=false
 	CascadeDelete bool `json:"cascadeDelete"`
+
 	//+kubebuilder:validation:Optional
 	Options []string `json:"options"`
+
 	//+kubebuilder:validation:Optional
-	Password string `json:"password"`
-	//+kubebuilder:validation:Optional
-	PasswordRef PasswordRef `json:"passwordRef"`
-	//+kubebuilder:validation:Optional
-	Groups []GroupGrantObject `json:"groups"`
+	Password *v1.SecretKeySelector `json:"password"`
+
 	//+kubebuilder:validation:Optional
 	Grants []Grant `json:"grants"`
-}
 
-type PasswordRef struct {
-	Name        string `json:"name"`
-	PasswordKey string `json:"passwordKey"`
+	//+kubebuilder:validation:Optional
+	Groups []GroupGrantObject `json:"groups"`
 }
 
 type Grant struct {
 	Database string        `json:"database"`
 	Objects  []GrantObject `json:"objects"`
 }
+
 type GroupGrantObject struct {
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	//+kubebuilder:default:=false
 	WithAdminOption bool `json:"withAdminOption"`
 }
+
 type GrantObject struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=VIEW;COLUMN;TABLE;SCHEMA;FUNCTION;SEQUENCE
@@ -77,8 +87,22 @@ type GrantObject struct {
 // +kubebuilder:validation:Enum=ALL;SELECT;INSERT;UPDATE;DELETE;TRUNCATE;REFERENCES;TRIGGER;USAGE;CREATE;CONNECT;TEMPORARY;TEMP;EXECUTE
 type Privilege string
 
+// RoleStatus defines the observed state of Role
 type RoleStatus struct {
-	Status string `json:"status"`
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+}
+
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+
+// Role is the Schema for the roles API
+type Role struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   RoleSpec   `json:"spec,omitempty"`
+	Status RoleStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -88,4 +112,8 @@ type RoleList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Role `json:"items"`
+}
+
+func init() {
+	SchemeBuilder.Register(&Role{}, &RoleList{})
 }
