@@ -18,14 +18,13 @@ spec:
           privileges:
             - ALL
           schema: public
-          table: ''''''
           type: SCHEMA
           withGrantOption: true
         - identifier: test
           privileges:
             - ALL
           schema: public
-          table: ''''''
+          table: example
           type: TABLE
           withGrantOption: true
   options:
