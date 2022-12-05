@@ -100,13 +100,23 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 		)
 
 		// delete the database
-		err := r.Delete(ctx)
+		exists, err := r.Exists(ctx)
 		if err != nil {
 			return err
 		}
 
+		if exists {
+			err := r.Delete(ctx)
+			if err != nil {
+				return err
+			}
+		}
+
 		// remove the finalizer
 		controllerutil.RemoveFinalizer(r.database, Finalizer)
+		if err := ctrClient.Update(ctx, r.database); err != nil {
+			return err
+		}
 
 		log.FromContext(ctx).Info("removing finalizer",
 			"instance", types.NamespacedName{
@@ -135,7 +145,7 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 		)
 
 		controllerutil.AddFinalizer(r.database, Finalizer)
-		if err := ctrClient.Update(ctx, r.instance); err != nil {
+		if err := ctrClient.Update(ctx, r.database); err != nil {
 			return err
 		}
 	}

@@ -48,7 +48,7 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, role *v1alpha1.Rol
 		}
 
 		var exists bool
-		exists, err = repository.DoesRoleExist(ctx)
+		exists, err = repository.Exists(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -110,13 +110,23 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 		)
 
 		// delete the database
-		err := r.Delete(ctx)
+		exists, err := r.Exists(ctx)
 		if err != nil {
 			return err
 		}
 
+		if exists {
+			err := r.Delete(ctx)
+			if err != nil {
+				return err
+			}
+		}
+
 		// remove the finalizer
 		controllerutil.RemoveFinalizer(r.role, Finalizer)
+		if err := ctrClient.Update(ctx, r.role); err != nil {
+			return err
+		}
 
 		log.FromContext(ctx).Info("removing finalizer",
 			"instance", types.NamespacedName{
@@ -145,7 +155,7 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 		)
 
 		controllerutil.AddFinalizer(r.role, Finalizer)
-		if err := ctrClient.Update(ctx, r.instance); err != nil {
+		if err := ctrClient.Update(ctx, r.role); err != nil {
 			return err
 		}
 	}

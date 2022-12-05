@@ -35,7 +35,7 @@ func (e RepositoryError) Error() string {
 	return e.Message
 }
 
-func (r *Repository) DoesRoleExist(ctx context.Context) (bool, error) {
+func (r *Repository) Exists(ctx context.Context) (bool, error) {
 
 	var exist bool
 	err := r.conn.QueryRow(
