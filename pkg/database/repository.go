@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pgk/utils"
+	"github.com/orbatschow/kubepost/pkg/postgres"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -78,7 +78,7 @@ func (r *Repository) Create(ctx context.Context) error {
 
 	_, err := r.conn.Exec(
 		ctx,
-		fmt.Sprintf("CREATE DATABASE %s", utils.SanitizeString(r.database.ObjectMeta.Name)),
+		fmt.Sprintf("CREATE DATABASE %s", postgres.SanitizeString(r.database.ObjectMeta.Name)),
 	)
 
 	if err != nil {
@@ -114,7 +114,7 @@ func (r *Repository) Delete(ctx context.Context) *RepositoryError {
 
 	_, err := r.conn.Query(
 		ctx,
-		fmt.Sprintf("DROP DATABASE %s WITH (FORCE)", utils.SanitizeString(r.database.ObjectMeta.Name)),
+		fmt.Sprintf("DROP DATABASE %s WITH (FORCE)", postgres.SanitizeString(r.database.ObjectMeta.Name)),
 	)
 
 	if err != nil {
@@ -192,8 +192,8 @@ func (r *Repository) AlterOwner(ctx context.Context) error {
 		ctx,
 		fmt.Sprintf(
 			"ALTER DATABASE %s OWNER TO %s",
-			utils.SanitizeString(r.database.ObjectMeta.Name),
-			utils.SanitizeString(r.database.Spec.Owner),
+			postgres.SanitizeString(r.database.ObjectMeta.Name),
+			postgres.SanitizeString(r.database.Spec.Owner),
 		),
 	)
 

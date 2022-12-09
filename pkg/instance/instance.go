@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pgk/namespace"
-	"github.com/orbatschow/kubepost/pgk/postgres"
+	"github.com/orbatschow/kubepost/pkg/namespace"
+	"github.com/orbatschow/kubepost/pkg/postgres"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +17,6 @@ import (
 )
 
 func List(ctx context.Context, ctrlClient client.Client, instanceNamespaceSelector metav1.LabelSelector, instanceSelector metav1.LabelSelector) ([]v1alpha1.Instance, error) {
-
 	namespaces, err := namespace.List(ctx, ctrlClient, instanceNamespaceSelector)
 	if err != nil {
 		return nil, err
@@ -45,7 +44,6 @@ func List(ctx context.Context, ctrlClient client.Client, instanceNamespaceSelect
 }
 
 func GetConnection(ctx context.Context, client client.Client, instance *v1alpha1.Instance) (*pgx.Conn, error) {
-
 	usernameRef := types.NamespacedName{
 		Namespace: instance.ObjectMeta.Namespace,
 		Name:      instance.Spec.Username.Name,

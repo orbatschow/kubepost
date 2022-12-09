@@ -8,7 +8,6 @@ import (
 )
 
 func List(ctx context.Context, ctrlClient client.Client, namespacesSelector metav1.LabelSelector) ([]v1.Namespace, error) {
-
 	var namespaces v1.NamespaceList
 
 	selector, err := metav1.LabelSelectorAsSelector(&namespacesSelector)

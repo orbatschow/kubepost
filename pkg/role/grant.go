@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pgk/instance"
-	"github.com/orbatschow/kubepost/pgk/utils"
+	"github.com/orbatschow/kubepost/pkg/instance"
+	"github.com/orbatschow/kubepost/pkg/postgres"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"strings"
@@ -44,10 +44,12 @@ func (r *Repository) ReconcileGrants(ctx context.Context, ctrlClient client.Clie
 		}
 
 		// regex
-		grantObjects, _ = r.regexExpandGrantObjects(ctx, grantObjects)
+		grantObjects, err = r.regexExpandGrantObjects(ctx, grantObjects)
+		if err != nil {
+			return err
+		}
 
 		currentGrants, err := r.GetCurrentGrants(ctx)
-
 		if err != nil {
 			return err
 		}
@@ -84,7 +86,7 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 	var currentGrants []v1alpha1.GrantObject
 	var buffer []v1alpha1.GrantObject
 
-	buffer, err := r.getGrantsByType(ctx, "TABLE")
+	buffer, err := r.getGrantsByType(ctx, postgres.TABLE)
 	currentGrants = append(currentGrants, buffer...)
 	if err != nil {
 		return nil, RepositoryError{
@@ -95,19 +97,7 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 		}
 	}
 
-	buffer, err = r.getGrantsByType(ctx, "SCHEMA")
-	currentGrants = append(currentGrants, buffer...)
-
-	if err != nil {
-		return nil, RepositoryError{
-			Role:      r.role.ObjectMeta.Name,
-			Instance:  r.instance.ObjectMeta.Name,
-			Namespace: r.role.ObjectMeta.Namespace,
-			Message:   err.Error(),
-		}
-	}
-
-	buffer, err = r.getGrantsByType(ctx, "COLUMN")
+	buffer, err = r.getGrantsByType(ctx, postgres.SCHEMA)
 	currentGrants = append(currentGrants, buffer...)
 
 	if err != nil {
@@ -119,7 +109,7 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 		}
 	}
 
-	buffer, err = r.getGrantsByType(ctx, "FUNCTION")
+	buffer, err = r.getGrantsByType(ctx, postgres.COLUMN)
 	currentGrants = append(currentGrants, buffer...)
 
 	if err != nil {
@@ -131,7 +121,19 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 		}
 	}
 
-	buffer, err = r.getGrantsByType(ctx, "SEQUENCE")
+	buffer, err = r.getGrantsByType(ctx, postgres.FUNCTION)
+	currentGrants = append(currentGrants, buffer...)
+
+	if err != nil {
+		return nil, RepositoryError{
+			Role:      r.role.ObjectMeta.Name,
+			Instance:  r.instance.ObjectMeta.Name,
+			Namespace: r.role.ObjectMeta.Namespace,
+			Message:   err.Error(),
+		}
+	}
+
+	buffer, err = r.getGrantsByType(ctx, postgres.SEQUENCE)
 	currentGrants = append(currentGrants, buffer...)
 
 	if err != nil {
@@ -178,13 +180,12 @@ func (r *Repository) Grant(ctx context.Context, desiredGrants []v1alpha1.GrantOb
 					PostgresErrorCode:    pgErr.Code,
 					PostgresErrorMessage: pgErr.Message,
 				}
-			} else {
-				return RepositoryError{
-					Role:      r.role.ObjectMeta.Name,
-					Instance:  r.instance.ObjectMeta.Name,
-					Namespace: r.role.ObjectMeta.Namespace,
-					Message:   fmt.Sprintf("unable to apply Grant query: '%s'", err.Error()),
-				}
+			}
+			return RepositoryError{
+				Role:      r.role.ObjectMeta.Name,
+				Instance:  r.instance.ObjectMeta.Name,
+				Namespace: r.role.ObjectMeta.Namespace,
+				Message:   fmt.Sprintf("unable to apply Grant query: '%s'", err.Error()),
 			}
 		}
 	}
@@ -223,13 +224,12 @@ func (r *Repository) Revoke(ctx context.Context, undesiredGrants []v1alpha1.Gran
 					PostgresErrorCode:    pgErr.Code,
 					PostgresErrorMessage: pgErr.Message,
 				}
-			} else {
-				return RepositoryError{
-					Role:      r.role.ObjectMeta.Name,
-					Instance:  r.instance.ObjectMeta.Name,
-					Namespace: r.role.ObjectMeta.Namespace,
-					Message:   fmt.Sprintf("unable to apply Revoke query: '%s'", err.Error()),
-				}
+			}
+			return RepositoryError{
+				Role:      r.role.ObjectMeta.Name,
+				Instance:  r.instance.ObjectMeta.Name,
+				Namespace: r.role.ObjectMeta.Namespace,
+				Message:   fmt.Sprintf("unable to apply Revoke query: '%s'", err.Error()),
 			}
 		}
 	}
@@ -239,18 +239,15 @@ func (r *Repository) Revoke(ctx context.Context, undesiredGrants []v1alpha1.Gran
 
 func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, error) {
 
-	privileges := map[string][]v1alpha1.Privilege{
-		"SCHEMA":   {"USAGE", "CREATE"},
-		"TABLE":    {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
-		"VIEW":     {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
-		"COLUMN":   {"SELECT", "UPDATE", "INSERT", "REFERENCES"},
-		"FUNCTION": {"EXECUTE"},
-		"SEQUENCE": {"USAGE", "SELECT", "UPDATE"},
-	}
-
 	var grantObjectsExpanded []v1alpha1.GrantObject
-	var err error
-	var rows pgx.Rows
+	privileges := map[string][]v1alpha1.Privilege{
+		postgres.SCHEMA:   {"USAGE", "CREATE"},
+		postgres.TABLE:    {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
+		postgres.VIEW:     {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"},
+		postgres.COLUMN:   {"SELECT", "UPDATE", "INSERT", "REFERENCES"},
+		postgres.FUNCTION: {"EXECUTE"},
+		postgres.SEQUENCE: {"USAGE", "SELECT", "UPDATE"},
+	}
 
 	// In case "ALL" is chosen, replace it with an expanded version
 	for index, grant := range grantObjects {
@@ -262,14 +259,18 @@ func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects [
 	}
 
 	for _, grantObject := range grantObjects {
+
+		var err error
+		var rows pgx.Rows
+
 		switch grantObject.Type {
-		case "SCHEMA":
+		case postgres.SCHEMA:
 			rows, err = r.conn.Query(
 				ctx,
 				`select nspname from pg_namespace where nspname ~ $1`,
 				"^"+grantObject.Identifier+"$",
 			)
-		case "VIEW":
+		case postgres.VIEW:
 			rows, err = r.conn.Query(
 				ctx,
 				`select
@@ -280,7 +281,7 @@ func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects [
 				"^"+grantObject.Schema+"$",
 				"^"+grantObject.Identifier+"$",
 			)
-		case "TABLE":
+		case postgres.TABLE:
 			rows, err = r.conn.Query(
 				ctx,
 				`select
@@ -291,7 +292,7 @@ func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects [
 				"^"+grantObject.Schema+"$",
 				"^"+grantObject.Identifier+"$",
 			)
-		case "COLUMN":
+		case postgres.COLUMN:
 			rows, err = r.conn.Query(
 				ctx,
 				`select
@@ -304,7 +305,7 @@ func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects [
 				"^"+grantObject.Table+"$",
 				"^"+grantObject.Identifier+"$",
 			)
-		case "FUNCTION":
+		case postgres.FUNCTION:
 			rows, err = r.conn.Query(
 				ctx,
 				`select
@@ -315,7 +316,7 @@ func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects [
 				"^"+grantObject.Schema+"$",
 				"^"+grantObject.Identifier+"$",
 			)
-		case "SEQUENCE":
+		case postgres.SEQUENCE:
 			rows, err = r.conn.Query(
 				ctx,
 				`select
@@ -327,8 +328,12 @@ func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects [
 				"^"+grantObject.Identifier+"$",
 			)
 		}
-		grantObjectsExpanded = append(grantObjectsExpanded)
-		entries := []string{}
+
+		if err != nil {
+			return nil, err
+		}
+
+		var entries []string
 		for rows.Next() {
 			var entry string
 			err = rows.Scan(&entry)
@@ -343,8 +348,8 @@ func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects [
 		for _, entry := range entries {
 			grantObject.Identifier = entry
 
-			if grantObject.Type == "VIEW" {
-				grantObject.Type = "TABLE"
+			if grantObject.Type == postgres.VIEW {
+				grantObject.Type = postgres.TABLE
 			}
 
 			grantObjectsExpanded = append(grantObjectsExpanded, grantObject)
@@ -455,9 +460,9 @@ func getGrantSymmetricDifference(a, b []v1alpha1.GrantObject) ([]v1alpha1.GrantO
 				outerIndex--
 				break
 			}
-
 		}
 	}
+
 	return a, b
 }
 
@@ -498,7 +503,7 @@ func subtractPrivilegeConjunction(a, b []v1alpha1.Privilege) []v1alpha1.Privileg
 		}
 	}
 
-	for key, _ := range buffer {
+	for key := range buffer {
 		result = append(result, key)
 	}
 	return result
@@ -508,7 +513,7 @@ func subtractPrivilegeConjunction(a, b []v1alpha1.Privilege) []v1alpha1.Privileg
 // the possibility for b (table) including a (columns). This function checks for
 // this case.
 func grantObjectIncludesTarget(a, b *v1alpha1.GrantObject) bool {
-	if a.Type == "COLUMN" && b.Type == "TABLE" {
+	if a.Type == postgres.COLUMN && b.Type == postgres.TABLE {
 		if a.Schema != b.Schema {
 			return false
 		}
@@ -525,7 +530,7 @@ func grantObjectIncludesTarget(a, b *v1alpha1.GrantObject) bool {
 
 func getGrantQueries() map[string]string {
 	return map[string]string{
-		"TABLE": `
+		postgres.TABLE: `
         select
 		'TABLE' as type,
 		table_schema as schema,
@@ -597,7 +602,7 @@ func getGrantQueries() map[string]string {
         routine_schema as schema,
         '' as table_name,
         routine_name as identifier,
-		array_agg('EXECUTE'::varchar) as priviliges,
+		array_agg('EXECUTE'::varchar) as privileges,
         is_grantable::bool as withGrantOption
         from information_schema.role_routine_grants
         WHERE grantee=$1
@@ -609,14 +614,14 @@ func getGrantQueries() map[string]string {
 			sq.schema,
 			'' as table_name,
 			sq.identifier,
-			array_agg(sq.priviliges) as priviliges,
+			array_agg(sq.privileges) as privileges,
 			sq.withGrantOption
 		from (
 			select
 			    'SEQUENCE' as type,
 			    nspname as schema,
 			    relname as identifier,
-			    (aclexplode(relacl)).privilege_type as priviliges,
+			    (aclexplode(relacl)).privilege_type as privileges,
 			    (aclexplode(relacl)).is_grantable as withGrantOption,
 			    (aclexplode(relacl)).grantee as grantee
 			from pg_class cl
@@ -633,48 +638,48 @@ func getGrantQueries() map[string]string {
 func (r *Repository) createGrantQuery(ctx context.Context, grantTarget *v1alpha1.GrantObject) (string, error) {
 	var query string
 	switch strings.ToUpper(grantTarget.Type) {
-	case "COLUMN":
+	case postgres.COLUMN:
 		query = fmt.Sprintf(
 			"GRANT %s (%s) ON TABLE %s.%s TO %s",
 			getJoinedPrivileges(ctx, grantTarget),
-			utils.SanitizeString(grantTarget.Identifier),
-			utils.SanitizeString(grantTarget.Schema),
-			utils.SanitizeString(grantTarget.Table),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(grantTarget.Identifier),
+			postgres.SanitizeString(grantTarget.Schema),
+			postgres.SanitizeString(grantTarget.Table),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
-	case "TABLE":
+	case postgres.TABLE:
 		query = fmt.Sprintf(
 			"GRANT %s ON %s.%s TO %s",
 			getJoinedPrivileges(ctx, grantTarget),
-			utils.SanitizeString(grantTarget.Schema),
-			utils.SanitizeString(grantTarget.Identifier),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(grantTarget.Schema),
+			postgres.SanitizeString(grantTarget.Identifier),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
 
-	case "SCHEMA":
+	case postgres.SCHEMA:
 		query = fmt.Sprintf(
 			"GRANT %s ON  SCHEMA %s TO %s",
 			getJoinedPrivileges(ctx, grantTarget),
-			utils.SanitizeString(grantTarget.Identifier),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(grantTarget.Identifier),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
 
-	case "FUNCTION":
+	case postgres.FUNCTION:
 		query = fmt.Sprintf(
 			"GRANT %s ON FUNCTION %s.%s TO %s",
 			getJoinedPrivileges(ctx, grantTarget),
-			utils.SanitizeString(grantTarget.Schema),
-			utils.SanitizeString(grantTarget.Identifier),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(grantTarget.Schema),
+			postgres.SanitizeString(grantTarget.Identifier),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
 
-	case "SEQUENCE":
+	case postgres.SEQUENCE:
 		query = fmt.Sprintf(
 			"GRANT %s ON SEQUENCE %s.%s TO %s",
 			getJoinedPrivileges(ctx, grantTarget),
-			utils.SanitizeString(grantTarget.Schema),
-			utils.SanitizeString(grantTarget.Identifier),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(grantTarget.Schema),
+			postgres.SanitizeString(grantTarget.Identifier),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
 
 	default:
@@ -693,48 +698,48 @@ func (r *Repository) createGrantQuery(ctx context.Context, grantTarget *v1alpha1
 func (r *Repository) createRevokeQuery(ctx context.Context, revokeTarget *v1alpha1.GrantObject) (string, error) {
 	var query string
 	switch strings.ToUpper(revokeTarget.Type) {
-	case "COLUMN":
+	case postgres.COLUMN:
 		query = fmt.Sprintf(
 			"REVOKE %s (%s) ON TABLE %s.%s FROM %s",
 			getJoinedPrivileges(ctx, revokeTarget),
-			utils.SanitizeString(revokeTarget.Identifier),
-			utils.SanitizeString(revokeTarget.Schema),
-			utils.SanitizeString(revokeTarget.Table),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(revokeTarget.Identifier),
+			postgres.SanitizeString(revokeTarget.Schema),
+			postgres.SanitizeString(revokeTarget.Table),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
-	case "TABLE":
+	case postgres.TABLE:
 		query = fmt.Sprintf(
 			"REVOKE %s ON %s.%s FROM %s",
 			getJoinedPrivileges(ctx, revokeTarget),
-			utils.SanitizeString(revokeTarget.Schema),
-			utils.SanitizeString(revokeTarget.Identifier),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(revokeTarget.Schema),
+			postgres.SanitizeString(revokeTarget.Identifier),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
 
-	case "SCHEMA":
+	case postgres.SCHEMA:
 		query = fmt.Sprintf(
 			"REVOKE %s ON SCHEMA %s FROM %s",
 			getJoinedPrivileges(ctx, revokeTarget),
-			utils.SanitizeString(revokeTarget.Identifier),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(revokeTarget.Identifier),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
 
-	case "FUNCTION":
+	case postgres.FUNCTION:
 		query = fmt.Sprintf(
 			"REVOKE %s ON FUNCTION %s.%s FROM %s",
 			getJoinedPrivileges(ctx, revokeTarget),
-			utils.SanitizeString(revokeTarget.Schema),
-			utils.SanitizeString(revokeTarget.Identifier),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(revokeTarget.Schema),
+			postgres.SanitizeString(revokeTarget.Identifier),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
 
-	case "SEQUENCE":
+	case postgres.SEQUENCE:
 		query = fmt.Sprintf(
 			"REVOKE %s ON SEQUENCE %s.%s FROM %s",
 			getJoinedPrivileges(ctx, revokeTarget),
-			utils.SanitizeString(revokeTarget.Schema),
-			utils.SanitizeString(revokeTarget.Identifier),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(revokeTarget.Schema),
+			postgres.SanitizeString(revokeTarget.Identifier),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		)
 
 	default:
@@ -755,4 +760,29 @@ func getJoinedPrivileges(ctx context.Context, grantObject *v1alpha1.GrantObject)
 	log.FromContext(ctx).Info("computed privileges", "privileges", privileges)
 
 	return strings.Join(privileges, ", ")
+}
+
+// TODO: move to database package
+func (r *Repository) GetDatabaseNames(ctx context.Context) ([]string, error) {
+	var databaseNames []string
+
+	rows, err := r.conn.Query(
+		ctx,
+		"select datname from pg_database where datistemplate = 'f'",
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		databaseNames = append(databaseNames, name)
+	}
+	return databaseNames, nil
 }

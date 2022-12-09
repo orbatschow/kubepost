@@ -1,0 +1,19 @@
+name: default
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  quality:
+    uses: ./.github/workflows/quality.yaml
+
+  manifest:
+    uses: ./.github/workflows/manifest.yaml
+
+  image:
+    needs: [ quality, manifest ]
+    uses: ./.github/workflows/image.yaml
+    with:
+      push: true

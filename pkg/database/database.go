@@ -1,9 +1,9 @@
-package role
+package database
 
 import (
 	"context"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pgk/instance"
+	"github.com/orbatschow/kubepost/pkg/instance"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/strings/slices"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -11,51 +11,61 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-var Finalizer = "finalizer.postgres.kubepost.io/role"
+var Finalizer = "finalizer.postgres.kubepost.io/database"
 
-func Reconcile(ctx context.Context, ctrlClient client.Client, role *v1alpha1.Role) (*v1alpha1.Role, error) {
+func Reconcile(ctx context.Context, ctrlClient client.Client, db *v1alpha1.Database) (*v1alpha1.Database, []v1alpha1.Instance, error) {
 
-	instances, err := instance.List(ctx, ctrlClient, role.Spec.InstanceNamespaceSelector, role.Spec.InstanceSelector)
+	instances, err := instance.List(ctx, ctrlClient, db.Spec.InstanceNamespaceSelector, db.Spec.InstanceSelector)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	for _, postgres := range instances {
+		log.FromContext(ctx).Info(
+			"reconciling database",
+			"instance", types.NamespacedName{
+				Namespace: postgres.ObjectMeta.Namespace,
+				Name:      postgres.ObjectMeta.Name,
+			},
+		)
+
 		conn, err := instance.GetConnection(ctx, ctrlClient, &postgres)
 		if err != nil {
 			log.FromContext(ctx).Error(
 				err,
 				"failed to establish a connection",
-				"instance", postgres.ObjectMeta.Name,
+				"instance", types.NamespacedName{
+					Namespace: postgres.ObjectMeta.Namespace,
+					Name:      postgres.ObjectMeta.Name,
+				},
 			)
 			continue
 		}
 
 		repository := Repository{
-			conn:     conn,
+			database: db,
 			instance: &postgres,
-			role:     role,
+			conn:     conn,
 		}
 
 		err = repository.handleFinalizer(ctx, ctrlClient)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		// skip everything else, if deletion is scheduled
-		if !repository.role.ObjectMeta.DeletionTimestamp.IsZero() {
-			return nil, nil
+		if !repository.database.ObjectMeta.DeletionTimestamp.IsZero() {
+			return nil, nil, nil
 		}
 
-		var exists bool
-		exists, err = repository.Exists(ctx)
+		exists, err := repository.Exists(ctx)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
-		if exists {
+		if exists == true {
 			log.FromContext(ctx).Info(
-				"role exists, skipping creation",
+				"database exists, skipping creation",
 				"instance", types.NamespacedName{
 					Namespace: postgres.ObjectMeta.Namespace,
 					Name:      postgres.ObjectMeta.Name,
@@ -64,45 +74,24 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, role *v1alpha1.Rol
 		} else {
 			err = repository.Create(ctx)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
 
-		password, err := repository.GetPassword(ctx, ctrlClient)
+		err = repository.AlterOwner(ctx)
 		if err != nil {
-			return nil, err
-		}
-
-		err = repository.SetPassword(ctx, password)
-		if err != nil {
-			return nil, err
-		}
-
-		err = repository.Alter(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		err = repository.ReconcileGroups(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		err = repository.ReconcileGrants(ctx, ctrlClient)
-		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
-	return role, nil
-
+	return db, instances, nil
 }
 
 func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Client) error {
 	switch {
 	// handle deletion and remove finalizer.
-	case !r.role.DeletionTimestamp.IsZero() && controllerutil.ContainsFinalizer(r.role, Finalizer):
-		log.FromContext(ctx).Info("handling role deletion",
+	case !r.database.DeletionTimestamp.IsZero() && controllerutil.ContainsFinalizer(r.database, Finalizer):
+		log.FromContext(ctx).Info("handling database deletion",
 			"instance", types.NamespacedName{
 				Namespace: r.instance.ObjectMeta.Namespace,
 				Name:      r.instance.ObjectMeta.Name,
@@ -123,8 +112,8 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 		}
 
 		// remove the finalizer
-		controllerutil.RemoveFinalizer(r.role, Finalizer)
-		if err := ctrClient.Update(ctx, r.role); err != nil {
+		controllerutil.RemoveFinalizer(r.database, Finalizer)
+		if err := ctrClient.Update(ctx, r.database); err != nil {
 			return err
 		}
 
@@ -136,7 +125,7 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 		)
 
 	// deletion already handled, don't do anything.
-	case !r.role.DeletionTimestamp.IsZero() && !slices.Contains(r.role.ObjectMeta.Finalizers, Finalizer):
+	case !r.database.DeletionTimestamp.IsZero() && !slices.Contains(r.database.ObjectMeta.Finalizers, Finalizer):
 		log.FromContext(ctx).Info("deletion pending",
 			"instance", types.NamespacedName{
 				Namespace: r.instance.ObjectMeta.Namespace,
@@ -145,7 +134,7 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 		)
 
 	// add finalizer to the object.
-	case r.role.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(r.role, Finalizer):
+	case r.database.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(r.database, Finalizer):
 		log.FromContext(ctx).Info(
 			"updating finalizers",
 			"instance", types.NamespacedName{
@@ -154,8 +143,8 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 			},
 		)
 
-		controllerutil.AddFinalizer(r.role, Finalizer)
-		if err := ctrClient.Update(ctx, r.role); err != nil {
+		controllerutil.AddFinalizer(r.database, Finalizer)
+		if err := ctrClient.Update(ctx, r.database); err != nil {
 			return err
 		}
 	}

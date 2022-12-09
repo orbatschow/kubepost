@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pgk/secret"
-	"github.com/orbatschow/kubepost/pgk/utils"
+	"github.com/orbatschow/kubepost/pkg/postgres"
+	"github.com/orbatschow/kubepost/pkg/secret"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -47,9 +47,8 @@ func (r *Repository) Exists(ctx context.Context) (bool, error) {
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			return false, nil
-		} else {
-			return false, err
 		}
+		return false, err
 	}
 
 	return true, nil
@@ -59,7 +58,7 @@ func (r *Repository) Create(ctx context.Context) error {
 
 	_, err := r.conn.Exec(
 		ctx,
-		fmt.Sprintf("CREATE ROLE %s", utils.SanitizeString(r.role.ObjectMeta.Name)),
+		fmt.Sprintf("CREATE ROLE %s", postgres.SanitizeString(r.role.ObjectMeta.Name)),
 	)
 
 	if err != nil {
@@ -68,9 +67,9 @@ func (r *Repository) Create(ctx context.Context) error {
 			if pgErr.Code == "42710" || pgErr.Code == "23505" {
 				log.FromContext(ctx).Info("postgres role already exists, skipping creation")
 				return nil
-			} else {
-				return err
 			}
+
+			return err
 		}
 	}
 
@@ -81,7 +80,7 @@ func (r *Repository) Delete(ctx context.Context) error {
 
 	_, err := r.conn.Exec(
 		ctx,
-		fmt.Sprintf("DROP ROLE %s", utils.SanitizeString(r.role.ObjectMeta.Name)),
+		fmt.Sprintf("DROP ROLE %s", postgres.SanitizeString(r.role.ObjectMeta.Name)),
 	)
 
 	if err != nil {
@@ -106,7 +105,7 @@ func (r *Repository) SetPassword(ctx context.Context, password string) error {
 		ctx,
 		fmt.Sprintf(
 			"ALTER ROLE %s WITH PASSWORD '%s';",
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 			password,
 		),
 	)
@@ -152,15 +151,14 @@ func (r *Repository) GetPassword(ctx context.Context, ctrlClient client.Client) 
 	// extract the password
 	buffer := passwordSecret.Data[r.role.Spec.Password.Key]
 	if buffer == nil {
-		return "", errors.New(
-			fmt.Sprintf(
+		return "",
+			fmt.Errorf(
 				"could not find key '%s' for secret '%s' in namespace '%s' for role '%s'",
 				r.role.Spec.Password.Key,
 				r.role.Spec.Password.Name,
 				r.role.Namespace,
 				r.role.Name,
-			),
-		)
+			)
 	}
 
 	return string(buffer), nil
@@ -175,7 +173,7 @@ func (r *Repository) Alter(ctx context.Context) error {
 
 	query := fmt.Sprintf(
 		"ALTER ROLE %s WITH %s;",
-		utils.SanitizeString(r.role.ObjectMeta.Name),
+		postgres.SanitizeString(r.role.ObjectMeta.Name),
 		strings.Join(r.role.Spec.Options[:], " "),
 	)
 
@@ -206,26 +204,4 @@ func (r *Repository) Alter(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-// TODO: move this to database repository
-func (r *Repository) GetDatabaseNames(ctx context.Context) ([]string, error) {
-	var databaseNames []string
-
-	rows, err := r.conn.Query(
-		ctx,
-		"select datname from pg_database where datistemplate = 'f'",
-	)
-
-	for rows.Next() {
-		var name string
-		err = rows.Scan(&name)
-
-		if err != nil {
-			return nil, err
-		}
-
-		databaseNames = append(databaseNames, name)
-	}
-	return databaseNames, nil
 }

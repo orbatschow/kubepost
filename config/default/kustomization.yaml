@@ -6,4 +6,3 @@ bases:
 - ../crd
 - ../rbac
 - ../manager
-

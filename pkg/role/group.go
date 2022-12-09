@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgconn"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pgk/utils"
+	"github.com/orbatschow/kubepost/pkg/postgres"
 )
 
 func (r *Repository) ReconcileGroups(ctx context.Context) error {
@@ -53,6 +53,9 @@ func (r *Repository) GetGroups(ctx context.Context) ([]v1alpha1.GroupGrantObject
         WHERE m.member = (select oid from pg_authid where rolname=$1)`,
 		r.role.ObjectMeta.Name,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	for rows.Next() {
 		var group v1alpha1.GroupGrantObject
@@ -71,8 +74,8 @@ func (r *Repository) AddGroup(ctx context.Context, group *v1alpha1.GroupGrantObj
 
 	query := fmt.Sprintf(
 		"GRANT %s TO %s",
-		utils.SanitizeString(group.Name),
-		utils.SanitizeString(r.role.ObjectMeta.Name),
+		postgres.SanitizeString(group.Name),
+		postgres.SanitizeString(r.role.ObjectMeta.Name),
 	)
 
 	if group.WithAdminOption {
@@ -112,8 +115,8 @@ func (r *Repository) RemoveGroup(ctx context.Context, group *v1alpha1.GroupGrant
 		ctx,
 		fmt.Sprintf(
 			"REVOKE %s FROM %s",
-			utils.SanitizeString(group.Name),
-			utils.SanitizeString(r.role.ObjectMeta.Name),
+			postgres.SanitizeString(group.Name),
+			postgres.SanitizeString(r.role.ObjectMeta.Name),
 		),
 	)
 

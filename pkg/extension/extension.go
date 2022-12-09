@@ -3,19 +3,19 @@ package extension
 import (
 	"context"
 	v1alpha1 "github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pgk/instance"
+	"github.com/orbatschow/kubepost/pkg/instance"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func Reconcile(ctx context.Context, ctrlClient client.Client, instances []v1alpha1.Instance, db *v1alpha1.Database) error {
 
-	for _, postgres := range instances {
+	for i, postgres := range instances {
 
 		// we have to connect to the desired database, so a switch from the instance database is performed here
 		postgres.Spec.Database = db.ObjectMeta.Name
 
-		conn, err := instance.GetConnection(ctx, ctrlClient, &postgres)
+		conn, err := instance.GetConnection(ctx, ctrlClient, &instances[i])
 		if err != nil {
 			log.FromContext(ctx).Error(
 				err,
@@ -31,6 +31,9 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, instances []v1alph
 		}
 
 		existingExtensions, err := repository.List(ctx)
+		if err != nil {
+			return err
+		}
 
 		// create missing extensions, update existing ones
 		// only applies to configured extensions, all other extensions won't be touched
@@ -55,7 +58,6 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, instances []v1alph
 					return err
 				}
 			}
-
 		}
 
 		// check if existing extension is still desired
@@ -76,7 +78,7 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, instances []v1alph
 			if desired != true {
 
 				// check if existingExtension is dependency of other extension
-				err, childExtensions := repository.GetChildExtensions(ctx, &existingExtension)
+				childExtensions, err := repository.GetChildExtensions(ctx, &existingExtension)
 
 				if err != nil {
 					return err
@@ -96,7 +98,7 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, instances []v1alph
 				}
 			}
 		}
-
 	}
+
 	return nil
 }

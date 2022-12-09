@@ -1,0 +1,87 @@
+name: main
+
+on:
+  push:
+    branches:
+      - "master"
+    tags:
+      - "v*"
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: compute checksums of auto generated files
+        run: |
+          echo hello world
+
+      - name: lint
+        run: | 
+          make test
+
+      - name: test
+        run: |
+          make test
+
+  manifest:
+    runs-on: ubuntu-latest
+    needs: [quality]
+    steps:
+      - name: generate
+        run: |
+          make manifests
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [quality]
+    steps:
+
+      - name: compute docker tag
+        id: compute_tag
+        run: |
+          if [[ $GITHUB_REF_TYPE == "tag" ]]; then
+            TAG="$(echo $GITHUB_REF_NAME | sed 's/[^a-zA-Z0-9_.-]/-/g' | sed -e 's/^v//')"
+          else
+            TAG="$(git rev-parse --short HEAD)"
+          fi
+          echo "computed docker tag: $(TAG)"
+          echo '::set-output name=tag::'${TAG}
+
+      - name: login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: set up qemu
+        uses: docker/setup-qemu-action@v1
+
+      - name: set up docker buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
+          push: true
+          tags: orbatschow/kubepost-ci:latest,orbatschow/kubepost-ci:${{ steps.compute_tag.outputs.tag }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [manifest, docker]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: push docker container
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: user/app:latest
+
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/bundle.yaml
