@@ -11,7 +11,7 @@ PostgreSQL instance, and configure a Role and a Database.
 To follow this guide, you will need a Kubernetes cluster with admin permissions and a running
 PostgreSQL instance with superuser permissions.
 
-## kind
+## Kubernetes
 
 You can use [kind](https://kind.sigs.k8s.io/) to create a fully functional Kubernetes cluster.
 
