@@ -41,7 +41,7 @@ to specific resources and ensure that the desired PostgreSQL match these resourc
 The Prometheus operator automatically detects changes in the Kubernetes API server to any of the above objects, and
 ensures that matching PostgreSQL objects are kept in sync.
 
-To learn more about the CRDs introduced by kubepost have a look at the [specification](docs/getting-started.md).
+To learn more about the CRDs introduced by kubepost have a look at the [getting started](docs/getting-started.md) guide.
 
 ## Quickstart
 
@@ -81,7 +81,6 @@ kubectl delete -f deploy/bundle.yaml
 ## Contributing
 
 Contributions are always welcome, have a look at the [contributing](docs/contributing.md) guidelines to get started.
-
 
 ## Troubleshooting
 
