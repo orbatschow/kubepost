@@ -7,14 +7,15 @@ may change, but in a backward compatible way.
 
 The kubepost operator provides [Kubernetes](https://kubernetes.io/) native deployment and management of
 [PostgreSQL](https://www.postgresql.org/) objects. The purpose of this project is to
-simplify and automate the configuration of a PostgreSQL objects.
+simplify and automate the configuration of PostgreSQL objects.
 
-The kubepost operator includes, but is not limited to, the following features:
+The kubepost operator implements, but is not limited to, the following features:
 
 * **Role**: Manage PostgreSQL [roles](https://www.postgresql.org/docs/current/user-manag.htm).
 
-* **Database**: Manage PostgresSQL [databases](https://www.postgresql.org/docs/current/managing-databases.html) and
-  their [extensions](https://www.postgresql.org/docs/current/external-extensions.html).
+* **Database**: Manage PostgresSQL [databases](https://www.postgresql.org/docs/current/managing-databases.html)
+
+* **Extensions** Manage PostgreSQL [extensions](https://www.postgresql.org/docs/current/external-extensions.html)
 
 ## Prerequisites
 

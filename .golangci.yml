@@ -77,19 +77,6 @@ linters:
     - whitespace
     - prealloc
 
-  # don't enable:
-  # - asciicheck
-  # - errcheck # Disabled since it detects defers that do not check errors. This is a standard pattern.
-  #              see https://github.com/kisielk/errcheck/issues/55
-  # - scopelint
-  # - gocognit
-  # - godot
-  # - godox
-  # - interfacer
-  # - nestif
-  # - testpackage
-  # - wsl
-
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
