@@ -28,7 +28,7 @@ The kubepost operator implements, but is not limited to, the following features:
 
 ## Prerequisites
 
-**Note:** This compatibility matrix is at the moment not tested, it is only provided based on personal experience.
+**Note:** This compatibility matrix is not tested at the moment, it is only provided based on personal experience.
 Therefore, it may also be possible, that other combinations are working properly.
 
 | Kubernetes | PostgreSQL | kubepost |
