@@ -45,6 +45,8 @@ To learn more about the CRDs introduced by kubepost have a look at the [getting 
 
 ## Quickstart
 
+### Installation
+
 **Note:** this quickstart does provision the kubepost stack, required to access all features of kubepost.
 
 ```sh
@@ -62,7 +64,7 @@ kubectl apply -f deploy/bundle.yaml TODO
 > Note: The tag used above might not be pointing to the latest release. Check the git tags within this repository to
 > get the latest tag.
 
-## Removal
+### Removal
 
 To remove the operator, first delete any custom resources you created in each namespace.
 
