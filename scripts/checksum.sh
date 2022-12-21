@@ -10,7 +10,9 @@ find . -type f ! -path './.*/*' ! -path './build/*' ! -path './bin/*' ! -path 'C
 echo "computed pre hashes"
 cat "$ROOT_DIR"/build/before.chk
 
-(cd "$ROOT_DIR" && make generate)
+(cd "$ROOT_DIR" && make generate-manifests)
+(cd "$ROOT_DIR" && make generate-client)
+(cd "$ROOT_DIR" && make generate-crd-documentation)
 
 # exclude all hidden directories, bin and build
 find . -type f ! -path './.*/*' ! -path './build/*' ! -path './bin/*' ! -path 'CHANGELOG.md' -exec md5sum "{}" + > build/after.chk
