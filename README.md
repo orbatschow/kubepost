@@ -50,8 +50,6 @@ to specific resources and ensure that the desired PostgreSQL match these resourc
 The kubepost operator automatically detects changes in the Kubernetes API server to any of the above objects, and
 ensures that matching PostgreSQL objects are kept in sync.
 
-To learn more about the CRDs introduced by kubepost have a look at the [getting started](docs/getting-started.md) guide.
-
 ## Quickstart
 
 ### Installation
@@ -72,6 +70,8 @@ kubectl apply -f deploy/bundle.yaml TODO
 
 > Note: The tag used above might not be pointing to the latest release. Check the git tags within this repository to
 > get the latest tag.
+
+To learn more about the CRDs introduced by kubepost have a look at the [getting started](docs/getting-started.md) guide.
 
 ### Removal
 
