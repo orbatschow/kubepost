@@ -4,6 +4,17 @@ on:
   workflow_call:
 
 jobs:
+
+  checksum:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: checksum
+        run: |
+          make checksum
+
   lint:
     runs-on: ubuntu-latest
     steps:

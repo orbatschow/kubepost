@@ -26,6 +26,8 @@ CRDOC_VERSION ?= v0.6.1
 GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint
 GOLANGCI_LINT_VERSION ?= v1.50.1
 
+# github_changelog_generator binary
+GITHUB_CHANGELOG_GENERATOR ?= github_changelog_generator
 
 ######################################################
 # misc
@@ -46,6 +48,9 @@ controller-gen:
 golangci-lint:
 	test -s $(GOLANGCI_LINT) || GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 
+.PHONY: github_changelog_generator
+github_changelog_generator:
+	gem install --conservative github_changelog_generator -v 1.16.4
 
 ######################################################
 # checksum
@@ -119,7 +124,7 @@ endif
 
 # all
 .PHONY: generate
-generate: generate-manifests generate-crd-documentation generate-client
+generate: generate-manifests generate-crd-documentation generate-client generate-changelog
 
 # manifests
 .PHONY: generate-manifests
@@ -138,6 +143,10 @@ generate-crd-documentation: crdoc generate-manifests
 	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_instances.yaml --output docs/instance.md
 	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_roles.yaml --output docs/role.md
 	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_databases.yaml --output docs/database.md
+
+.PHONY: generate-changelog
+generate-changelog: github_changelog_generator
+	github_changelog_generator -u orbatschow -p kubepost
 
 
 ######################################################

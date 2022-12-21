@@ -36,24 +36,27 @@ spec:
             properties:
               cascadeDelete:
                 default: false
+                description: TODO
                 type: boolean
               extensions:
+                description: List of extensions for this database.
                 items:
                   properties:
                     name:
+                      description: Name of the extensions that shall be managed within
+                        the database.
                       type: string
                     version:
                       default: latest
+                      description: Version of the extension.
                       type: string
                   required:
                   - name
                   type: object
                 type: array
               instanceNamespaceSelector:
-                description: A label selector is a label query over a set of resources.
-                  The result of matchLabels and matchExpressions are ANDed. An empty
-                  label selector matches all objects. A null label selector matches
-                  no objects.
+                description: Narrow down the namespaces for the previously matched
+                  instances.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
@@ -98,10 +101,8 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               instanceSelector:
-                description: A label selector is a label query over a set of resources.
-                  The result of matchLabels and matchExpressions are ANDed. An empty
-                  label selector matches all objects. A null label selector matches
-                  no objects.
+                description: Define which instances shall be managed by kubepost for
+                  this database.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
@@ -146,9 +147,11 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               owner:
+                description: Define the owner of the database.
                 type: string
               preventDeletion:
                 default: true
+                description: TODO
                 type: boolean
             required:
             - instanceNamespaceSelector

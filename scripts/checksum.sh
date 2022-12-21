@@ -2,20 +2,30 @@
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
-PRE_HASH=$(tar -cf - "$ROOT_DIR" | md5sum | awk '{print $1}')
+mkdir -p "$ROOT_DIR"/build
 
-echo "computed pre hash: $PRE_HASH"
+# exclude all hidden directories, bin and build
+find . -type f ! -path './.*/*' ! -path './build/*' ! -path './bin/*' ! -path 'CHANGELOG.md' -exec md5sum "{}" + > build/before.chk
+
+echo "computed pre hashes"
+cat "$ROOT_DIR"/build/before.chk
 
 (cd "$ROOT_DIR" && make generate)
 
-POST_HASH=$(tar -cf - "$ROOT_DIR" | md5sum | awk '{print $1}')
+# exclude all hidden directories, bin and build
+find . -type f ! -path './.*/*' ! -path './build/*' ! -path './bin/*' ! -path 'CHANGELOG.md' -exec md5sum "{}" + > build/after.chk
 
-echo "computed post hash: $PRE_HASH"
+echo "computed post hashes"
+cat "$ROOT_DIR"/build/after.chk
 
-if [[ "$PRE_HASH" == "$POST_HASH" ]]; then
-  echo "client and custom resource definitions are up to date, exiting"
+chk1=$(cksum build/before.chk | awk -F" " '{print $1}')
+chk2=$(cksum build/after.chk | awk -F" " '{print $1}')
+
+if [ "$chk1" -eq "$chk2" ]
+then
+  echo "client, custom resource definitions and documentation is up to date, exiting"
   exit 0
 else
-  echo "client and custom resource definitions are not up to date, please execute 'make generate'"
+  echo "client, custom resource definitions or documentation is not up to date, please execute 'make generate'"
   exit 1
 fi

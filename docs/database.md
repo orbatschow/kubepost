@@ -87,21 +87,21 @@ Database is the Schema for the databases API
         <td><b><a href="#databasespecinstancenamespaceselector">instanceNamespaceSelector</a></b></td>
         <td>object</td>
         <td>
-          A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.<br/>
+          Narrow down the namespaces for the previously matched instances.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b><a href="#databasespecinstanceselector">instanceSelector</a></b></td>
         <td>object</td>
         <td>
-          A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.<br/>
+          Define which instances shall be managed by kubepost for this database.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>cascadeDelete</b></td>
         <td>boolean</td>
         <td>
-          <br/>
+          TODO<br/>
           <br/>
             <i>Default</i>: false<br/>
         </td>
@@ -110,21 +110,21 @@ Database is the Schema for the databases API
         <td><b><a href="#databasespecextensionsindex">extensions</a></b></td>
         <td>[]object</td>
         <td>
-          <br/>
+          List of extensions for this database.<br/>
         </td>
         <td>false</td>
       </tr><tr>
         <td><b>owner</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Define the owner of the database.<br/>
         </td>
         <td>false</td>
       </tr><tr>
         <td><b>preventDeletion</b></td>
         <td>boolean</td>
         <td>
-          <br/>
+          TODO<br/>
           <br/>
             <i>Default</i>: true<br/>
         </td>
@@ -138,7 +138,7 @@ Database is the Schema for the databases API
 
 
 
-A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+Narrow down the namespaces for the previously matched instances.
 
 <table>
     <thead>
@@ -213,7 +213,7 @@ A label selector requirement is a selector that contains values, a key, and an o
 
 
 
-A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+Define which instances shall be managed by kubepost for this database.
 
 <table>
     <thead>
@@ -303,14 +303,14 @@ A label selector requirement is a selector that contains values, a key, and an o
         <td><b>name</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Name of the extensions that shall be managed within the database.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>version</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Version of the extension.<br/>
           <br/>
             <i>Default</i>: latest<br/>
         </td>

@@ -87,42 +87,42 @@ InstanceSpec defines the desired state of Instance
         <td><b>database</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Database of the PostgreSQL instance. This database is used by kubepost to connect to the PostgreSQL instance.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>host</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Host of the PostgreSQL instance<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b><a href="#instancespecpassword">password</a></b></td>
         <td>object</td>
         <td>
-          SecretKeySelector selects a key of a Secret.<br/>
+          Kubernetes secret reference for the password, that will be used by kubepost to connect to the PostgreSQL instance.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>port</b></td>
         <td>integer</td>
         <td>
-          <br/>
+          Port of the PostgreSQL instance<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b><a href="#instancespecusername">username</a></b></td>
         <td>object</td>
         <td>
-          SecretKeySelector selects a key of a Secret.<br/>
+          Kubernetes secret reference for the username, that will be used by kubepost to connect to the PostgreSQL instance.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>sslMode</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Connection mode that kubepost will use to connect to the instance.<br/>
           <br/>
             <i>Default</i>: prefer<br/>
         </td>
@@ -136,7 +136,7 @@ InstanceSpec defines the desired state of Instance
 
 
 
-SecretKeySelector selects a key of a Secret.
+Kubernetes secret reference for the password, that will be used by kubepost to connect to the PostgreSQL instance.
 
 <table>
     <thead>
@@ -177,7 +177,7 @@ SecretKeySelector selects a key of a Secret.
 
 
 
-SecretKeySelector selects a key of a Secret.
+Kubernetes secret reference for the username, that will be used by kubepost to connect to the PostgreSQL instance.
 
 <table>
     <thead>

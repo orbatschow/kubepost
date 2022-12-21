@@ -48,8 +48,6 @@ def main():
     # kustomization path
     kustomization_path = os.path.join(repo_dir, 'build', 'config', 'default', 'kustomization.yaml')
 
-    # compute the docker tag
-
     # compute changes for root kustomization
     data = compute_release_kustomization(kustomization_path, git_tag)
 

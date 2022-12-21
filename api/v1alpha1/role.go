@@ -5,66 +5,86 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // RoleSpec defines the desired state of Role
 type RoleSpec struct {
-	InstanceSelector          metav1.LabelSelector `json:"instanceSelector"`
+	// Define which instances shall be managed by kubepost for this role.
+	InstanceSelector metav1.LabelSelector `json:"instanceSelector"`
+	// Narrow down the namespaces for the previously matched instances.
 	InstanceNamespaceSelector metav1.LabelSelector `json:"instanceNamespaceSelector"`
 
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:default:=true
+	// TODO
 	PreventDeletion bool `json:"preventDeletion"`
 
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:default:=false
+	// TODO
 	CascadeDelete bool `json:"cascadeDelete"`
 
 	//+kubebuilder:validation:Optional
+	// Options that shall be applied to this role. Important: Options that are simply removed from the kubepost role
+	// will not be removed from the PostgreSQL role.
+	// E.g.: Granting "SUPERUSER" and then removing the option won't cause kubepost to remove this option from
+	// the role. You have to set the option "NOSUPERUSER".
 	Options []string `json:"options"`
 
 	//+kubebuilder:validation:Optional
+	// Kubernetes secret reference, that is used to set a password for the role.
 	Password *v1.SecretKeySelector `json:"password"`
 
 	//+kubebuilder:validation:Optional
+	// Grants that shall be applied to this role.
 	Grants []Grant `json:"grants"`
 
 	//+kubebuilder:validation:Optional
+	// Groups that shall be applied to this role.
 	Groups []GroupGrantObject `json:"groups"`
 }
 
 type Grant struct {
-	Database string        `json:"database"`
-	Objects  []GrantObject `json:"objects"`
+	// Define which database shall the grant be applied to.
+	Database string `json:"database"`
+	// Define the granular grants within the database.
+	Objects []GrantObject `json:"objects"`
 }
 
 type GroupGrantObject struct {
 	// +kubebuilder:validation:Required
+	// Define the name of the group.
 	Name string `json:"name"`
 	//+kubebuilder:default:=false
+	// Define whether the `WITH ADMIN OPTION` shall be granted. More information can be found within
+	// the official [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html) documentation.
 	WithAdminOption bool `json:"withAdminOption"`
 }
 
 type GrantObject struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=VIEW;COLUMN;TABLE;SCHEMA;FUNCTION;SEQUENCE
+	// Define the type that the grant shall be applied to.
 	Type string `json:"type"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:=public
+	// Define the schema that the grant shall be applied to.
 	Schema string `json:"schema"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:=''
+	// TODO
 	Table string `json:"table"`
 
 	// +kubebuilder:validation:Required
+	// Name of the PostgreSQL object (VIEW;COLUMN;TABLE;SCHEMA;FUNCTION;SEQUENCE) that the grant shall be applied to.
 	Identifier string `json:"identifier"`
 
 	// +kubebuilder:validation:Optional
+	// Define the privileges for the grant.
 	Privileges []Privilege `json:"privileges"`
 	//+kubebuilder:validation:Optional
+	// Define whether the `WITH GRANT OPTION` shall be granted. More information can be found within
+	// the official [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html) documentation.
 	WithGrantOption bool `json:"withGrantOption"`
 }
 

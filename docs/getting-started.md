@@ -92,7 +92,7 @@ This will create a new kubepost `Instance`, that can be used at a later stage. N
 requires a label to be useful. Whenever we create another kubepost resource at a later point we can reference
 the instance above via the label and kubepost will connect to the configured PostgreSQL instance.
 
-A more detailed explanation of the `Instance` resource can be found within the [instance](instance.md) documentation.
+A more detailed specification of the `Instance` resource can be found within the [instance](instance.md) documentation.
 
 ## Role
 
@@ -136,7 +136,7 @@ and grant/revoke the differences.
 > that still owns a database will cause kubepost to fail. The operator will log these errors and you can remove the
 > database beforehand.
 
-A more detailed explanation of the `Role` resource can be found within the [role](role.md) documentation.
+A more detailed specification of the `Role` resource can be found within the [role](role.md) documentation.
 
 ## Database
 
@@ -165,4 +165,4 @@ This resource will cause kubepost to search for an instance with label `kubepost
 that have an assigned label `default`. For all matching instances it will grab the connection details, connect
 to the `postgres` database and create the database and extensions.
 
-A more detailed explanation of the `Database` resource can be found within the [database](database.md) documentation.
+A more detailed specification of the `Database` resource can be found within the [database](database.md) documentation.

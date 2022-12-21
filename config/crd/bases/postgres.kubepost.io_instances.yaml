@@ -36,11 +36,15 @@ spec:
             description: InstanceSpec defines the desired state of Instance
             properties:
               database:
+                description: Database of the PostgreSQL instance. This database is
+                  used by kubepost to connect to the PostgreSQL instance.
                 type: string
               host:
+                description: Host of the PostgreSQL instance
                 type: string
               password:
-                description: SecretKeySelector selects a key of a Secret.
+                description: Kubernetes secret reference for the password, that will
+                  be used by kubepost to connect to the PostgreSQL instance.
                 properties:
                   key:
                     description: The key of the secret to select from.  Must be a
@@ -58,12 +62,16 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               port:
+                description: Port of the PostgreSQL instance
                 type: integer
               sslMode:
                 default: prefer
+                description: Connection mode that kubepost will use to connect to
+                  the instance.
                 type: string
               username:
-                description: SecretKeySelector selects a key of a Secret.
+                description: Kubernetes secret reference for the username, that will
+                  be used by kubepost to connect to the PostgreSQL instance.
                 properties:
                   key:
                     description: The key of the secret to select from.  Must be a

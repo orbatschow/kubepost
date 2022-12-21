@@ -37,18 +37,26 @@ spec:
             properties:
               cascadeDelete:
                 default: false
+                description: TODO
                 type: boolean
               grants:
+                description: Grants that shall be applied to this role.
                 items:
                   properties:
                     database:
+                      description: Define which database shall the grant be applied
+                        to.
                       type: string
                     objects:
+                      description: Define the granular grants within the database.
                       items:
                         properties:
                           identifier:
+                            description: Name of the PostgreSQL object (VIEW;COLUMN;TABLE;SCHEMA;FUNCTION;SEQUENCE)
+                              that the grant shall be applied to.
                             type: string
                           privileges:
+                            description: Define the privileges for the grant.
                             items:
                               enum:
                               - ALL
@@ -69,11 +77,16 @@ spec:
                             type: array
                           schema:
                             default: public
+                            description: Define the schema that the grant shall be
+                              applied to.
                             type: string
                           table:
                             default: ''''''
+                            description: TODO
                             type: string
                           type:
+                            description: Define the type that the grant shall be applied
+                              to.
                             enum:
                             - VIEW
                             - COLUMN
@@ -83,6 +96,10 @@ spec:
                             - SEQUENCE
                             type: string
                           withGrantOption:
+                            description: Define whether the `WITH GRANT OPTION` shall
+                              be granted. More information can be found within the
+                              official [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html)
+                              documentation.
                             type: boolean
                         required:
                         - identifier
@@ -95,12 +112,18 @@ spec:
                   type: object
                 type: array
               groups:
+                description: Groups that shall be applied to this role.
                 items:
                   properties:
                     name:
+                      description: Define the name of the group.
                       type: string
                     withAdminOption:
                       default: false
+                      description: Define whether the `WITH ADMIN OPTION` shall be
+                        granted. More information can be found within the official
+                        [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html)
+                        documentation.
                       type: boolean
                   required:
                   - name
@@ -108,10 +131,8 @@ spec:
                   type: object
                 type: array
               instanceNamespaceSelector:
-                description: A label selector is a label query over a set of resources.
-                  The result of matchLabels and matchExpressions are ANDed. An empty
-                  label selector matches all objects. A null label selector matches
-                  no objects.
+                description: Narrow down the namespaces for the previously matched
+                  instances.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
@@ -156,10 +177,8 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               instanceSelector:
-                description: A label selector is a label query over a set of resources.
-                  The result of matchLabels and matchExpressions are ANDed. An empty
-                  label selector matches all objects. A null label selector matches
-                  no objects.
+                description: Define which instances shall be managed by kubepost for
+                  this role.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
@@ -204,11 +223,17 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               options:
+                description: 'Options that shall be applied to this role. Important:
+                  Options that are simply removed from the kubepost role will not
+                  be removed from the PostgreSQL role. E.g.: Granting "SUPERUSER"
+                  and then removing the option won''t cause kubepost to remove this
+                  option from the role. You have to set the option "NOSUPERUSER".'
                 items:
                   type: string
                 type: array
               password:
-                description: SecretKeySelector selects a key of a Secret.
+                description: Kubernetes secret reference, that is used to set a password
+                  for the role.
                 properties:
                   key:
                     description: The key of the secret to select from.  Must be a
@@ -227,6 +252,7 @@ spec:
                 x-kubernetes-map-type: atomic
               preventDeletion:
                 default: true
+                description: TODO
                 type: boolean
             required:
             - instanceNamespaceSelector

@@ -87,21 +87,21 @@ RoleSpec defines the desired state of Role
         <td><b><a href="#rolespecinstancenamespaceselector">instanceNamespaceSelector</a></b></td>
         <td>object</td>
         <td>
-          A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.<br/>
+          Narrow down the namespaces for the previously matched instances.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b><a href="#rolespecinstanceselector">instanceSelector</a></b></td>
         <td>object</td>
         <td>
-          A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.<br/>
+          Define which instances shall be managed by kubepost for this role.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>cascadeDelete</b></td>
         <td>boolean</td>
         <td>
-          <br/>
+          TODO<br/>
           <br/>
             <i>Default</i>: false<br/>
         </td>
@@ -110,35 +110,35 @@ RoleSpec defines the desired state of Role
         <td><b><a href="#rolespecgrantsindex">grants</a></b></td>
         <td>[]object</td>
         <td>
-          <br/>
+          Grants that shall be applied to this role.<br/>
         </td>
         <td>false</td>
       </tr><tr>
         <td><b><a href="#rolespecgroupsindex">groups</a></b></td>
         <td>[]object</td>
         <td>
-          <br/>
+          Groups that shall be applied to this role.<br/>
         </td>
         <td>false</td>
       </tr><tr>
         <td><b>options</b></td>
         <td>[]string</td>
         <td>
-          <br/>
+          Options that shall be applied to this role. Important: Options that are simply removed from the kubepost role will not be removed from the PostgreSQL role. E.g.: Granting "SUPERUSER" and then removing the option won't cause kubepost to remove this option from the role. You have to set the option "NOSUPERUSER".<br/>
         </td>
         <td>false</td>
       </tr><tr>
         <td><b><a href="#rolespecpassword">password</a></b></td>
         <td>object</td>
         <td>
-          SecretKeySelector selects a key of a Secret.<br/>
+          Kubernetes secret reference, that is used to set a password for the role.<br/>
         </td>
         <td>false</td>
       </tr><tr>
         <td><b>preventDeletion</b></td>
         <td>boolean</td>
         <td>
-          <br/>
+          TODO<br/>
           <br/>
             <i>Default</i>: true<br/>
         </td>
@@ -152,7 +152,7 @@ RoleSpec defines the desired state of Role
 
 
 
-A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+Narrow down the namespaces for the previously matched instances.
 
 <table>
     <thead>
@@ -227,7 +227,7 @@ A label selector requirement is a selector that contains values, a key, and an o
 
 
 
-A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.
+Define which instances shall be managed by kubepost for this role.
 
 <table>
     <thead>
@@ -317,14 +317,14 @@ A label selector requirement is a selector that contains values, a key, and an o
         <td><b>database</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Define which database shall the grant be applied to.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b><a href="#rolespecgrantsindexobjectsindex">objects</a></b></td>
         <td>[]object</td>
         <td>
-          <br/>
+          Define the granular grants within the database.<br/>
         </td>
         <td>true</td>
       </tr></tbody>
@@ -351,14 +351,14 @@ A label selector requirement is a selector that contains values, a key, and an o
         <td><b>identifier</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Name of the PostgreSQL object (VIEW;COLUMN;TABLE;SCHEMA;FUNCTION;SEQUENCE) that the grant shall be applied to.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>type</b></td>
         <td>enum</td>
         <td>
-          <br/>
+          Define the type that the grant shall be applied to.<br/>
           <br/>
             <i>Enum</i>: VIEW, COLUMN, TABLE, SCHEMA, FUNCTION, SEQUENCE<br/>
         </td>
@@ -367,14 +367,14 @@ A label selector requirement is a selector that contains values, a key, and an o
         <td><b>privileges</b></td>
         <td>[]enum</td>
         <td>
-          <br/>
+          Define the privileges for the grant.<br/>
         </td>
         <td>false</td>
       </tr><tr>
         <td><b>schema</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Define the schema that the grant shall be applied to.<br/>
           <br/>
             <i>Default</i>: public<br/>
         </td>
@@ -383,7 +383,7 @@ A label selector requirement is a selector that contains values, a key, and an o
         <td><b>table</b></td>
         <td>string</td>
         <td>
-          <br/>
+          TODO<br/>
           <br/>
             <i>Default</i>: ''<br/>
         </td>
@@ -392,7 +392,7 @@ A label selector requirement is a selector that contains values, a key, and an o
         <td><b>withGrantOption</b></td>
         <td>boolean</td>
         <td>
-          <br/>
+          Define whether the `WITH GRANT OPTION` shall be granted. More information can be found within the official [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html) documentation.<br/>
         </td>
         <td>false</td>
       </tr></tbody>
@@ -419,14 +419,14 @@ A label selector requirement is a selector that contains values, a key, and an o
         <td><b>name</b></td>
         <td>string</td>
         <td>
-          <br/>
+          Define the name of the group.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>withAdminOption</b></td>
         <td>boolean</td>
         <td>
-          <br/>
+          Define whether the `WITH ADMIN OPTION` shall be granted. More information can be found within the official [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html) documentation.<br/>
           <br/>
             <i>Default</i>: false<br/>
         </td>
@@ -440,7 +440,7 @@ A label selector requirement is a selector that contains values, a key, and an o
 
 
 
-SecretKeySelector selects a key of a Secret.
+Kubernetes secret reference, that is used to set a password for the role.
 
 <table>
     <thead>

@@ -79,13 +79,8 @@ kubectl delete -f deploy/bundle.yaml
 
 ## Contributing
 
-Many files (documentation, manifests, ...) in this repository are
-auto-generated. E.g. `deploy/bundle.yaml` originates from the *yaml* files in
-`/config`. Before proposing a pull request:
+Contributions are always welcome, have a look at the [contributing](docs/contributing.md) guidelines to get started.
 
-1. Commit your changes.
-2. Run `make generate`.
-3. Commit the generated changes.
 
 ## Troubleshooting
 

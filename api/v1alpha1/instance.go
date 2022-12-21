@@ -7,13 +7,19 @@ import (
 
 // InstanceSpec defines the desired state of Instance
 type InstanceSpec struct {
-	Host     string                `json:"host"`
-	Port     int                   `json:"port"`
-	Database string                `json:"database"`
+	// Host of the PostgreSQL instance
+	Host string `json:"host"`
+	// Port of the PostgreSQL instance
+	Port int `json:"port"`
+	// Database of the PostgreSQL instance. This database is used by kubepost to connect to the PostgreSQL instance.
+	Database string `json:"database"`
+	// Kubernetes secret reference for the username, that will be used by kubepost to connect to the PostgreSQL instance.
 	Username *v1.SecretKeySelector `json:"username"`
+	// Kubernetes secret reference for the password, that will be used by kubepost to connect to the PostgreSQL instance.
 	Password *v1.SecretKeySelector `json:"password"`
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:default:=prefer
+	// Connection mode that kubepost will use to connect to the instance.
 	SSLMode string `json:"sslMode"`
 }
 
