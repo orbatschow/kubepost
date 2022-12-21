@@ -38,7 +38,7 @@ to specific resources and ensure that the desired PostgreSQL match these resourc
 
 * **`Database`**, which defines a PostgreSQL database and its extensions, that shall be managed by kubepost.
 
-The Prometheus operator automatically detects changes in the Kubernetes API server to any of the above objects, and
+The kubepost operator automatically detects changes in the Kubernetes API server to any of the above objects, and
 ensures that matching PostgreSQL objects are kept in sync.
 
 To learn more about the CRDs introduced by kubepost have a look at the [getting started](docs/getting-started.md) guide.
