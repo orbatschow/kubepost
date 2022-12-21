@@ -97,9 +97,6 @@ Before creating a new issue please check the whole [documentation](docs).
 
 Contributions are always welcome, have a look at the [contributing](docs/contributing.md) guidelines to get started.
 
-<a href="https://github.com/orbatschow/kubepost/graphs/contributors"><img src="https://opencollective.com/swag/contributors.svg?width=890&button=false" /></a>
-
-
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a link to your website.
