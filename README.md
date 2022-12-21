@@ -34,9 +34,9 @@ to specific resources and ensure that the desired PostgreSQL match these resourc
 
 * **`Instance`**, which defines one or multiple PostgreSQL instances, that shall be managed by kubepost.
 
-* **`Role`**, which defines a PostgreSQL role, that shall be managed by kubepost.
+* **`Role`**, which defines a PostgreSQL role and its permissions, that shall be managed by kubepost.
 
-* **`Database`**, which defines a PostgreSQL database, that shall be managed by kubepost.
+* **`Database`**, which defines a PostgreSQL database and its extensions, that shall be managed by kubepost.
 
 The Prometheus operator automatically detects changes in the Kubernetes API server to any of the above objects, and
 ensures that matching PostgreSQL objects are kept in sync.
