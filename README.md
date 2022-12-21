@@ -96,3 +96,10 @@ Contributions are always welcome, have a look at the [contributing](docs/contrib
 ## Troubleshooting
 
 Before creating a new issue please check the whole [documentation](docs).
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website.
+
+<a href="https://github.com/stackitcloud" target="_blank"><img src="https://avatars.githubusercontent.com/u/55577607?s=200&v=4"></a>
