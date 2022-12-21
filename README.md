@@ -1,13 +1,28 @@
 # kubepost
 
+<div style="display: flex; flex-direction: row; margin-bottom: 20px">
+    <div style="flex: 1 1 auto; margin-right: 50px">
+        <a href="https://github.com/orbatschow/kubepost/actions/workflows/default.yaml" target="_blank" rel="noopener"><img src="https://img.shields.io/github/actions/workflow/status/orbatschow/kubepost/default.yaml" alt="build" /></a>
+        <a href="https://github.com/orbatschow/kubepost/releases" target="_blank" rel="noopener"><img src="https://img.shields.io/github/release/orbatschow/kubepost.svg" alt="Latest releases" /></a>
+        <a href="https://github.com/orbatschow/kubepost/blob/master/LICENSE" target="_blank" rel="noopener"><img src="https://img.shields.io/github/license/orbatschow/kubepost" /></a>
+    <div>
+        </br>
+        The kubepost operator provides [Kubernetes](https://kubernetes.io/) native deployment and management of
+        <a href="https://www.postgresql.org/">PostgreSQL</a> objects. The purpose of this project is to
+        simplify and automate the configuration of PostgreSQL objects.
+        </br></br>
+    </div>
+    </div>
+    <div>
+        <img style="flex-direction: column" alt="kubepost" width="180px" src="assets/gopher.png">
+    </div>
+</div>
+
 **Project status: *beta*** Not all planned features are completed. The API, spec, status and other user facing objects
 may change, but in a backward compatible way.
 
-## Overview
 
-The kubepost operator provides [Kubernetes](https://kubernetes.io/) native deployment and management of
-[PostgreSQL](https://www.postgresql.org/) objects. The purpose of this project is to
-simplify and automate the configuration of PostgreSQL objects.
+## Features
 
 The kubepost operator implements, but is not limited to, the following features:
 
