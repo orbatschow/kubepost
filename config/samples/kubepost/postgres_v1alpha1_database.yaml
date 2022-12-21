@@ -1,0 +1,16 @@
+apiVersion: postgres.kubepost.io/v1alpha1
+kind: Database
+metadata:
+  name: kubepost
+spec:
+  instanceSelector:
+    matchLabels:
+      instance: kubepost
+  instanceNamespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: default
+  owner: kubepost
+  extensions:
+    - name: pg_stat_statements
+      version: "1.7"
+    - name: postgres_fdw

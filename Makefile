@@ -6,27 +6,25 @@
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
-.PHONY: all
-all: build
-
 ## location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
-
-######################################################
-# variables
-######################################################
-# image URL to use all building/pushing image targets
+# image url to use all building/pushing image targets
 IMG ?= controller:latest
 
-# controller generator version
+# controller generator binary and version
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 CONTROLLER_TOOLS_VERSION ?= v0.9.2
 
+# crdoc binary and version
+CRDOC ?= $(LOCALBIN)/crdoc
+CRDOC_VERSION ?= v0.6.1
+
 # golang ci linter version to use for linting targets
-GOLANGCI_VERSION = 1.49.0
+GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint
+GOLANGCI_LINT_VERSION ?= v1.50.1
 
 
 ######################################################
@@ -35,6 +33,18 @@ GOLANGCI_VERSION = 1.49.0
 .PHONY: clean
 clean:
 	rm -rf build
+
+.PHONY: crdoc
+crdoc:
+	test -s $(CRDOC) || GOBIN=$(LOCALBIN) go install fybrik.io/crdoc@$(CRDOC_VERSION)
+
+.PHONY: controller-gen
+controller-gen:
+	test -s $(CONTROLLER_GEN) || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
+
+.PHONY: golangci-lint
+golangci-lint:
+	test -s $(GOLANGCI_LINT) || GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 
 
 ######################################################
@@ -64,26 +74,13 @@ build: generate ## build manager binary.
 run: manifests generate fmt vet ## run a controller from your host
 	go run ./main.go
 
-######################################################
-# validate
-######################################################
-.PHONY: validate-image-tag
-validate-image-tag: ## validate the contents of the bundle.yaml
-	python scripts/validate-tag.py
 
 ######################################################
 # lint
 ######################################################
-bin/golangci-lint: bin/golangci-lint-$(GOLANGCI_VERSION)
-	@ln -sf golangci-lint-$(GOLANGCI_VERSION) $@
-
-bin/golangci-lint-$(GOLANGCI_VERSION):
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v$(GOLANGCI_VERSION)
-	@mv bin/golangci-lint $@
-
 .PHONY: lint
-lint: bin/golangci-lint out download ## lint all code with golangci-lint
-	bin/golangci-lint run ./... --timeout 15m0s
+lint: golangci-lint  ## lint all code with golangci-lint
+	$(GOLANGCI_LINT) run ./... --timeout 15m0s
 
 
 ######################################################
@@ -120,22 +117,27 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+# all
 .PHONY: generate
-generate: generate-manifests generate-client
+generate: generate-manifests generate-crd-documentation generate-client
 
+# manifests
 .PHONY: generate-manifests
 generate-manifests: controller-gen ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	kustomize build config/default > deploy/bundle.yaml
 
+# client
 .PHONY: generate-client
 generate-client: controller-gen ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
-.PHONY: controller-gen
-controller-gen: $(CONTROLLER_GEN) ## download controller-gen locally if necessary
-$(CONTROLLER_GEN): $(LOCALBIN)
-	test -s $(LOCALBIN)/controller-gen || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
+# documentation
+.PHONY: generate-crd-documentation
+generate-crd-documentation: crdoc generate-manifests
+	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_instances.yaml --output docs/instance.md
+	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_roles.yaml --output docs/role.md
+	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_databases.yaml --output docs/database.md
 
 
 ######################################################
@@ -146,21 +148,12 @@ ifndef ignore-not-found
 endif
 
 .PHONY: install
-install: manifests kustomize ## install CRDs into the K8s cluster specified in ~/.kube/config
+install: generate ## install CRDs into the K8s cluster specified in ~/.kube/config
 	kustomize build config/crd | kubectl apply -f -
 
 .PHONY: uninstall
-uninstall: manifests kustomize ## uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion
+uninstall: generate ## uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion
 	kustomize build config/crd | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
-
-.PHONY: deploy
-deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	kustomize build config/default | kubectl apply -f -
-
-.PHONY: undeploy
-undeploy: ## undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion
-	kustomize build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
 
 ######################################################

@@ -1,94 +1,92 @@
 # kubepost
-// TODO(user): Add simple overview of use/purpose
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+**Project status: *beta*** Not all planned features are completed. The API, spec, status and other user facing objects
+may change, but in a backward compatible way.
 
-## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
-**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+## Overview
 
-### Running on the cluster
-1. Install Instances of Custom Resources:
+The kubepost operator provides [Kubernetes](https://kubernetes.io/) native deployment and management of
+[PostgreSQL](https://www.postgresql.org/) objects. The purpose of this project is to
+simplify and automate the configuration of a PostgreSQL objects.
+
+The kubepost operator includes, but is not limited to, the following features:
+
+* **Role**: Manage PostgreSQL [roles](https://www.postgresql.org/docs/current/user-manag.htm).
+
+* **Database**: Manage PostgresSQL [databases](https://www.postgresql.org/docs/current/managing-databases.html) and
+  their [extensions](https://www.postgresql.org/docs/current/external-extensions.html).
+
+## Prerequisites
+
+**Note:** This compatibility matrix is at the moment not tested, it is only provided based on personal experience.
+Therefore, it may also be possible, that other combinations are working properly.
+
+| Kubernetes | PostgreSQL | kubepost |
+|------------|------------|----------|
+| 1.24       | 12,13,14   | 1.0.0    |
+| 1.25       | 12,13,14   | 1.0.0    |
+
+## CustomResourceDefinitions
+
+A core feature of kubepost is to monitor the Kubernetes API server for changes
+to specific resources and ensure that the desired PostgreSQL match these resources.
+
+* **`Instance`**, which defines one or multiple PostgreSQL instances, that shall be managed by kubepost.
+
+* **`Role`**, which defines a PostgreSQL role, that shall be managed by kubepost.
+
+* **`Database`**, which defines a PostgreSQL database, that shall be managed by kubepost.
+
+The Prometheus operator automatically detects changes in the Kubernetes API server to any of the above objects, and
+ensures that matching PostgreSQL objects are kept in sync.
+
+To learn more about the CRDs introduced by kubepost have a look at the [specification](docs/getting-started.md).
+
+## Quickstart
+
+**Note:** this quickstart does provision the kubepost stack, required to access all features of kubepost.
 
 ```sh
-kubectl apply -f config/samples/
+kubectl apply -f deploy/bundle.yaml
 ```
 
-2. Build and push your image to the location specified by `IMG`:
-	
-```sh
-make docker-build docker-push IMG=<some-registry>/kubepost:tag
-```
-	
-3. Deploy the controller to the cluster with the image specified by `IMG`:
+> Note: `deploy/bundle.yaml` may be unstable, if you plan to run kubepost in production please use a tagged release.
+
+Tagged versions can be installed using the following command:
 
 ```sh
-make deploy IMG=<some-registry>/kubepost:tag
+kubectl apply -f deploy/bundle.yaml TODO
 ```
 
-### Uninstall CRDs
-To delete the CRDs from the cluster:
+> Note: The tag used above might not be pointing to the latest release. Check the git tags within this repository to
+> get the latest tag.
+
+## Removal
+
+To remove the operator, first delete any custom resources you created in each namespace.
 
 ```sh
-make uninstall
+for n in $(kubectl get namespaces -o jsonpath={..metadata.name}); do
+  kubectl delete --all --namespace=$n roles.postgres.kubepost.io,instances.postgres.kubepost.io,databases.postgres.kubepost.io
+done
 ```
 
-### Undeploy controller
-UnDeploy the controller to the cluster:
+After a couple of minutes you can go ahead and remove the operator itself.
 
 ```sh
-make undeploy
+kubectl delete -f deploy/bundle.yaml
 ```
 
 ## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
 
-### How it works
-This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+Many files (documentation, manifests, ...) in this repository are
+auto-generated. E.g. `deploy/bundle.yaml` originates from the *yaml* files in
+`/config`. Before proposing a pull request:
 
-It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) 
-which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster 
+1. Commit your changes.
+2. Run `make generate`.
+3. Commit the generated changes.
 
-### Test It Out
-1. Install the CRDs into the cluster:
+## Troubleshooting
 
-```sh
-make install
-```
-
-2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
-
-```sh
-make run
-```
-
-**NOTE:** You can also run this in one step by running: `make install run`
-
-### Modifying the API definitions
-If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
-
-```sh
-make manifests
-```
-
-**NOTE:** Run `make --help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
-
-## License
-
-Copyright 2022.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
+Before creating a new issue please check the whole [documentation](docs).
