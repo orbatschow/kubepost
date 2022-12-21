@@ -24,8 +24,8 @@ Therefore, it may also be possible, that other combinations are working properly
 
 | Kubernetes | PostgreSQL | kubepost |
 |------------|------------|----------|
-| 1.24       | 12,13,14   | 1.0.0    |
-| 1.25       | 12,13,14   | 1.0.0    |
+| 1.24       | 12,13,14   | >=1.0.0  |
+| 1.25       | 12,13,14   | >=1.0.0  |
 
 ## CustomResourceDefinitions
 
