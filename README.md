@@ -89,17 +89,19 @@ After a couple of minutes you can go ahead and remove the operator itself.
 kubectl delete -f deploy/bundle.yaml
 ```
 
+## Troubleshooting
+
+Before creating a new issue please check the whole [documentation](docs).
+
 ## Contributing
 
 Contributions are always welcome, have a look at the [contributing](docs/contributing.md) guidelines to get started.
 
-## Troubleshooting
-
-Before creating a new issue please check the whole [documentation](docs).
+<a href="https://github.com/orbatschow/kubepost/graphs/contributors"><img src="https://opencollective.com/swag/contributors.svg?width=890&button=false" /></a>
 
 
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a link to your website.
 
-<a href="https://github.com/stackitcloud" target="_blank"><img src="https://avatars.githubusercontent.com/u/55577607?s=200&v=4"></a>
+<a href="https://github.com/stackitcloud" target="_blank"><img width="64px" src="https://avatars.githubusercontent.com/u/55577607?s=200&v=4"></a>
