@@ -2,6 +2,11 @@
 
 <img align="right" alt="kubepost" width="180px" src="assets/gopher.png">
 
+<p>
+    <a href="https://github.com/orbatschow/kubepost/actions/workflows/default.yaml" target="_blank" rel="noopener"><img src="https://img.shields.io/github/actions/workflow/status/orbatschow/kubepost/default.yaml" alt="build" /></a>
+    <a href="https://github.com/orbatschow/kubepost/releases" target="_blank" rel="noopener"><img src="https://img.shields.io/github/release/orbatschow/kubepost.svg" alt="Latest releases" /></a>
+    <a href="https://github.com/orbatschow/kubepost/blob/master/LICENSE" target="_blank" rel="noopener"><img src="https://img.shields.io/github/license/orbatschow/kubepost" /></a>
+</p>
 
 The kubepost operator provides [Kubernetes](https://kubernetes.io/) native deployment and management of
 <a href="https://www.postgresql.org/">PostgreSQL</a> objects. The purpose of this project is to
