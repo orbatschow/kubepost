@@ -781,7 +781,7 @@ spec:
         - --leader-elect
         command:
         - /usr/local/bin/kubepost
-        image: controller:latest
+        image: ghcr.io/orbatschow/kubepost
         livenessProbe:
           httpGet:
             path: /healthz
