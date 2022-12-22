@@ -1,0 +1,19 @@
+name: pr
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  quality:
+    uses: ./.github/workflows/quality.yaml
+
+  manifest:
+    uses: ./.github/workflows/manifest.yaml
+
+  docker:
+    needs: [ quality, manifest ]
+    uses: ./.github/workflows/image.yaml
+    with:
+      push: false

@@ -1,0 +1,268 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: roles.postgres.kubepost.io
+spec:
+  group: postgres.kubepost.io
+  names:
+    kind: Role
+    listKind: RoleList
+    plural: roles
+    singular: role
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Role is the Schema for the roles API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RoleSpec defines the desired state of Role
+            properties:
+              cascadeDelete:
+                default: false
+                description: TODO
+                type: boolean
+              connectionNamespaceSelector:
+                description: Narrow down the namespaces for the previously matched
+                  connections.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: A label selector requirement is a selector that
+                        contains values, a key, and an operator that relates the key
+                        and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to
+                            a set of values. Valid operators are In, NotIn, Exists
+                            and DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the
+                            operator is In or NotIn, the values array must be non-empty.
+                            If the operator is Exists or DoesNotExist, the values
+                            array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: matchLabels is a map of {key,value} pairs. A single
+                      {key,value} in the matchLabels map is equivalent to an element
+                      of matchExpressions, whose key field is "key", the operator
+                      is "In", and the values array contains only "value". The requirements
+                      are ANDed.
+                    type: object
+                type: object
+                x-kubernetes-map-type: atomic
+              connectionSelector:
+                description: Define which connections shall be used by kubepost for
+                  this role.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: A label selector requirement is a selector that
+                        contains values, a key, and an operator that relates the key
+                        and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to
+                            a set of values. Valid operators are In, NotIn, Exists
+                            and DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the
+                            operator is In or NotIn, the values array must be non-empty.
+                            If the operator is Exists or DoesNotExist, the values
+                            array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: matchLabels is a map of {key,value} pairs. A single
+                      {key,value} in the matchLabels map is equivalent to an element
+                      of matchExpressions, whose key field is "key", the operator
+                      is "In", and the values array contains only "value". The requirements
+                      are ANDed.
+                    type: object
+                type: object
+                x-kubernetes-map-type: atomic
+              grants:
+                description: Grants that shall be applied to this role.
+                items:
+                  properties:
+                    database:
+                      description: Define which database shall the grant be applied
+                        to.
+                      type: string
+                    objects:
+                      description: Define the granular grants within the database.
+                      items:
+                        properties:
+                          identifier:
+                            description: Name of the PostgreSQL object (VIEW;COLUMN;TABLE;SCHEMA;FUNCTION;SEQUENCE)
+                              that the grant shall be applied to.
+                            type: string
+                          privileges:
+                            description: Define the privileges for the grant.
+                            items:
+                              enum:
+                              - ALL
+                              - SELECT
+                              - INSERT
+                              - UPDATE
+                              - DELETE
+                              - TRUNCATE
+                              - REFERENCES
+                              - TRIGGER
+                              - USAGE
+                              - CREATE
+                              - CONNECT
+                              - TEMPORARY
+                              - TEMP
+                              - EXECUTE
+                              type: string
+                            type: array
+                          schema:
+                            default: public
+                            description: Define the schema that the grant shall be
+                              applied to.
+                            type: string
+                          table:
+                            default: ''''''
+                            description: TODO
+                            type: string
+                          type:
+                            description: Define the type that the grant shall be applied
+                              to.
+                            enum:
+                            - VIEW
+                            - COLUMN
+                            - TABLE
+                            - SCHEMA
+                            - FUNCTION
+                            - SEQUENCE
+                            type: string
+                          withGrantOption:
+                            description: Define whether the `WITH GRANT OPTION` shall
+                              be granted. More information can be found within the
+                              official [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html)
+                              documentation.
+                            type: boolean
+                        required:
+                        - identifier
+                        - type
+                        type: object
+                      type: array
+                  required:
+                  - database
+                  - objects
+                  type: object
+                type: array
+              groups:
+                description: Groups that shall be applied to this role.
+                items:
+                  properties:
+                    name:
+                      description: Define the name of the group.
+                      type: string
+                    withAdminOption:
+                      default: false
+                      description: Define whether the `WITH ADMIN OPTION` shall be
+                        granted. More information can be found within the official
+                        [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html)
+                        documentation.
+                      type: boolean
+                  required:
+                  - name
+                  - withAdminOption
+                  type: object
+                type: array
+              options:
+                description: 'Options that shall be applied to this role. Important:
+                  Options that are simply removed from the kubepost role will not
+                  be removed from the PostgreSQL role. E.g.: Granting "SUPERUSER"
+                  and then removing the option won''t cause kubepost to remove this
+                  option from the role. You have to set the option "NOSUPERUSER".'
+                items:
+                  type: string
+                type: array
+              password:
+                description: Kubernetes secret reference, that is used to set a password
+                  for the role.
+                properties:
+                  key:
+                    description: The key of the secret to select from.  Must be a
+                      valid secret key.
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                  optional:
+                    description: Specify whether the Secret or its key must be defined
+                    type: boolean
+                required:
+                - key
+                type: object
+                x-kubernetes-map-type: atomic
+              preventDeletion:
+                default: true
+                description: TODO
+                type: boolean
+            required:
+            - connectionNamespaceSelector
+            - connectionSelector
+            type: object
+          status:
+            description: RoleStatus defines the observed state of Role
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,20 @@
+name: manifest
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: generate
+        run: |
+          make generate-release-manifests
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: manifests
+          path: ${{ github.workspace }}/build/config

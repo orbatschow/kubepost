@@ -1,0 +1,25 @@
+apiVersion: postgres.kubepost.io/v1alpha1
+kind: Role
+metadata:
+  name: kubepost
+  namespace: default
+spec:
+  connectionSelector:
+    matchLabels:
+      instance: default
+  connectionNamespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: default
+  cascadeDelete: false
+  grants:
+    - database: kubepost
+      objects:
+        - identifier: public
+          privileges:
+            - ALL
+          schema: public
+          type: SCHEMA
+          withGrantOption: true
+  options:
+    - SUPERUSER
+  preventDeletion: false

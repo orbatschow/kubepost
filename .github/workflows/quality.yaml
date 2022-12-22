@@ -1,0 +1,48 @@
+name: quality
+
+on:
+  workflow_call:
+
+jobs:
+
+  checksum:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.1'
+
+      - name: checksum
+        run: |
+          make checksum
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.1'
+
+      - name: lint
+        run: |
+          make lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.1'
+
+      - name: test
+        run: |
+          make test

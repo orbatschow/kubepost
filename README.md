@@ -1,208 +1,104 @@
-**This is alpha software, use it on your own risk!**
+# kubepost
 
-# kubepost Operator
+<img align="right" alt="kubepost" width="180px" src="assets/gopher.png">
 
-The kubepost Operator manages various Postgres objects via standard Kubernetes CRDs. It requires
-[Metacontroller](https://github.com/metacontroller/metacontroller) to be installed within the cluster.
+<p>
+    <a href="https://github.com/orbatschow/kubepost/actions/workflows/default.yaml" target="_blank" rel="noopener"><img src="https://img.shields.io/github/actions/workflow/status/orbatschow/kubepost/default.yaml" alt="build" /></a>
+    <a href="https://github.com/orbatschow/kubepost/releases" target="_blank" rel="noopener"><img src="https://img.shields.io/github/release/orbatschow/kubepost.svg" alt="Latest releases" /></a>
+    <a href="https://github.com/orbatschow/kubepost/blob/master/LICENSE" target="_blank" rel="noopener"><img src="https://img.shields.io/github/license/orbatschow/kubepost" /></a>
+</p>
+
+The kubepost operator provides [Kubernetes](https://kubernetes.io/) native deployment and management of
+<a href="https://www.postgresql.org/">PostgreSQL</a> objects. The purpose of this project is to
+simplify and automate the configuration of PostgreSQL objects.
+
+**Project status: *beta*** Not all planned features are completed. The API, spec, status and other user facing objects
+may change, but in a backward compatible way.
 
 ## Features
 
-- Role lifecycle management
-- Database lifecycle management
-- Database extension lifecycle management
-- Permission lifecycle management
+The kubepost operator implements, but is not limited to, the following features:
 
-## PostgreSQL
+* **Role**: Manage PostgreSQL [roles](https://www.postgresql.org/docs/current/user-manag.htm).
 
-At the moment only Postgres 13 is supported, backwards compatibility might be added at a later stage.
+* **Database**: Manage PostgresSQL [databases](https://www.postgresql.org/docs/current/managing-databases.html)
 
-## Installation
+* **Extension** Manage PostgreSQL [extensions](https://www.postgresql.org/docs/current/external-extensions.html)
 
-### Metacontroller
+## Prerequisites
 
-kubepost uses Metacontroller under the hood, so this component hast to be installed within the cluster. You can view
-detailed instructions for the installation
-process [here](https://metacontroller.github.io/metacontroller/guide/install.html).
+**Note:** This compatibility matrix is not tested at the moment, it is only provided based on personal experience.
+Therefore, it may also be possible, that other combinations are working properly.
 
-Create a new kustomization file with the following content:
+| Kubernetes | PostgreSQL | kubepost |
+|------------|------------|----------|
+| 1.24       | 12,13,14   | >=1.0.0  |
+| 1.25       | 12,13,14   | >=1.0.0  |
 
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: metacontroller
+## CustomResourceDefinitions
 
-resources:
-  - github.com/metacontroller/metacontroller/manifests//production
+A core feature of kubepost is to monitor the Kubernetes API server for changes
+to specific resources and ensure that the desired PostgreSQL match these resources.
+
+* **`Connection`**, which defines connections for one or multiple PostgreSQL clusters, that shall be managed by
+  kubepost.
+
+* **`Role`**, which defines a PostgreSQL role and its permissions, that shall be managed by kubepost.
+
+* **`Database`**, which defines a PostgreSQL database and its extensions, that shall be managed by kubepost.
+
+The kubepost operator automatically detects changes in the Kubernetes API server to any of the above objects, and
+ensures that matching PostgreSQL objects are kept in sync.
+
+## Quickstart
+
+### Installation
+
+**Note:** this quickstart does provision the kubepost stack, required to access all features of kubepost.
+
+```sh
+kubectl apply -f deploy/bundle.yaml
 ```
 
-And apply it to the desired cluster:
+> Note: `deploy/bundle.yaml` may be unstable, if you plan to run kubepost in production please use a tagged release.
 
-```shell
-kustomize build . | kubectl apply -f -
+Tagged versions can be installed using the following command:
+
+```sh
+kubectl apply -f https://github.com/orbatschow/kubepost/releases/download/v1.0.0/bundle.yaml
 ```
 
-### kubepost
+> Note: The tag used above might not be pointing to the latest release. Check the git tags within this repository to
+> get the latest tag.
 
-After you have installed metacontroller you have to deploy kubepost. Create a new kustomization file with the following
-content:
+To learn more about the CRDs introduced by kubepost have a look at the [getting started](docs/getting-started.md) guide.
 
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: metacontroller
+### Removal
 
-resources:
-  - github.com/orbatschow/kubepost//manifests
+To remove the operator, first delete any custom resources you created in each namespace.
+
+```sh
+for n in $(kubectl get namespaces -o jsonpath={..metadata.name}); do
+  kubectl delete --all --namespace=$n roles.postgres.kubepost.io,connections.postgres.kubepost.io,databases.postgres.kubepost.io
+done
 ```
 
-And apply it to the desired cluster:
+After a couple of minutes you can go ahead and remove the operator itself.
 
-```shell
-kustomize build . | kubectl apply -f -
+```sh
+kubectl delete -f deploy/bundle.yaml
 ```
 
-## Usage
+## Troubleshooting
 
-### Instance
+Before creating a new issue please check the whole [documentation](docs).
 
-The instance is used by other CRDs to connect to the desired database instance. It allows a clear segregation between
-roles, databases and the instance itself. To connect to the databse it uses a secret that should be available within the
-Kubernetes cluster.
+## Contributing
 
-```yaml
-apiVersion: kubepost.io/v1alpha1
-kind: Instance
-metadata:
-  name: kubepost # this is the instanceRef, used by other CRDs
-spec:
-  host: localhost
-  port: 5432
-  database: postgres
-  secretRef:
-    name: kubepost-instance-credentials
-    userKey: username
-    passwordKey: password
-```
+Contributions are always welcome, have a look at the [contributing](docs/contributing.md) guidelines to get started.
 
-The corresponding secret might look like this:
+## Sponsors
 
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: kubepost-instance-credentials
-data:
-  username: cG9zdGdyZXM=
-  password: cm9vdA==
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website.
 
-```
-
-### Database
-
-This database uses the previously mentioned instance CRD to connect to the database instance and creates a database with
-the name `kubepost`. After the database is created the extension `pg_stat_statements` will be installed.
-
-```yaml
-apiVersion: kubepost.io/v1alpha1
-kind: Database
-metadata:
-  name: kubepost
-spec:
-  databaseName: kubepost
-  databaseOwner: kubepost
-  preventDeletion: false
-  instanceRef:
-    name: kubepost
-  extensions:
-    - name: pg_stat_statements
-      version: "1.8"
-      # if no version is specified, latest will be used
-    - name: postgres_fdw
-```
-
-### Role
-
-This role uses the previously mentioned instance CRD to connect to the database instance and creates a role with the
-name `kubepost`. It then grants this role `ALL PRIVILEGES` on schema `public` in database`kubepost`. The grant section
-is optional.
-
-Completed features:
-- table
-- schema
-- groups
-- sequences
-- functions
-- columns
-- views
-
-```yaml
-apiVersion: kubepost.io/v1alpha1
-kind: Role
-metadata:
-  name: kubepost
-spec:
-  roleName: kubepost
-  preventDeletion: false
-  passwordRef:
-    name: kubepost-role-credentials
-    passwordKey: password
-  instanceRef:
-    name: kubepost
-  options:
-    - SUPERUSER
-    - LOGIN
-
-  # Group section
-  # lists the membership in groups
-  groups:
-    - name: kubepost-admin
-      withAdminOption: true
-  grants:
-    # This field specifies the database to which kubepost will connect for all following grants.
-    - database: kubepost
-
-      # This is an array of database-objects and belonging user previliges.
-      objects:
-        # Schema grant
-          # the identifiert can be chosen like the corresponding identifier in postgres
-          # for example one table with schema: public.test_table
-          # implicitly for finding matching objects the identifier will be used
-          # as a POSIX regex expression
-          # to prevent setting privileges to all objects that contain the identifier
-          # string it will be wrapped like this: ^identifier$ automaticly
-        - identifier: public
-
-          # possible options: ["TABLE", "SCHEMA", "FUNCTION", "SEQUENCE", "ROLE"]
-          # SCHEMA will result in an 'GRANT PREVILIGES TO ALL TABLES IN SCHEMA'
-          # every other option will result in GRANT-Querys similar to:
-          # https://www.postgresql.org/docs/current/sql-grant.html
-          type: SCHEMA
-          
-          # possible options are: 
-          # possible options: ["ALL", "INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]
-          privileges:
-            - ALL
-          
-          # this option can be set if the user should be able to grant this privilige himself
-          withGrantOption: true
-
-        # Table grant
-        - identifier: test
-          schema: public
-          type: TABLE
-          privileges: 
-            - ALL
-          withGrantOption: true
-        
-        # Coloumn grant
-        - identifier: test
-
-          # here you can set the table name to the column
-          # these work with regex aswell
-          table: test
-          schema: public
-          type: TABLE
-          privileges:
-            - ALL
-          withGrantOption: true
-```
+<a href="https://github.com/stackitcloud" target="_blank"><img width="64px" src="https://avatars.githubusercontent.com/u/55577607?s=200&v=4"></a>

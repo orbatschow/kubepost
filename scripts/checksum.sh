@@ -1,37 +1,33 @@
 #!/usr/bin/env bash
 
-set -eu
+ROOT_DIR=$(git rev-parse --show-toplevel)
 
-declare -a current_checksums
-declare -a computed_checksums
+mkdir -p "$ROOT_DIR"/build
 
-# Iterate over files in maifests/crd folder and build checksum
-for file in "$(pwd)"/manifests/crd/*.yaml; do
-	# calculate md5sum
-	checksum=$(md5sum "$file" | awk '{ print $1 }')
+# exclude all hidden directories, bin and build
+find . -type f ! -path './.*/*' ! -path './build/*' ! -path './bin/*' ! -path 'CHANGELOG.md' -exec md5sum "{}" + > build/before.chk
 
-	current_checksums=("${current_checksums[@]}" "$checksum")
-done
+echo "computed pre hashes"
+cat "$ROOT_DIR"/build/before.chk
 
-# recreate all manifests
-make manifests
+(cd "$ROOT_DIR" && make generate-manifests)
+(cd "$ROOT_DIR" && make generate-client)
+(cd "$ROOT_DIR" && make generate-crd-documentation)
 
-# Iterate over new manifests in maifests/crd folder and build the new checksums
-for file in "$(pwd)"/manifests/crd/*.yaml; do
-	# calculate md5sum
-	checksum=$(md5sum "$file" | awk '{ print $1 }')
+# exclude all hidden directories, bin and build
+find . -type f ! -path './.*/*' ! -path './build/*' ! -path './bin/*' ! -path 'CHANGELOG.md' -exec md5sum "{}" + > build/after.chk
 
-	computed_checksums=("${computed_checksums[@]}" "$checksum")
-done
+echo "computed post hashes"
+cat "$ROOT_DIR"/build/after.chk
 
-declare -a difference
+chk1=$(cksum build/before.chk | awk -F" " '{print $1}')
+chk2=$(cksum build/after.chk | awk -F" " '{print $1}')
 
-difference=($(echo "${current_checksums[@]}" "${computed_checksums[@]}" | tr ' ' '\n' | sort | uniq -u))
-
-if [ ${#difference[@]} -eq 0 ]; then
-	echo "checksum computation passed successfully"
-	exit 0
+if [ "$chk1" -eq "$chk2" ]
+then
+  echo "client, custom resource definitions and documentation is up to date, exiting"
+  exit 0
 else
-	echo "checksum computation failed, execute 'make manifests' before pushing code with changed CRD specifications"
-	exit 1
+  echo "client, custom resource definitions or documentation is not up to date, please execute 'make generate'"
+  exit 1
 fi
