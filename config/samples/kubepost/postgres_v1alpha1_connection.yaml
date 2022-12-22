@@ -6,7 +6,7 @@ metadata:
   labels:
     instance: default
 spec:
-  host: postgres.svc.cluster.local
+  host: postgres.postgres.svc.cluster.local
   port: 5432
   database: postgres
   username:

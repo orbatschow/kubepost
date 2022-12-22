@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- update changelog and readme [\#43](https://github.com/orbatschow/kubepost/pull/43) ([orbatschow](https://github.com/orbatschow))
 - Migrate to kubebuilder [\#41](https://github.com/orbatschow/kubepost/pull/41) ([orbatschow](https://github.com/orbatschow))
 - Run release workflow directly [\#38](https://github.com/orbatschow/kubepost/pull/38) ([debfx](https://github.com/debfx))
 - fix pre-check stage [\#35](https://github.com/orbatschow/kubepost/pull/35) ([orbatschow](https://github.com/orbatschow))
