@@ -70,7 +70,7 @@ spec:
         - /usr/local/bin/kubepost
         args:
         - --leader-elect
-        image: controller:latest
+        image: ghcr.io/orbatschow/kubepost
         name: manager
         securityContext:
           allowPrivilegeEscalation: false

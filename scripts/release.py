@@ -20,7 +20,7 @@ def compute_release_kustomization(kustomization_path, git_tag):
 
         patch = [
             {
-                "name": "controller",
+                "name": "ghcr.io/orbatschow/kubepost",
                 "newName": "ghcr.io/orbatschow/kubepost",
                 "newTag": docker_tag
             }
