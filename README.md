@@ -65,7 +65,7 @@ kubectl apply -f deploy/bundle.yaml
 Tagged versions can be installed using the following command:
 
 ```sh
-kubectl apply -f deploy/bundle.yaml TODO
+kubectl apply -f https://github.com/orbatschow/kubepost/releases/download/v1.0.0/bundle.yaml
 ```
 
 > Note: The tag used above might not be pointing to the latest release. Check the git tags within this repository to
