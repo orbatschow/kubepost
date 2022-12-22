@@ -8,12 +8,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// nolint: gocyclo
-// TODO: this can be improved
 func Reconcile(ctx context.Context, ctrlClient client.Client, connections []v1alpha1.Connection, db *v1alpha1.Database) error {
 
 	for i, postgres := range connections {
-
 		// we have to connect to the desired database, so a switch from the connection database is performed here
 		postgres.Spec.Database = db.ObjectMeta.Name
 
@@ -78,7 +75,6 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, connections []v1al
 
 			// delete existing extension if it is not desired
 			if desired != true {
-
 				// check if existingExtension is dependency of other extension
 				childExtensions, err := repository.GetChildExtensions(ctx, &existingExtension)
 

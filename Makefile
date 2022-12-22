@@ -85,7 +85,7 @@ run: manifests generate fmt vet ## run a controller from your host
 ######################################################
 .PHONY: lint
 lint: golangci-lint  ## lint all code with golangci-lint
-	$(GOLANGCI_LINT) run ./... --timeout 15m0s
+	$(GOLANGCI_LINT) run .
 
 
 ######################################################

@@ -32,7 +32,6 @@ func (e RepositoryError) Error() string {
 }
 
 func (r *Repository) List(ctx context.Context) ([]v1alpha1.Extension, error) {
-
 	var extensions []v1alpha1.Extension
 
 	err := pgxscan.Select(

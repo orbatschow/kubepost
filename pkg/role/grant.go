@@ -27,7 +27,6 @@ func (r *Repository) ReconcileGrants(ctx context.Context, ctrlClient client.Clie
 	log.FromContext(ctx).Info("computed databases for grant", "databases", databases)
 
 	for _, database := range databases {
-
 		// we have to connect to all databases to grant/revoke the privileges
 		// therefore we will modify the connection for each database
 		r.connection.Spec.Database = database
@@ -150,11 +149,9 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 }
 
 func (r *Repository) Grant(ctx context.Context, desiredGrants []v1alpha1.GrantObject) error {
-
 	log.FromContext(ctx).Info("reconciling desired grants", "grants", desiredGrants)
 
 	for _, desiredGrant := range desiredGrants {
-
 		query, err := r.createGrantQuery(
 			ctx,
 			&desiredGrant,
@@ -194,11 +191,9 @@ func (r *Repository) Grant(ctx context.Context, desiredGrants []v1alpha1.GrantOb
 }
 
 func (r *Repository) Revoke(ctx context.Context, undesiredGrants []v1alpha1.GrantObject) error {
-
 	log.FromContext(ctx).Info("reconciling undesired grants", "grants", undesiredGrants)
 
 	for _, undesiredGrant := range undesiredGrants {
-
 		query, err := r.createRevokeQuery(
 			ctx,
 			&undesiredGrant,
@@ -238,8 +233,6 @@ func (r *Repository) Revoke(ctx context.Context, undesiredGrants []v1alpha1.Gran
 	return nil
 }
 
-// nolint: gocyclo
-// TODO: this can be improved
 func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, error) {
 
 	var grantObjectsExpanded []v1alpha1.GrantObject

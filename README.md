@@ -23,7 +23,7 @@ The kubepost operator implements, but is not limited to, the following features:
 
 * **Database**: Manage PostgresSQL [databases](https://www.postgresql.org/docs/current/managing-databases.html)
 
-* **Extensions** Manage PostgreSQL [extensions](https://www.postgresql.org/docs/current/external-extensions.html)
+* **Extension** Manage PostgreSQL [extensions](https://www.postgresql.org/docs/current/external-extensions.html)
 
 ## Prerequisites
 

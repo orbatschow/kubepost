@@ -48,7 +48,6 @@ func (r *Repository) Exists(ctx context.Context) (bool, error) {
 	).Scan(&exists)
 
 	if err != nil {
-
 		if err.Error() == "no rows in result set" {
 			return false, nil
 		}
@@ -111,7 +110,6 @@ func (r *Repository) Create(ctx context.Context) error {
 }
 
 func (r *Repository) Delete(ctx context.Context) *RepositoryError {
-
 	_, err := r.conn.Query(
 		ctx,
 		fmt.Sprintf("DROP DATABASE %s WITH (FORCE)", postgres.SanitizeString(r.database.ObjectMeta.Name)),
