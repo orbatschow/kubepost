@@ -1,20 +1,20 @@
-# permissions for end users to edit instances.
+# permissions for end users to edit roles.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/instance: connection-editor-role
+    app.kubernetes.io/instance: role-editor-role
     app.kubernetes.io/component: rbac
     app.kubernetes.io/created-by: kubepost
     app.kubernetes.io/part-of: kubepost
     app.kubernetes.io/managed-by: kustomize
-  name: connection-editor-role
+  name: role-editor-role
 rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
-  - connections
+  - roles
   verbs:
   - create
   - delete
@@ -26,6 +26,19 @@ rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
-  - connections/status
+  - roles/status
   verbs:
   - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: role-editor-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: controller-manager
+    namespace: system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: role-editor-role

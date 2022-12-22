@@ -16,10 +16,10 @@ type RoleReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// Reconcile will perform a reconciliation of the Role CRD
 // +kubebuilder:rbac:groups=postgres.kubepost.io,resources=roles,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=postgres.kubepost.io,resources=roles/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=postgres.kubepost.io,resources=roles/finalizers,verbs=update
+
 func (r *RoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var obj v1alpha1.Role
 	if err := r.Get(ctx, req.NamespacedName, &obj); err != nil {

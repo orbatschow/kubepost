@@ -1,20 +1,20 @@
-# permissions for end users to view databases.
+# permissions for end users to view connections.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/instance: database-viewer-role
+    app.kubernetes.io/instance: connection-viewer-role
     app.kubernetes.io/component: rbac
     app.kubernetes.io/created-by: kubepost
     app.kubernetes.io/part-of: kubepost
     app.kubernetes.io/managed-by: kustomize
-  name: database-viewer-role
+  name: connection-viewer-role
 rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
-  - databases
+  - connections
   verbs:
   - get
   - list
@@ -22,6 +22,6 @@ rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
-  - databases/status
+  - connections/status
   verbs:
   - get

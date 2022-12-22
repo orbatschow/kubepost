@@ -6,22 +6,6 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
   - postgres.kubepost.io
   resources:
   - connections
@@ -69,32 +53,6 @@ rules:
   - postgres.kubepost.io
   resources:
   - databases/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - roles
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - roles/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - roles/status
   verbs:
   - get
   - patch

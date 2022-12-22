@@ -555,9 +555,9 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    app.kuberentes.io/instance: controller-manager
     app.kubernetes.io/component: rbac
     app.kubernetes.io/created-by: kubepost
+    app.kubernetes.io/instance: controller-manager
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: serviceaccount
     app.kubernetes.io/part-of: kubepost
@@ -616,6 +616,22 @@ metadata:
   name: kubepost-manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - postgres.kubepost.io
   resources:
   - connections
@@ -667,48 +683,32 @@ rules:
   - get
   - patch
   - update
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/component: kube-rbac-proxy
-    app.kubernetes.io/created-by: kubepost
-    app.kubernetes.io/instance: metrics-reader
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/part-of: kubepost
-  name: kubepost-metrics-reader
-rules:
-- nonResourceURLs:
-  - /metrics
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - roles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - roles/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - roles/status
   verbs:
   - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/component: kube-rbac-proxy
-    app.kubernetes.io/created-by: kubepost
-    app.kubernetes.io/instance: proxy-role
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/part-of: kubepost
-  name: kubepost-proxy-role
-rules:
-- apiGroups:
-  - authentication.k8s.io
-  resources:
-  - tokenreviews
-  verbs:
-  - create
-- apiGroups:
-  - authorization.k8s.io
-  resources:
-  - subjectaccessreviews
-  verbs:
-  - create
+  - patch
+  - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -751,48 +751,6 @@ subjects:
   name: kubepost-controller-manager
   namespace: kubepost-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    app.kubernetes.io/component: kube-rbac-proxy
-    app.kubernetes.io/created-by: kubepost
-    app.kubernetes.io/instance: proxy-rolebinding
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: clusterrolebinding
-    app.kubernetes.io/part-of: kubepost
-  name: kubepost-proxy-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: kubepost-proxy-role
-subjects:
-- kind: ServiceAccount
-  name: kubepost-controller-manager
-  namespace: kubepost-system
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/component: kube-rbac-proxy
-    app.kubernetes.io/created-by: kubepost
-    app.kubernetes.io/instance: controller-manager-metrics-service
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: service
-    app.kubernetes.io/part-of: kubepost
-    control-plane: controller-manager
-  name: kubepost-controller-manager-metrics-service
-  namespace: kubepost-system
-spec:
-  ports:
-  - name: https
-    port: 8443
-    protocol: TCP
-    targetPort: https
-  selector:
-    control-plane: controller-manager
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -822,7 +780,7 @@ spec:
       - args:
         - --leader-elect
         command:
-        - /manager
+        - /usr/local/bin/kubepost
         image: controller:latest
         livenessProbe:
           httpGet:
