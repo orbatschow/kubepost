@@ -1,16 +1,17 @@
 apiVersion: postgres.kubepost.io/v1alpha1
 kind: Connection
 metadata:
-  name: kubepost
+  name: default
+  namespace: default
   labels:
     instance: default
 spec:
-  host: localhost
+  host: postgres.svc.cluster.local
   port: 5432
   database: postgres
   username:
-    name: kubepost
+    name: connection-credentials
     key: username
   password:
-    name: kubepost
+    name: connection-credentials
     key: password

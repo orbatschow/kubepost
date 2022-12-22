@@ -59,7 +59,7 @@ stringData:
   password: postgres
 ```
 
-If you haven't used the sample postgres cluster provided beforehand you have to modify this secret to reflect
+> If you haven't used the sample postgres cluster provided beforehand you have to modify this secret to reflect
 the actual credentials used for your PostgreSQL cluster.
 
 After we have provided our secret to the cluster we can create our first kubepost resource:
@@ -151,7 +151,7 @@ metadata:
 spec:
   connectionSelector:
     matchLabels:
-      instance: kubepost
+      instance: default
   connectionNamespaceSelector:
     matchLabels:
       kubernetes.io/metadata.name: default

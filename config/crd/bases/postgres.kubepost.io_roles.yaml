@@ -35,9 +35,13 @@ spec:
           spec:
             description: RoleSpec defines the desired state of Role
             properties:
-              ConnectionSelector:
-                description: Define which connections shall be used by kubepost for
-                  this role.
+              cascadeDelete:
+                default: false
+                description: TODO
+                type: boolean
+              connectionNamespaceSelector:
+                description: Narrow down the namespaces for the previously matched
+                  connections.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
@@ -81,13 +85,9 @@ spec:
                     type: object
                 type: object
                 x-kubernetes-map-type: atomic
-              cascadeDelete:
-                default: false
-                description: TODO
-                type: boolean
-              connectionNamespaceSelector:
-                description: Narrow down the namespaces for the previously matched
-                  connections.
+              connectionSelector:
+                description: Define which connections shall be used by kubepost for
+                  this role.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
@@ -255,8 +255,8 @@ spec:
                 description: TODO
                 type: boolean
             required:
-            - ConnectionSelector
             - connectionNamespaceSelector
+            - connectionSelector
             type: object
           status:
             description: RoleStatus defines the observed state of Role

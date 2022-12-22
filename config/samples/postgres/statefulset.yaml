@@ -15,15 +15,6 @@ spec:
       labels:
         app: postgres
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - worker-2.k3s
       terminationGracePeriodSeconds: 60
       containers:
         - name: postgres
@@ -83,9 +74,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 3
           volumeMounts:
-            - name: data
-              mountPath: /var/lib/postgresql/data
-              subPath: postgres-db
             - name: config
               mountPath: /etc/pg_hba.conf
               subPath: pg_hba.conf
@@ -96,6 +84,3 @@ spec:
         - name: config
           configMap:
             name: postgres
-        - name: data
-          hostPath:
-            path: /mnt/data/postgres/data

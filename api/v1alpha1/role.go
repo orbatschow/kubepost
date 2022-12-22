@@ -8,7 +8,7 @@ import (
 // RoleSpec defines the desired state of Role
 type RoleSpec struct {
 	// Define which connections shall be used by kubepost for this role.
-	ConnectionSelector metav1.LabelSelector `json:"ConnectionSelector"`
+	ConnectionSelector metav1.LabelSelector `json:"connectionSelector"`
 	// Narrow down the namespaces for the previously matched connections.
 	ConnectionNamespaceSelector metav1.LabelSelector `json:"connectionNamespaceSelector"`
 

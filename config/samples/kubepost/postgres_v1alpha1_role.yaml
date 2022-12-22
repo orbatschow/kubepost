@@ -20,13 +20,6 @@ spec:
           schema: public
           type: SCHEMA
           withGrantOption: true
-        - identifier: test
-          privileges:
-            - ALL
-          schema: public
-          table: example
-          type: TABLE
-          withGrantOption: true
   options:
     - SUPERUSER
   preventDeletion: false
