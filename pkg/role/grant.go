@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pkg/instance"
+	"github.com/orbatschow/kubepost/pkg/connection"
 	"github.com/orbatschow/kubepost/pkg/postgres"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -15,8 +15,9 @@ import (
 )
 
 func (r *Repository) ReconcileGrants(ctx context.Context, ctrlClient client.Client) error {
+	var err error
 
-	defaultDatabase := r.instance.Spec.Database
+	defaultDatabase := r.connection.Spec.Database
 
 	databases, err := r.GetDatabaseNames(ctx)
 	if err != nil {
@@ -29,8 +30,8 @@ func (r *Repository) ReconcileGrants(ctx context.Context, ctrlClient client.Clie
 
 		// we have to connect to all databases to grant/revoke the privileges
 		// therefore we will modify the connection for each database
-		r.instance.Spec.Database = database
-		r.conn, err = instance.GetConnection(ctx, ctrlClient, r.instance)
+		r.connection.Spec.Database = database
+		r.conn, err = connection.GetConnection(ctx, ctrlClient, r.connection)
 		if err != nil {
 			return err
 		}
@@ -73,8 +74,8 @@ func (r *Repository) ReconcileGrants(ctx context.Context, ctrlClient client.Clie
 	}
 
 	// reset the database to the previous database, that was configured within the CRD
-	r.instance.Spec.Database = defaultDatabase
-	r.conn, err = instance.GetConnection(ctx, ctrlClient, r.instance)
+	r.connection.Spec.Database = defaultDatabase
+	r.conn, err = connection.GetConnection(ctx, ctrlClient, r.connection)
 	if err != nil {
 		return err
 	}
@@ -90,10 +91,10 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 	currentGrants = append(currentGrants, buffer...)
 	if err != nil {
 		return nil, RepositoryError{
-			Role:      r.role.ObjectMeta.Name,
-			Instance:  r.instance.ObjectMeta.Name,
-			Namespace: r.role.ObjectMeta.Namespace,
-			Message:   err.Error(),
+			Role:       r.role.ObjectMeta.Name,
+			Connection: r.connection.ObjectMeta.Name,
+			Namespace:  r.role.ObjectMeta.Namespace,
+			Message:    err.Error(),
 		}
 	}
 
@@ -102,10 +103,10 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 
 	if err != nil {
 		return nil, RepositoryError{
-			Role:      r.role.ObjectMeta.Name,
-			Instance:  r.instance.ObjectMeta.Name,
-			Namespace: r.role.ObjectMeta.Namespace,
-			Message:   err.Error(),
+			Role:       r.role.ObjectMeta.Name,
+			Connection: r.connection.ObjectMeta.Name,
+			Namespace:  r.role.ObjectMeta.Namespace,
+			Message:    err.Error(),
 		}
 	}
 
@@ -114,10 +115,10 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 
 	if err != nil {
 		return nil, RepositoryError{
-			Role:      r.role.ObjectMeta.Name,
-			Instance:  r.instance.ObjectMeta.Name,
-			Namespace: r.role.ObjectMeta.Namespace,
-			Message:   err.Error(),
+			Role:       r.role.ObjectMeta.Name,
+			Connection: r.connection.ObjectMeta.Name,
+			Namespace:  r.role.ObjectMeta.Namespace,
+			Message:    err.Error(),
 		}
 	}
 
@@ -126,10 +127,10 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 
 	if err != nil {
 		return nil, RepositoryError{
-			Role:      r.role.ObjectMeta.Name,
-			Instance:  r.instance.ObjectMeta.Name,
-			Namespace: r.role.ObjectMeta.Namespace,
-			Message:   err.Error(),
+			Role:       r.role.ObjectMeta.Name,
+			Connection: r.connection.ObjectMeta.Name,
+			Namespace:  r.role.ObjectMeta.Namespace,
+			Message:    err.Error(),
 		}
 	}
 
@@ -138,10 +139,10 @@ func (r *Repository) GetCurrentGrants(ctx context.Context) ([]v1alpha1.GrantObje
 
 	if err != nil {
 		return nil, RepositoryError{
-			Role:      r.role.ObjectMeta.Name,
-			Instance:  r.instance.ObjectMeta.Name,
-			Namespace: r.role.ObjectMeta.Namespace,
-			Message:   err.Error(),
+			Role:       r.role.ObjectMeta.Name,
+			Connection: r.connection.ObjectMeta.Name,
+			Namespace:  r.role.ObjectMeta.Namespace,
+			Message:    err.Error(),
 		}
 	}
 
@@ -174,7 +175,7 @@ func (r *Repository) Grant(ctx context.Context, desiredGrants []v1alpha1.GrantOb
 			if errors.As(err, &pgErr) {
 				return RepositoryError{
 					Role:                 r.role.ObjectMeta.Name,
-					Instance:             r.instance.ObjectMeta.Name,
+					Connection:           r.connection.ObjectMeta.Name,
 					Namespace:            r.role.ObjectMeta.Namespace,
 					Message:              "unable to apply revoke query",
 					PostgresErrorCode:    pgErr.Code,
@@ -182,10 +183,10 @@ func (r *Repository) Grant(ctx context.Context, desiredGrants []v1alpha1.GrantOb
 				}
 			}
 			return RepositoryError{
-				Role:      r.role.ObjectMeta.Name,
-				Instance:  r.instance.ObjectMeta.Name,
-				Namespace: r.role.ObjectMeta.Namespace,
-				Message:   fmt.Sprintf("unable to apply Grant query: '%s'", err.Error()),
+				Role:       r.role.ObjectMeta.Name,
+				Connection: r.connection.ObjectMeta.Name,
+				Namespace:  r.role.ObjectMeta.Namespace,
+				Message:    fmt.Sprintf("unable to apply Grant query: '%s'", err.Error()),
 			}
 		}
 	}
@@ -218,7 +219,7 @@ func (r *Repository) Revoke(ctx context.Context, undesiredGrants []v1alpha1.Gran
 			if errors.As(err, &pgErr) {
 				return RepositoryError{
 					Role:                 r.role.ObjectMeta.Name,
-					Instance:             r.instance.ObjectMeta.Name,
+					Connection:           r.connection.ObjectMeta.Name,
 					Namespace:            r.role.ObjectMeta.Namespace,
 					Message:              "unable to apply Revoke query",
 					PostgresErrorCode:    pgErr.Code,
@@ -226,10 +227,10 @@ func (r *Repository) Revoke(ctx context.Context, undesiredGrants []v1alpha1.Gran
 				}
 			}
 			return RepositoryError{
-				Role:      r.role.ObjectMeta.Name,
-				Instance:  r.instance.ObjectMeta.Name,
-				Namespace: r.role.ObjectMeta.Namespace,
-				Message:   fmt.Sprintf("unable to apply Revoke query: '%s'", err.Error()),
+				Role:       r.role.ObjectMeta.Name,
+				Connection: r.connection.ObjectMeta.Name,
+				Namespace:  r.role.ObjectMeta.Namespace,
+				Message:    fmt.Sprintf("unable to apply Revoke query: '%s'", err.Error()),
 			}
 		}
 	}
@@ -237,6 +238,8 @@ func (r *Repository) Revoke(ctx context.Context, undesiredGrants []v1alpha1.Gran
 	return nil
 }
 
+// nolint: gocyclo
+// TODO: this can be improved
 func (r *Repository) regexExpandGrantObjects(ctx context.Context, grantObjects []v1alpha1.GrantObject) ([]v1alpha1.GrantObject, error) {
 
 	var grantObjectsExpanded []v1alpha1.GrantObject
@@ -380,10 +383,10 @@ func (r *Repository) getGrantsByType(ctx context.Context, grantType string) ([]v
 
 	if err != nil {
 		return nil, RepositoryError{
-			Role:      r.role.ObjectMeta.Name,
-			Instance:  r.instance.ObjectMeta.Name,
-			Namespace: r.role.ObjectMeta.Namespace,
-			Message:   err.Error(),
+			Role:       r.role.ObjectMeta.Name,
+			Connection: r.connection.ObjectMeta.Name,
+			Namespace:  r.role.ObjectMeta.Namespace,
+			Message:    err.Error(),
 		}
 	}
 
@@ -400,10 +403,10 @@ func (r *Repository) getGrantsByType(ctx context.Context, grantType string) ([]v
 		)
 		if err != nil {
 			return nil, RepositoryError{
-				Role:      r.role.ObjectMeta.Name,
-				Instance:  r.instance.ObjectMeta.Name,
-				Namespace: r.role.ObjectMeta.Namespace,
-				Message:   err.Error(),
+				Role:       r.role.ObjectMeta.Name,
+				Connection: r.connection.ObjectMeta.Name,
+				Namespace:  r.role.ObjectMeta.Namespace,
+				Message:    err.Error(),
 			}
 		}
 

@@ -4,17 +4,17 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/instance: instance-editor-role
+    app.kubernetes.io/instance: connection-editor-role
     app.kubernetes.io/component: rbac
     app.kubernetes.io/created-by: kubepost
     app.kubernetes.io/part-of: kubepost
     app.kubernetes.io/managed-by: kustomize
-  name: instance-editor-role
+  name: connection-editor-role
 rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
-  - instances
+  - connections
   verbs:
   - create
   - delete
@@ -26,6 +26,6 @@ rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
-  - instances/status
+  - connections/status
   verbs:
   - get

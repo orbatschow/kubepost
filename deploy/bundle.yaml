@@ -17,6 +17,111 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
+  name: connections.postgres.kubepost.io
+spec:
+  group: postgres.kubepost.io
+  names:
+    kind: Connection
+    listKind: ConnectionList
+    plural: connections
+    singular: connection
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Connection is the Schema for the connections API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ConnectionSpec defines the desired state of Connection
+            properties:
+              database:
+                description: Database of the PostgreSQL connection. This database
+                  is used by kubepost to connect to the PostgreSQL connection.
+                type: string
+              host:
+                description: Host of the PostgreSQL connection
+                type: string
+              password:
+                description: Kubernetes secret reference for the password, that will
+                  be used by kubepost to connect to the PostgreSQL connection.
+                properties:
+                  key:
+                    description: The key of the secret to select from.  Must be a
+                      valid secret key.
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                  optional:
+                    description: Specify whether the Secret or its key must be defined
+                    type: boolean
+                required:
+                - key
+                type: object
+                x-kubernetes-map-type: atomic
+              port:
+                description: Port of the PostgreSQL connection
+                type: integer
+              sslMode:
+                default: prefer
+                description: Connection mode that kubepost will use to connect to
+                  the connection.
+                type: string
+              username:
+                description: Kubernetes secret reference for the username, that will
+                  be used by kubepost to connect to the PostgreSQL connection.
+                properties:
+                  key:
+                    description: The key of the secret to select from.  Must be a
+                      valid secret key.
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                  optional:
+                    description: Specify whether the Secret or its key must be defined
+                    type: boolean
+                required:
+                - key
+                type: object
+                x-kubernetes-map-type: atomic
+            required:
+            - database
+            - host
+            - password
+            - port
+            - username
+            type: object
+          status:
+            description: ConnectionStatus defines the observed state of Connection
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: databases.postgres.kubepost.io
 spec:
   group: postgres.kubepost.io
@@ -50,25 +155,9 @@ spec:
                 default: false
                 description: TODO
                 type: boolean
-              extensions:
-                description: List of extensions for this database.
-                items:
-                  properties:
-                    name:
-                      description: Name of the extensions that shall be managed within
-                        the database.
-                      type: string
-                    version:
-                      default: latest
-                      description: Version of the extension.
-                      type: string
-                  required:
-                  - name
-                  type: object
-                type: array
-              instanceNamespaceSelector:
+              connectionNamespaceSelector:
                 description: Narrow down the namespaces for the previously matched
-                  instances.
+                  connections.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
@@ -112,8 +201,8 @@ spec:
                     type: object
                 type: object
                 x-kubernetes-map-type: atomic
-              instanceSelector:
-                description: Define which instances shall be managed by kubepost for
+              connectionSelector:
+                description: Define which connections shall be used by kubepost for
                   this database.
                 properties:
                   matchExpressions:
@@ -158,6 +247,22 @@ spec:
                     type: object
                 type: object
                 x-kubernetes-map-type: atomic
+              extensions:
+                description: List of extensions for this database.
+                items:
+                  properties:
+                    name:
+                      description: Name of the extensions that shall be managed within
+                        the database.
+                      type: string
+                    version:
+                      default: latest
+                      description: Version of the extension.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
               owner:
                 description: Define the owner of the database.
                 type: string
@@ -166,116 +271,11 @@ spec:
                 description: TODO
                 type: boolean
             required:
-            - instanceNamespaceSelector
-            - instanceSelector
+            - connectionNamespaceSelector
+            - connectionSelector
             type: object
           status:
             description: DatabaseStatus defines the observed state of Database
-            type: object
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
-  creationTimestamp: null
-  name: instances.postgres.kubepost.io
-spec:
-  group: postgres.kubepost.io
-  names:
-    kind: Instance
-    listKind: InstanceList
-    plural: instances
-    singular: instance
-  scope: Namespaced
-  versions:
-  - name: v1alpha1
-    schema:
-      openAPIV3Schema:
-        description: Instance is the Schema for the instances API
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: InstanceSpec defines the desired state of Instance
-            properties:
-              database:
-                description: Database of the PostgreSQL instance. This database is
-                  used by kubepost to connect to the PostgreSQL instance.
-                type: string
-              host:
-                description: Host of the PostgreSQL instance
-                type: string
-              password:
-                description: Kubernetes secret reference for the password, that will
-                  be used by kubepost to connect to the PostgreSQL instance.
-                properties:
-                  key:
-                    description: The key of the secret to select from.  Must be a
-                      valid secret key.
-                    type: string
-                  name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?'
-                    type: string
-                  optional:
-                    description: Specify whether the Secret or its key must be defined
-                    type: boolean
-                required:
-                - key
-                type: object
-                x-kubernetes-map-type: atomic
-              port:
-                description: Port of the PostgreSQL instance
-                type: integer
-              sslMode:
-                default: prefer
-                description: Connection mode that kubepost will use to connect to
-                  the instance.
-                type: string
-              username:
-                description: Kubernetes secret reference for the username, that will
-                  be used by kubepost to connect to the PostgreSQL instance.
-                properties:
-                  key:
-                    description: The key of the secret to select from.  Must be a
-                      valid secret key.
-                    type: string
-                  name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?'
-                    type: string
-                  optional:
-                    description: Specify whether the Secret or its key must be defined
-                    type: boolean
-                required:
-                - key
-                type: object
-                x-kubernetes-map-type: atomic
-            required:
-            - database
-            - host
-            - password
-            - port
-            - username
-            type: object
-          status:
-            description: InstanceStatus defines the observed state of Instance
             type: object
         type: object
     served: true
@@ -319,10 +319,102 @@ spec:
           spec:
             description: RoleSpec defines the desired state of Role
             properties:
+              ConnectionSelector:
+                description: Define which connections shall be used by kubepost for
+                  this role.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: A label selector requirement is a selector that
+                        contains values, a key, and an operator that relates the key
+                        and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to
+                            a set of values. Valid operators are In, NotIn, Exists
+                            and DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the
+                            operator is In or NotIn, the values array must be non-empty.
+                            If the operator is Exists or DoesNotExist, the values
+                            array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: matchLabels is a map of {key,value} pairs. A single
+                      {key,value} in the matchLabels map is equivalent to an element
+                      of matchExpressions, whose key field is "key", the operator
+                      is "In", and the values array contains only "value". The requirements
+                      are ANDed.
+                    type: object
+                type: object
+                x-kubernetes-map-type: atomic
               cascadeDelete:
                 default: false
                 description: TODO
                 type: boolean
+              connectionNamespaceSelector:
+                description: Narrow down the namespaces for the previously matched
+                  connections.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: A label selector requirement is a selector that
+                        contains values, a key, and an operator that relates the key
+                        and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to
+                            a set of values. Valid operators are In, NotIn, Exists
+                            and DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the
+                            operator is In or NotIn, the values array must be non-empty.
+                            If the operator is Exists or DoesNotExist, the values
+                            array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: matchLabels is a map of {key,value} pairs. A single
+                      {key,value} in the matchLabels map is equivalent to an element
+                      of matchExpressions, whose key field is "key", the operator
+                      is "In", and the values array contains only "value". The requirements
+                      are ANDed.
+                    type: object
+                type: object
+                x-kubernetes-map-type: atomic
               grants:
                 description: Grants that shall be applied to this role.
                 items:
@@ -414,98 +506,6 @@ spec:
                   - withAdminOption
                   type: object
                 type: array
-              instanceNamespaceSelector:
-                description: Narrow down the namespaces for the previously matched
-                  instances.
-                properties:
-                  matchExpressions:
-                    description: matchExpressions is a list of label selector requirements.
-                      The requirements are ANDed.
-                    items:
-                      description: A label selector requirement is a selector that
-                        contains values, a key, and an operator that relates the key
-                        and values.
-                      properties:
-                        key:
-                          description: key is the label key that the selector applies
-                            to.
-                          type: string
-                        operator:
-                          description: operator represents a key's relationship to
-                            a set of values. Valid operators are In, NotIn, Exists
-                            and DoesNotExist.
-                          type: string
-                        values:
-                          description: values is an array of string values. If the
-                            operator is In or NotIn, the values array must be non-empty.
-                            If the operator is Exists or DoesNotExist, the values
-                            array must be empty. This array is replaced during a strategic
-                            merge patch.
-                          items:
-                            type: string
-                          type: array
-                      required:
-                      - key
-                      - operator
-                      type: object
-                    type: array
-                  matchLabels:
-                    additionalProperties:
-                      type: string
-                    description: matchLabels is a map of {key,value} pairs. A single
-                      {key,value} in the matchLabels map is equivalent to an element
-                      of matchExpressions, whose key field is "key", the operator
-                      is "In", and the values array contains only "value". The requirements
-                      are ANDed.
-                    type: object
-                type: object
-                x-kubernetes-map-type: atomic
-              instanceSelector:
-                description: Define which instances shall be managed by kubepost for
-                  this role.
-                properties:
-                  matchExpressions:
-                    description: matchExpressions is a list of label selector requirements.
-                      The requirements are ANDed.
-                    items:
-                      description: A label selector requirement is a selector that
-                        contains values, a key, and an operator that relates the key
-                        and values.
-                      properties:
-                        key:
-                          description: key is the label key that the selector applies
-                            to.
-                          type: string
-                        operator:
-                          description: operator represents a key's relationship to
-                            a set of values. Valid operators are In, NotIn, Exists
-                            and DoesNotExist.
-                          type: string
-                        values:
-                          description: values is an array of string values. If the
-                            operator is In or NotIn, the values array must be non-empty.
-                            If the operator is Exists or DoesNotExist, the values
-                            array must be empty. This array is replaced during a strategic
-                            merge patch.
-                          items:
-                            type: string
-                          type: array
-                      required:
-                      - key
-                      - operator
-                      type: object
-                    type: array
-                  matchLabels:
-                    additionalProperties:
-                      type: string
-                    description: matchLabels is a map of {key,value} pairs. A single
-                      {key,value} in the matchLabels map is equivalent to an element
-                      of matchExpressions, whose key field is "key", the operator
-                      is "In", and the values array contains only "value". The requirements
-                      are ANDed.
-                    type: object
-                type: object
-                x-kubernetes-map-type: atomic
               options:
                 description: 'Options that shall be applied to this role. Important:
                   Options that are simply removed from the kubepost role will not
@@ -539,8 +539,8 @@ spec:
                 description: TODO
                 type: boolean
             required:
-            - instanceNamespaceSelector
-            - instanceSelector
+            - ConnectionSelector
+            - connectionNamespaceSelector
             type: object
           status:
             description: RoleStatus defines the observed state of Role
@@ -618,6 +618,32 @@ rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
+  - connections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - connections/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - connections/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
   - databases
   verbs:
   - create
@@ -637,32 +663,6 @@ rules:
   - postgres.kubepost.io
   resources:
   - databases/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - instances
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - instances/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - instances/status
   verbs:
   - get
   - patch

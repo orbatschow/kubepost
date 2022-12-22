@@ -3,31 +3,33 @@ package extension
 import (
 	"context"
 	v1alpha1 "github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pkg/instance"
+	"github.com/orbatschow/kubepost/pkg/connection"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func Reconcile(ctx context.Context, ctrlClient client.Client, instances []v1alpha1.Instance, db *v1alpha1.Database) error {
+// nolint: gocyclo
+// TODO: this can be improved
+func Reconcile(ctx context.Context, ctrlClient client.Client, connections []v1alpha1.Connection, db *v1alpha1.Database) error {
 
-	for i, postgres := range instances {
+	for i, postgres := range connections {
 
-		// we have to connect to the desired database, so a switch from the instance database is performed here
+		// we have to connect to the desired database, so a switch from the connection database is performed here
 		postgres.Spec.Database = db.ObjectMeta.Name
 
-		conn, err := instance.GetConnection(ctx, ctrlClient, &instances[i])
+		conn, err := connection.GetConnection(ctx, ctrlClient, &connections[i])
 		if err != nil {
 			log.FromContext(ctx).Error(
 				err,
 				"failed to establish a connection",
-				"instance", postgres.ObjectMeta.Name,
+				"connection", postgres.ObjectMeta.Name,
 			)
 		}
 
 		repository := Repository{
-			conn:     conn,
-			instance: &postgres,
-			database: db,
+			conn:       conn,
+			connection: &postgres,
+			database:   db,
 		}
 
 		existingExtensions, err := repository.List(ctx)

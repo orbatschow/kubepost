@@ -16,16 +16,16 @@ import (
 )
 
 type Repository struct {
-	role     *v1alpha1.Role
-	instance *v1alpha1.Instance
-	conn     *pgx.Conn
+	role       *v1alpha1.Role
+	connection *v1alpha1.Connection
+	conn       *pgx.Conn
 }
 
 type RepositoryError struct {
-	Role      string
-	Instance  string
-	Namespace string
-	Message   string
+	Role       string
+	Connection string
+	Namespace  string
+	Message    string
 
 	PostgresErrorCode    string
 	PostgresErrorMessage string
@@ -120,7 +120,7 @@ func (r *Repository) SetPassword(ctx context.Context, password string) error {
 
 		return RepositoryError{
 			Role:                 r.role.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.role.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,
@@ -195,7 +195,7 @@ func (r *Repository) Alter(ctx context.Context) error {
 
 		return RepositoryError{
 			Role:                 r.role.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.role.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,

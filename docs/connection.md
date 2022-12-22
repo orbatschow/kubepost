@@ -8,12 +8,12 @@ Packages:
 
 Resource Types:
 
-- [Instance](#instance)
+- [Connection](#connection)
 
 
 
 
-## Instance
+## Connection
 <sup><sup>[↩ Parent](#postgreskubepostiov1alpha1 )</sup></sup>
 
 
@@ -21,7 +21,7 @@ Resource Types:
 
 
 
-Instance is the Schema for the instances API
+Connection is the Schema for the connections API
 
 <table>
     <thead>
@@ -41,7 +41,7 @@ Instance is the Schema for the instances API
       <tr>
       <td><b>kind</b></td>
       <td>string</td>
-      <td>Instance</td>
+      <td>Connection</td>
       <td>true</td>
       </tr>
       <tr>
@@ -50,29 +50,29 @@ Instance is the Schema for the instances API
       <td>Refer to the Kubernetes API documentation for the fields of the `metadata` field.</td>
       <td>true</td>
       </tr><tr>
-        <td><b><a href="#instancespec">spec</a></b></td>
+        <td><b><a href="#connectionspec">spec</a></b></td>
         <td>object</td>
         <td>
-          InstanceSpec defines the desired state of Instance<br/>
+          ConnectionSpec defines the desired state of Connection<br/>
         </td>
         <td>false</td>
       </tr><tr>
         <td><b>status</b></td>
         <td>object</td>
         <td>
-          InstanceStatus defines the observed state of Instance<br/>
+          ConnectionStatus defines the observed state of Connection<br/>
         </td>
         <td>false</td>
       </tr></tbody>
 </table>
 
 
-### Instance.spec
-<sup><sup>[↩ Parent](#instance)</sup></sup>
+### Connection.spec
+<sup><sup>[↩ Parent](#connection)</sup></sup>
 
 
 
-InstanceSpec defines the desired state of Instance
+ConnectionSpec defines the desired state of Connection
 
 <table>
     <thead>
@@ -87,42 +87,42 @@ InstanceSpec defines the desired state of Instance
         <td><b>database</b></td>
         <td>string</td>
         <td>
-          Database of the PostgreSQL instance. This database is used by kubepost to connect to the PostgreSQL instance.<br/>
+          Database of the PostgreSQL connection. This database is used by kubepost to connect to the PostgreSQL connection.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>host</b></td>
         <td>string</td>
         <td>
-          Host of the PostgreSQL instance<br/>
+          Host of the PostgreSQL connection<br/>
         </td>
         <td>true</td>
       </tr><tr>
-        <td><b><a href="#instancespecpassword">password</a></b></td>
+        <td><b><a href="#connectionspecpassword">password</a></b></td>
         <td>object</td>
         <td>
-          Kubernetes secret reference for the password, that will be used by kubepost to connect to the PostgreSQL instance.<br/>
+          Kubernetes secret reference for the password, that will be used by kubepost to connect to the PostgreSQL connection.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>port</b></td>
         <td>integer</td>
         <td>
-          Port of the PostgreSQL instance<br/>
+          Port of the PostgreSQL connection<br/>
         </td>
         <td>true</td>
       </tr><tr>
-        <td><b><a href="#instancespecusername">username</a></b></td>
+        <td><b><a href="#connectionspecusername">username</a></b></td>
         <td>object</td>
         <td>
-          Kubernetes secret reference for the username, that will be used by kubepost to connect to the PostgreSQL instance.<br/>
+          Kubernetes secret reference for the username, that will be used by kubepost to connect to the PostgreSQL connection.<br/>
         </td>
         <td>true</td>
       </tr><tr>
         <td><b>sslMode</b></td>
         <td>string</td>
         <td>
-          Connection mode that kubepost will use to connect to the instance.<br/>
+          Connection mode that kubepost will use to connect to the connection.<br/>
           <br/>
             <i>Default</i>: prefer<br/>
         </td>
@@ -131,12 +131,12 @@ InstanceSpec defines the desired state of Instance
 </table>
 
 
-### Instance.spec.password
-<sup><sup>[↩ Parent](#instancespec)</sup></sup>
+### Connection.spec.password
+<sup><sup>[↩ Parent](#connectionspec)</sup></sup>
 
 
 
-Kubernetes secret reference for the password, that will be used by kubepost to connect to the PostgreSQL instance.
+Kubernetes secret reference for the password, that will be used by kubepost to connect to the PostgreSQL connection.
 
 <table>
     <thead>
@@ -172,12 +172,12 @@ Kubernetes secret reference for the password, that will be used by kubepost to c
 </table>
 
 
-### Instance.spec.username
-<sup><sup>[↩ Parent](#instancespec)</sup></sup>
+### Connection.spec.username
+<sup><sup>[↩ Parent](#connectionspec)</sup></sup>
 
 
 
-Kubernetes secret reference for the username, that will be used by kubepost to connect to the PostgreSQL instance.
+Kubernetes secret reference for the username, that will be used by kubepost to connect to the PostgreSQL connection.
 
 <table>
     <thead>

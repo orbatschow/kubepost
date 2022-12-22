@@ -98,7 +98,7 @@ func (r *Repository) AddGroup(ctx context.Context, group *v1alpha1.GroupGrantObj
 
 		return RepositoryError{
 			Role:                 r.role.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.role.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,
@@ -131,7 +131,7 @@ func (r *Repository) RemoveGroup(ctx context.Context, group *v1alpha1.GroupGrant
 
 		return RepositoryError{
 			Role:                 r.role.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.role.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,

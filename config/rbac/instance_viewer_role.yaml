@@ -4,17 +4,17 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/instance: instance-viewer-role
+    app.kubernetes.io/instance: connection-viewer-role
     app.kubernetes.io/component: rbac
     app.kubernetes.io/created-by: kubepost
     app.kubernetes.io/part-of: kubepost
     app.kubernetes.io/managed-by: kustomize
-  name: instance-viewer-role
+  name: connection-viewer-role
 rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
-  - instances
+  - connections
   verbs:
   - get
   - list
@@ -22,6 +22,6 @@ rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
-  - instances/status
+  - connections/status
   verbs:
   - get

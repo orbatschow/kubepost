@@ -15,7 +15,6 @@ simplify and automate the configuration of PostgreSQL objects.
 **Project status: *beta*** Not all planned features are completed. The API, spec, status and other user facing objects
 may change, but in a backward compatible way.
 
-
 ## Features
 
 The kubepost operator implements, but is not limited to, the following features:
@@ -41,7 +40,8 @@ Therefore, it may also be possible, that other combinations are working properly
 A core feature of kubepost is to monitor the Kubernetes API server for changes
 to specific resources and ensure that the desired PostgreSQL match these resources.
 
-* **`Instance`**, which defines one or multiple PostgreSQL instances, that shall be managed by kubepost.
+* **`Connection`**, which defines connections for one or multiple PostgreSQL clusters, that shall be managed by
+  kubepost.
 
 * **`Role`**, which defines a PostgreSQL role and its permissions, that shall be managed by kubepost.
 
@@ -79,7 +79,7 @@ To remove the operator, first delete any custom resources you created in each na
 
 ```sh
 for n in $(kubectl get namespaces -o jsonpath={..metadata.name}); do
-  kubectl delete --all --namespace=$n roles.postgres.kubepost.io,instances.postgres.kubepost.io,databases.postgres.kubepost.io
+  kubectl delete --all --namespace=$n roles.postgres.kubepost.io,connections.postgres.kubepost.io,databases.postgres.kubepost.io
 done
 ```
 

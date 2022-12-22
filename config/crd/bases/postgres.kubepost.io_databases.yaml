@@ -38,25 +38,9 @@ spec:
                 default: false
                 description: TODO
                 type: boolean
-              extensions:
-                description: List of extensions for this database.
-                items:
-                  properties:
-                    name:
-                      description: Name of the extensions that shall be managed within
-                        the database.
-                      type: string
-                    version:
-                      default: latest
-                      description: Version of the extension.
-                      type: string
-                  required:
-                  - name
-                  type: object
-                type: array
-              instanceNamespaceSelector:
+              connectionNamespaceSelector:
                 description: Narrow down the namespaces for the previously matched
-                  instances.
+                  connections.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
@@ -100,8 +84,8 @@ spec:
                     type: object
                 type: object
                 x-kubernetes-map-type: atomic
-              instanceSelector:
-                description: Define which instances shall be managed by kubepost for
+              connectionSelector:
+                description: Define which connections shall be used by kubepost for
                   this database.
                 properties:
                   matchExpressions:
@@ -146,6 +130,22 @@ spec:
                     type: object
                 type: object
                 x-kubernetes-map-type: atomic
+              extensions:
+                description: List of extensions for this database.
+                items:
+                  properties:
+                    name:
+                      description: Name of the extensions that shall be managed within
+                        the database.
+                      type: string
+                    version:
+                      default: latest
+                      description: Version of the extension.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
               owner:
                 description: Define the owner of the database.
                 type: string
@@ -154,8 +154,8 @@ spec:
                 description: TODO
                 type: boolean
             required:
-            - instanceNamespaceSelector
-            - instanceSelector
+            - connectionNamespaceSelector
+            - connectionSelector
             type: object
           status:
             description: DatabaseStatus defines the observed state of Database

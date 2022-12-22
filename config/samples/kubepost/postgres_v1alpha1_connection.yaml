@@ -1,9 +1,9 @@
 apiVersion: postgres.kubepost.io/v1alpha1
-kind: Instance
+kind: Connection
 metadata:
   name: kubepost
   labels:
-    instance: kubepost
+    instance: default
 spec:
   host: localhost
   port: 5432

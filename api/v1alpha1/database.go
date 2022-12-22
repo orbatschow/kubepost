@@ -5,23 +5,23 @@ import (
 )
 
 type DatabaseSpec struct {
-	// Define which instances shall be managed by kubepost for this database.
-	InstanceSelector metav1.LabelSelector `json:"instanceSelector"`
-	// Narrow down the namespaces for the previously matched instances.
-	InstanceNamespaceSelector metav1.LabelSelector `json:"instanceNamespaceSelector"`
+	// Define which connections shall be used by kubepost for this database.
+	ConnectionSelector metav1.LabelSelector `json:"connectionSelector"`
+	// Narrow down the namespaces for the previously matched connections.
+	ConnectionNamespaceSelector metav1.LabelSelector `json:"connectionNamespaceSelector"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	// Define the owner of the database.
 	Owner string `json:"owner"`
-	//+kubebuilder:validation:Optional
-	//+kubebuilder:default:=true
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=true
 	// TODO
 	PreventDeletion bool `json:"preventDeletion"`
-	//+kubebuilder:validation:Optional
-	//+kubebuilder:default:=false
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=false
 	// TODO
 	CascadeDelete bool `json:"cascadeDelete"`
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	// List of extensions for this database.
 	Extensions []Extension `json:"extensions"`
 }
@@ -29,8 +29,8 @@ type DatabaseSpec struct {
 type Extension struct {
 	// Name of the extensions that shall be managed within the database.
 	Name string `json:"name"`
-	//+kubebuilder:default:=latest
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:default:=latest
+	// +kubebuilder:validation:Optional
 	// Version of the extension.
 	Version string `json:"version,omitempty"`
 }
@@ -41,8 +41,8 @@ type DatabaseStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // Database is the Schema for the databases API
 type Database struct {
@@ -53,7 +53,7 @@ type Database struct {
 	Status DatabaseStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // DatabaseList contains a list of Database
 type DatabaseList struct {

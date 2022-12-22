@@ -34,7 +34,7 @@ func (r *DatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	_, instances, err := database.Reconcile(ctx, r.Client, &obj)
+	_, connections, err := database.Reconcile(ctx, r.Client, &obj)
 	if err != nil {
 		log.FromContext(ctx).Error(err, "failed to reconcile database",
 			"database", obj.ObjectMeta.Name,
@@ -43,7 +43,7 @@ func (r *DatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	if instances == nil {
+	if connections == nil {
 		return ctrl.Result{}, nil
 	}
 
@@ -52,7 +52,7 @@ func (r *DatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, nil
 	}
 
-	err = extension.Reconcile(ctx, r.Client, instances, &obj)
+	err = extension.Reconcile(ctx, r.Client, connections, &obj)
 	if err != nil {
 		log.FromContext(ctx).Error(err, "failed to reconcile database",
 			"database", obj.ObjectMeta.Name,

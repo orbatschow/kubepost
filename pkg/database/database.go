@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
-	"github.com/orbatschow/kubepost/pkg/instance"
+	"github.com/orbatschow/kubepost/pkg/connection"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/strings/slices"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -13,28 +13,28 @@ import (
 
 var Finalizer = "finalizer.postgres.kubepost.io/database"
 
-func Reconcile(ctx context.Context, ctrlClient client.Client, db *v1alpha1.Database) (*v1alpha1.Database, []v1alpha1.Instance, error) {
+func Reconcile(ctx context.Context, ctrlClient client.Client, db *v1alpha1.Database) (*v1alpha1.Database, []v1alpha1.Connection, error) {
 
-	instances, err := instance.List(ctx, ctrlClient, db.Spec.InstanceNamespaceSelector, db.Spec.InstanceSelector)
+	connections, err := connection.List(ctx, ctrlClient, db.Spec.ConnectionNamespaceSelector, db.Spec.ConnectionSelector)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	for _, postgres := range instances {
+	for _, postgres := range connections {
 		log.FromContext(ctx).Info(
 			"reconciling database",
-			"instance", types.NamespacedName{
+			"connection", types.NamespacedName{
 				Namespace: postgres.ObjectMeta.Namespace,
 				Name:      postgres.ObjectMeta.Name,
 			},
 		)
 
-		conn, err := instance.GetConnection(ctx, ctrlClient, &postgres)
+		conn, err := connection.GetConnection(ctx, ctrlClient, &postgres)
 		if err != nil {
 			log.FromContext(ctx).Error(
 				err,
 				"failed to establish a connection",
-				"instance", types.NamespacedName{
+				"connection", types.NamespacedName{
 					Namespace: postgres.ObjectMeta.Namespace,
 					Name:      postgres.ObjectMeta.Name,
 				},
@@ -43,9 +43,9 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, db *v1alpha1.Datab
 		}
 
 		repository := Repository{
-			database: db,
-			instance: &postgres,
-			conn:     conn,
+			database:   db,
+			connection: &postgres,
+			conn:       conn,
 		}
 
 		err = repository.handleFinalizer(ctx, ctrlClient)
@@ -66,7 +66,7 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, db *v1alpha1.Datab
 		if exists == true {
 			log.FromContext(ctx).Info(
 				"database exists, skipping creation",
-				"instance", types.NamespacedName{
+				"connection", types.NamespacedName{
 					Namespace: postgres.ObjectMeta.Namespace,
 					Name:      postgres.ObjectMeta.Name,
 				},
@@ -84,7 +84,7 @@ func Reconcile(ctx context.Context, ctrlClient client.Client, db *v1alpha1.Datab
 		}
 	}
 
-	return db, instances, nil
+	return db, connections, nil
 }
 
 func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Client) error {
@@ -92,9 +92,9 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 	// handle deletion and remove finalizer.
 	case !r.database.DeletionTimestamp.IsZero() && controllerutil.ContainsFinalizer(r.database, Finalizer):
 		log.FromContext(ctx).Info("handling database deletion",
-			"instance", types.NamespacedName{
-				Namespace: r.instance.ObjectMeta.Namespace,
-				Name:      r.instance.ObjectMeta.Name,
+			"connection", types.NamespacedName{
+				Namespace: r.connection.ObjectMeta.Namespace,
+				Name:      r.connection.ObjectMeta.Name,
 			},
 		)
 
@@ -118,18 +118,18 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 		}
 
 		log.FromContext(ctx).Info("removing finalizer",
-			"instance", types.NamespacedName{
-				Namespace: r.instance.ObjectMeta.Namespace,
-				Name:      r.instance.ObjectMeta.Name,
+			"connection", types.NamespacedName{
+				Namespace: r.connection.ObjectMeta.Namespace,
+				Name:      r.connection.ObjectMeta.Name,
 			},
 		)
 
 	// deletion already handled, don't do anything.
 	case !r.database.DeletionTimestamp.IsZero() && !slices.Contains(r.database.ObjectMeta.Finalizers, Finalizer):
 		log.FromContext(ctx).Info("deletion pending",
-			"instance", types.NamespacedName{
-				Namespace: r.instance.ObjectMeta.Namespace,
-				Name:      r.instance.ObjectMeta.Name,
+			"connection", types.NamespacedName{
+				Namespace: r.connection.ObjectMeta.Namespace,
+				Name:      r.connection.ObjectMeta.Name,
 			},
 		)
 
@@ -137,9 +137,9 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 	case r.database.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(r.database, Finalizer):
 		log.FromContext(ctx).Info(
 			"updating finalizers",
-			"instance", types.NamespacedName{
-				Namespace: r.instance.ObjectMeta.Namespace,
-				Name:      r.instance.ObjectMeta.Name,
+			"connection", types.NamespacedName{
+				Namespace: r.connection.ObjectMeta.Namespace,
+				Name:      r.connection.ObjectMeta.Name,
 			},
 		)
 

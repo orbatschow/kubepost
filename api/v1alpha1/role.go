@@ -7,37 +7,37 @@ import (
 
 // RoleSpec defines the desired state of Role
 type RoleSpec struct {
-	// Define which instances shall be managed by kubepost for this role.
-	InstanceSelector metav1.LabelSelector `json:"instanceSelector"`
-	// Narrow down the namespaces for the previously matched instances.
-	InstanceNamespaceSelector metav1.LabelSelector `json:"instanceNamespaceSelector"`
+	// Define which connections shall be used by kubepost for this role.
+	ConnectionSelector metav1.LabelSelector `json:"ConnectionSelector"`
+	// Narrow down the namespaces for the previously matched connections.
+	ConnectionNamespaceSelector metav1.LabelSelector `json:"connectionNamespaceSelector"`
 
-	//+kubebuilder:validation:Optional
-	//+kubebuilder:default:=true
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=true
 	// TODO
 	PreventDeletion bool `json:"preventDeletion"`
 
-	//+kubebuilder:validation:Optional
-	//+kubebuilder:default:=false
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=false
 	// TODO
 	CascadeDelete bool `json:"cascadeDelete"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	// Options that shall be applied to this role. Important: Options that are simply removed from the kubepost role
 	// will not be removed from the PostgreSQL role.
 	// E.g.: Granting "SUPERUSER" and then removing the option won't cause kubepost to remove this option from
 	// the role. You have to set the option "NOSUPERUSER".
 	Options []string `json:"options"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	// Kubernetes secret reference, that is used to set a password for the role.
 	Password *v1.SecretKeySelector `json:"password"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	// Grants that shall be applied to this role.
 	Grants []Grant `json:"grants"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	// Groups that shall be applied to this role.
 	Groups []GroupGrantObject `json:"groups"`
 }
@@ -53,7 +53,7 @@ type GroupGrantObject struct {
 	// +kubebuilder:validation:Required
 	// Define the name of the group.
 	Name string `json:"name"`
-	//+kubebuilder:default:=false
+	// +kubebuilder:default:=false
 	// Define whether the `WITH ADMIN OPTION` shall be granted. More information can be found within
 	// the official [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html) documentation.
 	WithAdminOption bool `json:"withAdminOption"`
@@ -82,7 +82,7 @@ type GrantObject struct {
 	// +kubebuilder:validation:Optional
 	// Define the privileges for the grant.
 	Privileges []Privilege `json:"privileges"`
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	// Define whether the `WITH GRANT OPTION` shall be granted. More information can be found within
 	// the official [PostgreSQL](https://www.postgresql.org/docs/current/sql-grant.html) documentation.
 	WithGrantOption bool `json:"withGrantOption"`
@@ -97,8 +97,8 @@ type RoleStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // Role is the Schema for the roles API
 type Role struct {
@@ -109,7 +109,7 @@ type Role struct {
 	Status RoleStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // RoleList contains a list of Role
 type RoleList struct {

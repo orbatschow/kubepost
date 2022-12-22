@@ -11,7 +11,7 @@ options for you, but maybe the easiest one is [kind](https://kind.sigs.k8s.io/).
 
 ### PostgreSQL
 
-Most likely you want to test your changes within a running PostgreSQL instance. You can
+Most likely you want to test your changes within a running PostgreSQL cluster. You can
 set up a fully functional stack by applying the provided manifests within this repository:
 
 ```sh

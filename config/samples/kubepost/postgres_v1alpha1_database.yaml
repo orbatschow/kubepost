@@ -3,10 +3,10 @@ kind: Database
 metadata:
   name: kubepost
 spec:
-  instanceSelector:
+  connectionSelector:
     matchLabels:
-      instance: kubepost
-  instanceNamespaceSelector:
+      instance: default
+  connectionNamespaceSelector:
     matchLabels:
       kubernetes.io/metadata.name: default
   owner: kubepost

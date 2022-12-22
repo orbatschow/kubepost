@@ -84,17 +84,17 @@ RoleSpec defines the desired state of Role
         </tr>
     </thead>
     <tbody><tr>
-        <td><b><a href="#rolespecinstancenamespaceselector">instanceNamespaceSelector</a></b></td>
+        <td><b><a href="#rolespecconnectionselector">ConnectionSelector</a></b></td>
         <td>object</td>
         <td>
-          Narrow down the namespaces for the previously matched instances.<br/>
+          Define which connections shall be used by kubepost for this role.<br/>
         </td>
         <td>true</td>
       </tr><tr>
-        <td><b><a href="#rolespecinstanceselector">instanceSelector</a></b></td>
+        <td><b><a href="#rolespecconnectionnamespaceselector">connectionNamespaceSelector</a></b></td>
         <td>object</td>
         <td>
-          Define which instances shall be managed by kubepost for this role.<br/>
+          Narrow down the namespaces for the previously matched connections.<br/>
         </td>
         <td>true</td>
       </tr><tr>
@@ -147,12 +147,12 @@ RoleSpec defines the desired state of Role
 </table>
 
 
-### Role.spec.instanceNamespaceSelector
+### Role.spec.ConnectionSelector
 <sup><sup>[↩ Parent](#rolespec)</sup></sup>
 
 
 
-Narrow down the namespaces for the previously matched instances.
+Define which connections shall be used by kubepost for this role.
 
 <table>
     <thead>
@@ -164,7 +164,7 @@ Narrow down the namespaces for the previously matched instances.
         </tr>
     </thead>
     <tbody><tr>
-        <td><b><a href="#rolespecinstancenamespaceselectormatchexpressionsindex">matchExpressions</a></b></td>
+        <td><b><a href="#rolespecconnectionselectormatchexpressionsindex">matchExpressions</a></b></td>
         <td>[]object</td>
         <td>
           matchExpressions is a list of label selector requirements. The requirements are ANDed.<br/>
@@ -181,8 +181,8 @@ Narrow down the namespaces for the previously matched instances.
 </table>
 
 
-### Role.spec.instanceNamespaceSelector.matchExpressions[index]
-<sup><sup>[↩ Parent](#rolespecinstancenamespaceselector)</sup></sup>
+### Role.spec.ConnectionSelector.matchExpressions[index]
+<sup><sup>[↩ Parent](#rolespecconnectionselector)</sup></sup>
 
 
 
@@ -222,12 +222,12 @@ A label selector requirement is a selector that contains values, a key, and an o
 </table>
 
 
-### Role.spec.instanceSelector
+### Role.spec.connectionNamespaceSelector
 <sup><sup>[↩ Parent](#rolespec)</sup></sup>
 
 
 
-Define which instances shall be managed by kubepost for this role.
+Narrow down the namespaces for the previously matched connections.
 
 <table>
     <thead>
@@ -239,7 +239,7 @@ Define which instances shall be managed by kubepost for this role.
         </tr>
     </thead>
     <tbody><tr>
-        <td><b><a href="#rolespecinstanceselectormatchexpressionsindex">matchExpressions</a></b></td>
+        <td><b><a href="#rolespecconnectionnamespaceselectormatchexpressionsindex">matchExpressions</a></b></td>
         <td>[]object</td>
         <td>
           matchExpressions is a list of label selector requirements. The requirements are ANDed.<br/>
@@ -256,8 +256,8 @@ Define which instances shall be managed by kubepost for this role.
 </table>
 
 
-### Role.spec.instanceSelector.matchExpressions[index]
-<sup><sup>[↩ Parent](#rolespecinstanceselector)</sup></sup>
+### Role.spec.connectionNamespaceSelector.matchExpressions[index]
+<sup><sup>[↩ Parent](#rolespecconnectionnamespaceselector)</sup></sup>
 
 
 

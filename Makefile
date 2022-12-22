@@ -140,7 +140,7 @@ generate-client: controller-gen ## generate code containing DeepCopy, DeepCopyIn
 # documentation
 .PHONY: generate-crd-documentation
 generate-crd-documentation: crdoc generate-manifests
-	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_instances.yaml --output docs/instance.md
+	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_connections.yaml --output docs/connection.md
 	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_roles.yaml --output docs/role.md
 	$(CRDOC) --resources config/crd/bases/postgres.kubepost.io_databases.yaml --output docs/database.md
 

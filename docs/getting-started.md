@@ -4,12 +4,13 @@ The goal of kubepost is to make PostgreSQL management on top of Kubernetes
 as easy as possible, while preserving Kubernetes-native configuration options.
 
 This guide will show you how to deploy the kubepost operator, set up a
-PostgreSQL instance, and configure a Role and a Database.
+PostgreSQL cluster and configure a `Connection`, that can be used to manage
+`Roles` and `Databases`.
 
 # Pre-requisites
 
 To follow this guide, you will need a Kubernetes cluster with admin permissions and a running
-PostgreSQL instance with superuser permissions.
+PostgreSQL cluster with superuser permissions.
 
 ## Kubernetes
 
@@ -17,7 +18,7 @@ You can use [kind](https://kind.sigs.k8s.io/) to create a fully functional Kuber
 
 ## PostgreSQL
 
-In order to complete this guide you need an already existing PostgreSQL instance. You can use this
+In order to complete this guide you need an already existing PostgreSQL cluster. You can use this
 command in order to create a fully functional cluster:
 
 ```sh
@@ -35,16 +36,15 @@ Run the following commands to install the CRDs and deploy the operator:
 kubectl apply -f deploy/bundle.yaml
 ```
 
-The Prometheus Operator introduces custom resources in Kubernetes to declare
-the desired state of a PostgreSQL instance as well as the
-its configuration.
+The kubepost operator introduces custom resources in Kubernetes to declare
+the desired state of PostgreSQL clusters as well as its configuration.
 
 # Custom Resource Definitions
 
-## Instance
+## Connection
 
-The `Instance` resource declaratively describes the connection details for one or more PostgreSQL
-instances. Those instances are not managed by kubepost and therefore have to exist already.
+The `Connection` resource declaratively describes the connection details for one or more PostgreSQL
+clusters. Those clusters are not managed by kubepost and therefore have to exist already.
 
 First, let's create a new Kubernetes secret, that will hold confidential data regarding the connection details:
 
@@ -59,19 +59,19 @@ stringData:
   password: postgres
 ```
 
-If you haven't used the sample postgres instance provided beforehand you have to modify this secret to reflect
-the actual credentials used for your PostgreSQL instance.
+If you haven't used the sample postgres cluster provided beforehand you have to modify this secret to reflect
+the actual credentials used for your PostgreSQL cluster.
 
 After we have provided our secret to the cluster we can create our first kubepost resource:
 
 ```yaml
 apiVersion: postgres.kubepost.io/v1alpha1
-kind: Instance
+kind: Connection
 metadata:
   name: default
   namespace: default
   labels:
-    instance: kubepost
+    instance: default
 spec:
   host: postgres.svc.cluster.local
   port: 5432
@@ -88,11 +88,12 @@ spec:
 > ensure, that the user has all necessary permissions. If you are unsure regarding the permissions you can start
 > with a superuser and gradually remove permissions.
 
-This will create a new kubepost `Instance`, that can be used at a later stage. Note that every instance
+This will create a new kubepost `Connection`, that can be used at a later stage. Note that every connection
 requires a label to be useful. Whenever we create another kubepost resource at a later point we can reference
-the instance above via the label and kubepost will connect to the configured PostgreSQL instance.
+the connection above via the label and kubepost will connect to the configured PostgreSQL cluster.
 
-A more detailed specification of the `Instance` resource can be found within the [instance](instance.md) documentation.
+A more detailed specification of the `Connection` resource can be found within the [connection](connection.md)
+documentation.
 
 ## Role
 
@@ -105,10 +106,10 @@ metadata:
   name: kubepost
   namespace: default
 spec:
-  instanceSelector:
+  connectionSelector:
     matchLabels:
-      instance: kubepost
-  instanceNamespaceSelector:
+      instance: default
+  connectionNamespaceSelector:
     matchLabels:
       kubernetes.io/metadata.name: default
   cascadeDelete: false
@@ -126,8 +127,8 @@ spec:
   preventDeletion: false
 ```
 
-This resource will cause kubepost to search for an instance with label `kubepost` within all namespaces,
-that have an assigned label `default`. For all matching instances it will grab the connection details, connect
+This resource will cause kubepost to search for an connection with label `default` within all namespaces,
+that have an assigned label `default`. For all matching connections it will grab the connection details, connect
 to the `postgres` database and create the role. After creating the role, kubepost will check if the desired
 permissions are equal to the current ones. If there are differences kubepost will try to resolve those issues
 and grant/revoke the differences.
@@ -148,10 +149,10 @@ kind: Database
 metadata:
   name: kubepost
 spec:
-  instanceSelector:
+  connectionSelector:
     matchLabels:
       instance: kubepost
-  instanceNamespaceSelector:
+  connectionNamespaceSelector:
     matchLabels:
       kubernetes.io/metadata.name: default
   owner: kubepost
@@ -161,8 +162,8 @@ spec:
     - name: postgres_fdw
 ```
 
-This resource will cause kubepost to search for an instance with label `kubepost` within all namespaces,
-that have an assigned label `default`. For all matching instances it will grab the connection details, connect
+This resource will cause kubepost to search for a connection with label `default` within all namespaces,
+that have an assigned label `default`. For all matching connections it will grab the connection details, connect
 to the `postgres` database and create the database and extensions.
 
 A more detailed specification of the `Database` resource can be found within the [database](database.md) documentation.

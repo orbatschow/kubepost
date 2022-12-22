@@ -1,4 +1,4 @@
-package instance
+package connection
 
 import (
 	"context"
@@ -16,42 +16,42 @@ import (
 	"strconv"
 )
 
-func List(ctx context.Context, ctrlClient client.Client, instanceNamespaceSelector metav1.LabelSelector, instanceSelector metav1.LabelSelector) ([]v1alpha1.Instance, error) {
-	namespaces, err := namespace.List(ctx, ctrlClient, instanceNamespaceSelector)
+func List(ctx context.Context, ctrlClient client.Client, connectionNamespaceSelector metav1.LabelSelector, connectionSelector metav1.LabelSelector) ([]v1alpha1.Connection, error) {
+	namespaces, err := namespace.List(ctx, ctrlClient, connectionNamespaceSelector)
 	if err != nil {
 		return nil, err
 	}
 
-	var instances []v1alpha1.Instance
-	selector, err := metav1.LabelSelectorAsSelector(&instanceSelector)
+	var connections []v1alpha1.Connection
+	selector, err := metav1.LabelSelectorAsSelector(&connectionSelector)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, ns := range namespaces {
-		var buffer v1alpha1.InstanceList
+		var buffer v1alpha1.ConnectionList
 		err = ctrlClient.List(ctx, &buffer, client.InNamespace(ns.Name), client.MatchingLabelsSelector{
 			Selector: selector,
 		})
 
-		instances = append(instances, buffer.Items...)
+		connections = append(connections, buffer.Items...)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return instances, nil
+	return connections, nil
 }
 
-func GetConnection(ctx context.Context, client client.Client, instance *v1alpha1.Instance) (*pgx.Conn, error) {
+func GetConnection(ctx context.Context, client client.Client, connection *v1alpha1.Connection) (*pgx.Conn, error) {
 	usernameRef := types.NamespacedName{
-		Namespace: instance.ObjectMeta.Namespace,
-		Name:      instance.Spec.Username.Name,
+		Namespace: connection.ObjectMeta.Namespace,
+		Name:      connection.Spec.Username.Name,
 	}
 
 	passwordRef := types.NamespacedName{
-		Namespace: instance.ObjectMeta.Namespace,
-		Name:      instance.Spec.Username.Name,
+		Namespace: connection.ObjectMeta.Namespace,
+		Name:      connection.Spec.Username.Name,
 	}
 
 	var usernameSecret v1.Secret
@@ -64,23 +64,23 @@ func GetConnection(ctx context.Context, client client.Client, instance *v1alpha1
 		return nil, errors.NewNotFound(schema.GroupResource{Resource: "secrets"}, passwordSecret.Name)
 	}
 
-	usernameBytes := usernameSecret.Data[instance.Spec.Username.Key]
+	usernameBytes := usernameSecret.Data[connection.Spec.Username.Key]
 	if usernameBytes == nil {
-		return nil, fmt.Errorf("could not parse username for instance '%s/%s' from secret '%s/%s", instance.ObjectMeta.Namespace, instance.ObjectMeta.Name, instance.ObjectMeta.Namespace, usernameSecret.ObjectMeta.Name)
+		return nil, fmt.Errorf("could not parse username for connection '%s/%s' from secret '%s/%s", connection.ObjectMeta.Namespace, connection.ObjectMeta.Name, connection.ObjectMeta.Namespace, usernameSecret.ObjectMeta.Name)
 	}
 
-	passwordBytes := passwordSecret.Data[instance.Spec.Password.Key]
+	passwordBytes := passwordSecret.Data[connection.Spec.Password.Key]
 	if passwordBytes == nil {
-		return nil, fmt.Errorf("could not parse password for instance '%s/%s' from secret '%s/%s", instance.ObjectMeta.Namespace, instance.ObjectMeta.Name, instance.ObjectMeta.Namespace, usernameSecret.ObjectMeta.Name)
+		return nil, fmt.Errorf("could not parse password for connection '%s/%s' from secret '%s/%s", connection.ObjectMeta.Namespace, connection.ObjectMeta.Name, connection.ObjectMeta.Namespace, usernameSecret.ObjectMeta.Name)
 	}
 
 	p := postgres.Postgres{
-		Host:     instance.Spec.Host,
-		Port:     strconv.Itoa(instance.Spec.Port),
+		Host:     connection.Spec.Host,
+		Port:     strconv.Itoa(connection.Spec.Port),
 		Username: string(usernameBytes),
 		Password: string(passwordBytes),
-		Database: instance.Spec.Database,
-		SSLMode:  instance.Spec.SSLMode,
+		Database: connection.Spec.Database,
+		SSLMode:  connection.Spec.SSLMode,
 	}
 
 	conn, err := pgx.Connect(context.Background(), fmt.Sprintf(

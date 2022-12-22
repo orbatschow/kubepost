@@ -12,16 +12,16 @@ import (
 const latest = "latest"
 
 type Repository struct {
-	database *v1alpha1.Database
-	instance *v1alpha1.Instance
-	conn     *pgx.Conn
+	database   *v1alpha1.Database
+	connection *v1alpha1.Connection
+	conn       *pgx.Conn
 }
 
 type RepositoryError struct {
-	Database  string
-	Instance  string
-	Namespace string
-	Message   string
+	Database   string
+	Connection string
+	Namespace  string
+	Message    string
 
 	PostgresErrorCode    string
 	PostgresErrorMessage string

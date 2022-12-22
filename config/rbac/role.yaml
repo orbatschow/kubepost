@@ -8,6 +8,32 @@ rules:
 - apiGroups:
   - postgres.kubepost.io
   resources:
+  - connections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - connections/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
+  - connections/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - postgres.kubepost.io
+  resources:
   - databases
   verbs:
   - create
@@ -27,32 +53,6 @@ rules:
   - postgres.kubepost.io
   resources:
   - databases/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - instances
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - instances/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - postgres.kubepost.io
-  resources:
-  - instances/status
   verbs:
   - get
   - patch

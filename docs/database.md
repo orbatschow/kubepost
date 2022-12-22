@@ -84,17 +84,17 @@ Database is the Schema for the databases API
         </tr>
     </thead>
     <tbody><tr>
-        <td><b><a href="#databasespecinstancenamespaceselector">instanceNamespaceSelector</a></b></td>
+        <td><b><a href="#databasespecconnectionnamespaceselector">connectionNamespaceSelector</a></b></td>
         <td>object</td>
         <td>
-          Narrow down the namespaces for the previously matched instances.<br/>
+          Narrow down the namespaces for the previously matched connections.<br/>
         </td>
         <td>true</td>
       </tr><tr>
-        <td><b><a href="#databasespecinstanceselector">instanceSelector</a></b></td>
+        <td><b><a href="#databasespecconnectionselector">connectionSelector</a></b></td>
         <td>object</td>
         <td>
-          Define which instances shall be managed by kubepost for this database.<br/>
+          Define which connections shall be used by kubepost for this database.<br/>
         </td>
         <td>true</td>
       </tr><tr>
@@ -133,12 +133,12 @@ Database is the Schema for the databases API
 </table>
 
 
-### Database.spec.instanceNamespaceSelector
+### Database.spec.connectionNamespaceSelector
 <sup><sup>[↩ Parent](#databasespec)</sup></sup>
 
 
 
-Narrow down the namespaces for the previously matched instances.
+Narrow down the namespaces for the previously matched connections.
 
 <table>
     <thead>
@@ -150,7 +150,7 @@ Narrow down the namespaces for the previously matched instances.
         </tr>
     </thead>
     <tbody><tr>
-        <td><b><a href="#databasespecinstancenamespaceselectormatchexpressionsindex">matchExpressions</a></b></td>
+        <td><b><a href="#databasespecconnectionnamespaceselectormatchexpressionsindex">matchExpressions</a></b></td>
         <td>[]object</td>
         <td>
           matchExpressions is a list of label selector requirements. The requirements are ANDed.<br/>
@@ -167,8 +167,8 @@ Narrow down the namespaces for the previously matched instances.
 </table>
 
 
-### Database.spec.instanceNamespaceSelector.matchExpressions[index]
-<sup><sup>[↩ Parent](#databasespecinstancenamespaceselector)</sup></sup>
+### Database.spec.connectionNamespaceSelector.matchExpressions[index]
+<sup><sup>[↩ Parent](#databasespecconnectionnamespaceselector)</sup></sup>
 
 
 
@@ -208,12 +208,12 @@ A label selector requirement is a selector that contains values, a key, and an o
 </table>
 
 
-### Database.spec.instanceSelector
+### Database.spec.connectionSelector
 <sup><sup>[↩ Parent](#databasespec)</sup></sup>
 
 
 
-Define which instances shall be managed by kubepost for this database.
+Define which connections shall be used by kubepost for this database.
 
 <table>
     <thead>
@@ -225,7 +225,7 @@ Define which instances shall be managed by kubepost for this database.
         </tr>
     </thead>
     <tbody><tr>
-        <td><b><a href="#databasespecinstanceselectormatchexpressionsindex">matchExpressions</a></b></td>
+        <td><b><a href="#databasespecconnectionselectormatchexpressionsindex">matchExpressions</a></b></td>
         <td>[]object</td>
         <td>
           matchExpressions is a list of label selector requirements. The requirements are ANDed.<br/>
@@ -242,8 +242,8 @@ Define which instances shall be managed by kubepost for this database.
 </table>
 
 
-### Database.spec.instanceSelector.matchExpressions[index]
-<sup><sup>[↩ Parent](#databasespecinstanceselector)</sup></sup>
+### Database.spec.connectionSelector.matchExpressions[index]
+<sup><sup>[↩ Parent](#databasespecconnectionselector)</sup></sup>
 
 
 

@@ -13,16 +13,16 @@ import (
 )
 
 type Repository struct {
-	database *v1alpha1.Database
-	instance *v1alpha1.Instance
-	conn     *pgx.Conn
+	database   *v1alpha1.Database
+	connection *v1alpha1.Connection
+	conn       *pgx.Conn
 }
 
 type RepositoryError struct {
-	Database  string
-	Instance  string
-	Namespace string
-	Message   string
+	Database   string
+	Connection string
+	Namespace  string
+	Message    string
 
 	PostgresErrorCode    string
 	PostgresErrorMessage string
@@ -36,8 +36,8 @@ func (r *Repository) Exists(ctx context.Context) (bool, error) {
 	log.FromContext(ctx).Info(
 		"checking if database already exists",
 		"database", r.database.ObjectMeta.Name,
-		"instance", r.instance.ObjectMeta.Name,
-		"namespace", r.instance.ObjectMeta.Namespace,
+		"connection", r.connection.ObjectMeta.Name,
+		"namespace", r.connection.ObjectMeta.Namespace,
 	)
 
 	var exists bool
@@ -63,7 +63,7 @@ func (r *Repository) Exists(ctx context.Context) (bool, error) {
 
 		return false, &RepositoryError{
 			Database:             r.database.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.database.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,
@@ -92,7 +92,7 @@ func (r *Repository) Create(ctx context.Context) error {
 
 		return &RepositoryError{
 			Database:             r.database.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.database.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,
@@ -101,9 +101,9 @@ func (r *Repository) Create(ctx context.Context) error {
 	}
 
 	log.FromContext(ctx).Info("created database",
-		"instance", types.NamespacedName{
-			Namespace: r.instance.ObjectMeta.Namespace,
-			Name:      r.instance.ObjectMeta.Name,
+		"connection", types.NamespacedName{
+			Namespace: r.connection.ObjectMeta.Namespace,
+			Name:      r.connection.ObjectMeta.Name,
 		},
 	)
 
@@ -128,7 +128,7 @@ func (r *Repository) Delete(ctx context.Context) *RepositoryError {
 
 		return &RepositoryError{
 			Database:             r.database.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.database.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,
@@ -137,9 +137,9 @@ func (r *Repository) Delete(ctx context.Context) *RepositoryError {
 	}
 
 	log.FromContext(ctx).Info("deleted database",
-		"instance", types.NamespacedName{
-			Namespace: r.instance.ObjectMeta.Namespace,
-			Name:      r.instance.ObjectMeta.Name,
+		"connection", types.NamespacedName{
+			Namespace: r.connection.ObjectMeta.Namespace,
+			Name:      r.connection.ObjectMeta.Name,
 		},
 	)
 
@@ -168,7 +168,7 @@ func (r *Repository) AlterOwner(ctx context.Context) error {
 
 		return &RepositoryError{
 			Database:             r.database.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.database.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,
@@ -180,9 +180,9 @@ func (r *Repository) AlterOwner(ctx context.Context) error {
 		log.FromContext(ctx).Info(
 			"skipping ownership change",
 			"owner", r.database.Spec.Owner,
-			"instance", types.NamespacedName{
-				Namespace: r.instance.ObjectMeta.Namespace,
-				Name:      r.instance.ObjectMeta.Name,
+			"connection", types.NamespacedName{
+				Namespace: r.connection.ObjectMeta.Namespace,
+				Name:      r.connection.ObjectMeta.Name,
 			},
 		)
 		return nil
@@ -208,7 +208,7 @@ func (r *Repository) AlterOwner(ctx context.Context) error {
 
 		return &RepositoryError{
 			Database:             r.database.ObjectMeta.Name,
-			Instance:             r.instance.ObjectMeta.Name,
+			Connection:           r.connection.ObjectMeta.Name,
 			Namespace:            r.database.ObjectMeta.Namespace,
 			Message:              err.Error(),
 			PostgresErrorCode:    errorCode,
@@ -217,9 +217,9 @@ func (r *Repository) AlterOwner(ctx context.Context) error {
 	}
 
 	log.FromContext(ctx).Info("changed ownership",
-		"instance", types.NamespacedName{
-			Namespace: r.instance.ObjectMeta.Namespace,
-			Name:      r.instance.ObjectMeta.Name,
+		"connection", types.NamespacedName{
+			Namespace: r.connection.ObjectMeta.Namespace,
+			Name:      r.connection.ObjectMeta.Name,
 		},
 	)
 
