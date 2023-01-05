@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strconv"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
@@ -78,7 +77,7 @@ func GetConnection(ctx context.Context, client client.Client, connection *v1alph
 
 	p := postgres.Postgres{
 		Host:     connection.Spec.Host,
-		Port:     strconv.Itoa(connection.Spec.Port),
+		Port:     connection.Spec.Port,
 		Username: string(usernameBytes),
 		Password: string(passwordBytes),
 		Database: connection.Spec.Database,
@@ -86,7 +85,7 @@ func GetConnection(ctx context.Context, client client.Client, connection *v1alph
 	}
 
 	conn, err := pgx.Connect(context.Background(), fmt.Sprintf(
-		"postgres://%s@%s:%s/%s?sslmode=%s&application_name=kubepost",
+		"postgres://%s@%s:%d/%s?sslmode=%s&application_name=kubepost",
 		url.UserPassword(p.Username, p.Password).String(),
 		p.Host,
 		p.Port,
