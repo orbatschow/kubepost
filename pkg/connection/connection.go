@@ -3,6 +3,9 @@ package connection
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strconv"
+
 	"github.com/jackc/pgx/v4"
 	"github.com/orbatschow/kubepost/api/v1alpha1"
 	"github.com/orbatschow/kubepost/pkg/namespace"
@@ -13,7 +16,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strconv"
 )
 
 func List(ctx context.Context, ctrlClient client.Client, connectionNamespaceSelector metav1.LabelSelector, connectionSelector metav1.LabelSelector) ([]v1alpha1.Connection, error) {
@@ -84,12 +86,11 @@ func GetConnection(ctx context.Context, client client.Client, connection *v1alph
 	}
 
 	conn, err := pgx.Connect(context.Background(), fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=%s&application_name=kubepost",
-		p.Username,
-		p.Password,
+		"postgres://%s@%s:%s/%s?sslmode=%s&application_name=kubepost",
+		url.UserPassword(p.Username, p.Password).String(),
 		p.Host,
 		p.Port,
-		p.Database,
+		url.PathEscape(p.Database),
 		p.SSLMode,
 	),
 	)
