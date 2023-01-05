@@ -53,7 +53,7 @@ Database is the Schema for the databases API
         <td><b><a href="#databasespec">spec</a></b></td>
         <td>object</td>
         <td>
-          <br/>
+          DatabaseSpec defines the desired state of Database<br/>
         </td>
         <td>false</td>
       </tr><tr>
@@ -72,7 +72,7 @@ Database is the Schema for the databases API
 
 
 
-
+DatabaseSpec defines the desired state of Database
 
 <table>
     <thead>
@@ -98,15 +98,6 @@ Database is the Schema for the databases API
         </td>
         <td>true</td>
       </tr><tr>
-        <td><b>cascadeDelete</b></td>
-        <td>boolean</td>
-        <td>
-          TODO<br/>
-          <br/>
-            <i>Default</i>: false<br/>
-        </td>
-        <td>false</td>
-      </tr><tr>
         <td><b><a href="#databasespecextensionsindex">extensions</a></b></td>
         <td>[]object</td>
         <td>
@@ -121,10 +112,10 @@ Database is the Schema for the databases API
         </td>
         <td>false</td>
       </tr><tr>
-        <td><b>preventDeletion</b></td>
+        <td><b>protected</b></td>
         <td>boolean</td>
         <td>
-          TODO<br/>
+          Define whether the PostgreSQL database deletion is skipped when the CR is deleted.<br/>
           <br/>
             <i>Default</i>: true<br/>
         </td>

@@ -108,17 +108,32 @@ func (r *Repository) handleFinalizer(ctx context.Context, ctrClient client.Clien
 			},
 		)
 
-		// delete the database
-		exists, err := r.Exists(ctx)
-		if err != nil {
-			return err
-		}
-
-		if exists {
-			err := r.Delete(ctx)
+		if r.role.Spec.Protected != true {
+			// delete the role if it is not protected
+			log.FromContext(ctx).Info("postgres role will be deleted, protection is turned off",
+				"connection", types.NamespacedName{
+					Namespace: r.connection.ObjectMeta.Namespace,
+					Name:      r.connection.ObjectMeta.Name,
+				},
+			)
+			exists, err := r.Exists(ctx)
 			if err != nil {
 				return err
 			}
+
+			if exists {
+				err := r.Delete(ctx)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			log.FromContext(ctx).Info("postgres role will not be deleted, protection is turned on",
+				"connection", types.NamespacedName{
+					Namespace: r.connection.ObjectMeta.Namespace,
+					Name:      r.connection.ObjectMeta.Name,
+				},
+			)
 		}
 
 		// remove the finalizer

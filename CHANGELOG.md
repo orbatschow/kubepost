@@ -6,6 +6,8 @@
 
 **Merged pull requests:**
 
+- Escape values in Postgres connect URL [\#45](https://github.com/orbatschow/kubepost/pull/45) ([ntap-fge](https://github.com/ntap-fge))
+- update changelog and readme [\#44](https://github.com/orbatschow/kubepost/pull/44) ([orbatschow](https://github.com/orbatschow))
 - update changelog and readme [\#43](https://github.com/orbatschow/kubepost/pull/43) ([orbatschow](https://github.com/orbatschow))
 - Migrate to kubebuilder [\#41](https://github.com/orbatschow/kubepost/pull/41) ([orbatschow](https://github.com/orbatschow))
 - Run release workflow directly [\#38](https://github.com/orbatschow/kubepost/pull/38) ([debfx](https://github.com/debfx))

@@ -33,11 +33,8 @@ spec:
           metadata:
             type: object
           spec:
+            description: DatabaseSpec defines the desired state of Database
             properties:
-              cascadeDelete:
-                default: false
-                description: TODO
-                type: boolean
               connectionNamespaceSelector:
                 description: Narrow down the namespaces for the previously matched
                   connections.
@@ -149,9 +146,10 @@ spec:
               owner:
                 description: Define the owner of the database.
                 type: string
-              preventDeletion:
+              protected:
                 default: true
-                description: TODO
+                description: Define whether the PostgreSQL database deletion is skipped
+                  when the CR is deleted.
                 type: boolean
             required:
             - connectionNamespaceSelector

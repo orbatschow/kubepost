@@ -14,13 +14,8 @@ type RoleSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:=true
-	// TODO
-	PreventDeletion bool `json:"preventDeletion"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default:=false
-	// TODO
-	CascadeDelete bool `json:"cascadeDelete"`
+	// Define whether the PostgreSQL role deletion is skipped when the CR is deleted.
+	Protected bool `json:"protected"`
 
 	// +kubebuilder:validation:Optional
 	// Options that shall be applied to this role. Important: Options that are simply removed from the kubepost role
@@ -89,6 +84,7 @@ type GrantObject struct {
 }
 
 // +kubebuilder:validation:Enum=ALL;SELECT;INSERT;UPDATE;DELETE;TRUNCATE;REFERENCES;TRIGGER;USAGE;CREATE;CONNECT;TEMPORARY;TEMP;EXECUTE
+
 type Privilege string
 
 // RoleStatus defines the observed state of Role
