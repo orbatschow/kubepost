@@ -4,6 +4,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// DatabaseSpec defines the desired state of Database
 type DatabaseSpec struct {
 	// Define which connections shall be used by kubepost for this database.
 	ConnectionSelector metav1.LabelSelector `json:"connectionSelector"`
@@ -13,14 +14,12 @@ type DatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	// Define the owner of the database.
 	Owner string `json:"owner"`
+
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:=true
-	// TODO
-	PreventDeletion bool `json:"preventDeletion"`
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default:=false
-	// TODO
-	CascadeDelete bool `json:"cascadeDelete"`
+	// Define whether the PostgreSQL database deletion is skipped when the CR is deleted.
+	Protected bool `json:"protected"`
+
 	// +kubebuilder:validation:Optional
 	// List of extensions for this database.
 	Extensions []Extension `json:"extensions"`

@@ -98,15 +98,6 @@ RoleSpec defines the desired state of Role
         </td>
         <td>true</td>
       </tr><tr>
-        <td><b>cascadeDelete</b></td>
-        <td>boolean</td>
-        <td>
-          TODO<br/>
-          <br/>
-            <i>Default</i>: false<br/>
-        </td>
-        <td>false</td>
-      </tr><tr>
         <td><b><a href="#rolespecgrantsindex">grants</a></b></td>
         <td>[]object</td>
         <td>
@@ -135,10 +126,10 @@ RoleSpec defines the desired state of Role
         </td>
         <td>false</td>
       </tr><tr>
-        <td><b>preventDeletion</b></td>
+        <td><b>protected</b></td>
         <td>boolean</td>
         <td>
-          TODO<br/>
+          Define whether the PostgreSQL role deletion is skipped when the CR is deleted.<br/>
           <br/>
             <i>Default</i>: true<br/>
         </td>

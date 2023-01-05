@@ -35,10 +35,6 @@ spec:
           spec:
             description: RoleSpec defines the desired state of Role
             properties:
-              cascadeDelete:
-                default: false
-                description: TODO
-                type: boolean
               connectionNamespaceSelector:
                 description: Narrow down the namespaces for the previously matched
                   connections.
@@ -250,9 +246,10 @@ spec:
                 - key
                 type: object
                 x-kubernetes-map-type: atomic
-              preventDeletion:
+              protected:
                 default: true
-                description: TODO
+                description: Define whether the PostgreSQL role deletion is skipped
+                  when the CR is deleted.
                 type: boolean
             required:
             - connectionNamespaceSelector
