@@ -11,15 +11,6 @@ const (
 	SEQUENCE = "SEQUENCE"
 )
 
-type Postgres struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Database string
-	SSLMode  string
-}
-
 func SanitizeString(input string) string {
 	var ids pgx.Identifier
 	ids = append(ids, input)
