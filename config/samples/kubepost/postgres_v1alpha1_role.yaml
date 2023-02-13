@@ -10,7 +10,6 @@ spec:
   connectionNamespaceSelector:
     matchLabels:
       kubernetes.io/metadata.name: default
-  cascadeDelete: false
   grants:
     - database: kubepost
       objects:
@@ -22,4 +21,3 @@ spec:
           withGrantOption: true
   options:
     - SUPERUSER
-  preventDeletion: false
